@@ -1,0 +1,7 @@
+/* Design tokens: all colors, fonts, spacing values live here. */
+:root {
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; }
+img, video, canvas, svg { display: block; max-width: 100%; }
