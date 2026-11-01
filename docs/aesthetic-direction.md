@@ -1,6 +1,6 @@
 # Aesthetic direction
 
-Status: **exploratory**. Nothing here is locked; values get tuned in the lab (`~/ai-workshop-lab`) before they become tokens.
+Status: **early exploration**. These are starting inspirations and working assumptions from the first session, not decisions. Most of the visual language is still undesigned. Effects and theming are being tested in [`lab/`](../lab/).
 
 ## Source
 Elena Burger, ["Toward a working definition of paperclip-punk"](https://www.virtualelena.co/p/toward-a-working-definition-of-paperclip). We borrow it faithfully as a base:
@@ -30,6 +30,10 @@ Elena Burger, ["Toward a working definition of paperclip-punk"](https://www.virt
 
 ## Open questions
 - How the 3D is rendered: technical-illustration outlines, wireframe, solid, or something else.
-- Final palette and the light vs. dark default.
-- Final typefaces and type scale.
+- Palette, and the light vs. dark default.
+- Typefaces and type scale.
+- Layout and grid.
+- Flow and pacing of the scroll presentation.
+- Contained graphics: diagrams, illustrations, 3D.
+- Whether the display effects stay, and how strong they are.
 - How the shader layer carries over to the real site. The lab uses an invisible DOM text layer under a WebGL render, so text stays selectable.
