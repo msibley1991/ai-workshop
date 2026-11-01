@@ -1,0 +1,75 @@
+/* The DOM is an invisible layout + selection layer. All visible pixels come
+   from the WebGL canvas behind it. Type variables are written by js/main.js
+   from the dial values, so DOM layout always matches what gets drawn. */
+:root {
+  --font: "JetBrains Mono", monospace;
+  --h1-size: 48px;  --h1-lh: 1.1;
+  --h2-size: 32px;  --h2-lh: 1.2;
+  --h3-size: 24px;  --h3-lh: 1.3;
+  --body-size: 20px; --body-lh: 1.5;
+  --small-size: 14px; --small-lh: 1.4;
+  --gap: 24px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: transparent;
+}
+
+#screen {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+}
+
+#content {
+  position: relative;
+  z-index: 1;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: calc(var(--gap) * 2) var(--gap);
+  font-family: var(--font);
+  font-size: var(--body-size);
+  line-height: var(--body-lh);
+  color: transparent;
+  caret-color: transparent;
+}
+
+#content ::selection { background: transparent; color: transparent; }
+
+h1, h2, h3, p, ul, pre { margin: 0 0 var(--gap); font-weight: 400; }
+h1 { font-size: var(--h1-size); line-height: var(--h1-lh); font-weight: 600; }
+h2 { font-size: var(--h2-size); line-height: var(--h2-lh); font-weight: 600; }
+h3 { font-size: var(--h3-size); line-height: var(--h3-lh); }
+.small { font-size: var(--small-size); line-height: var(--small-lh); }
+section { margin-bottom: calc(var(--gap) * 3); }
+ul { padding-left: 1.5em; }
+pre, code { font-family: var(--font); font-size: var(--body-size); white-space: pre; }
+
+.status {
+  display: flex;
+  gap: var(--gap);
+  padding: 8px 12px;
+  margin-bottom: calc(var(--gap) * 3);
+  font-size: var(--small-size);
+}
+footer.status { margin: 0; }
+
+.panel { padding: var(--gap); }
+.row { display: flex; justify-content: space-between; gap: var(--gap); margin: 6px 0; }
+.bar { height: 14px; margin: var(--gap) 0; padding: 3px; }
+.bar-fill { height: 100%; }
+.field { flex: 1; padding: 4px 8px; }
+.key { padding: 4px 12px; }
+
+.diagram { display: block; width: 100%; height: auto; }
+.diagram-labels { padding: 0 2%; }
+.viewport3d { height: 360px; margin-bottom: 12px; }
+
+/* SVG shapes are read for geometry only. */
+.diagram * { fill: none; stroke: none; }

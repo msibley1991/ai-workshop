@@ -1,0 +1,14 @@
+{
+  "resolution": { "pixelScale": 3, "hardText": 0.5 },
+  "glow": { "intensity": 1.0, "radius": 2, "tintToPhosphor": 0.3 },
+  "ghost": { "decay": 0.6, "scrollGain": 0.35 },
+  "grid": { "mode": "scanlines", "opacity": 0.25, "pitch": 1, "snapScroll": true },
+  "type": {
+    "h1": { "size": 72, "lineHeight": 1.05 },
+    "h2": { "size": 44, "lineHeight": 1.15 },
+    "h3": { "size": 32, "lineHeight": 1.25 },
+    "body": { "size": 28, "lineHeight": 1.45 },
+    "small": { "size": 20, "lineHeight": 1.4 },
+    "gap": 32
+  }
+}

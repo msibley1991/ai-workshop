@@ -1,0 +1,68 @@
+{
+  "resolution": {
+    "pixelScale": 2,
+    "hardText": 1
+  },
+  "glow": {
+    "intensity": 0.5,
+    "radius": 1.6,
+    "tintToPhosphor": 0
+  },
+  "ghost": {
+    "decay": 0.8,
+    "scrollGain": 0
+  },
+  "grid": {
+    "mode": "off",
+    "opacity": 0.1,
+    "pitch": 1,
+    "snapScroll": true
+  },
+  "phosphor": {
+    "persistenceColor": "#000000",
+    "shift": 0.18,
+    "jitter": 0.6,
+    "flicker": 0.05
+  },
+  "theme": {
+    "mode": "light",
+    "light": {
+      "ground": "#f4f4eb",
+      "phosphor": "#00010f",
+      "accent": "#F38020"
+    },
+    "dark": {
+      "ground": "#0A0C10",
+      "phosphor": "#3D7BFF",
+      "accent": "#F38020"
+    }
+  },
+  "type": {
+    "family": "JetBrains Mono",
+    "h1": {
+      "size": 72,
+      "lineHeight": 1.05
+    },
+    "h2": {
+      "size": 44,
+      "lineHeight": 1.15
+    },
+    "h3": {
+      "size": 32,
+      "lineHeight": 1.25
+    },
+    "body": {
+      "size": 28,
+      "lineHeight": 1.45
+    },
+    "small": {
+      "size": 20,
+      "lineHeight": 1.4
+    },
+    "gap": 32
+  },
+  "object": {
+    "style": "edges + faces",
+    "spin": 0.3
+  }
+}

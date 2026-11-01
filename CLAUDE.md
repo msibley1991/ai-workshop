@@ -9,6 +9,7 @@ Purpose: _TBD_
 - `js/main.js`: entry script (deferred).
 - `assets/`: images, fonts, media.
 - `docs/`: context docs. Read only the ones relevant to the task.
+- `lab/`: effects playground (separate from the site). See [lab/CLAUDE.md](lab/CLAUDE.md) before working there.
 
 ## Conventions
 
@@ -18,4 +19,5 @@ Purpose: _TBD_
 
 ## Docs
 
-_(none yet)_
+- [docs/aesthetic-direction.md](docs/aesthetic-direction.md): visual direction and open questions (exploratory)
+- [docs/handoffs/](docs/handoffs/): session handoff notes, newest last

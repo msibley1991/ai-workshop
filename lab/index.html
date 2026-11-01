@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Effects Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;600&family=VT323&display=swap">
+  <link rel="stylesheet" href="vendor/dialkit/styles.css">
+  <link rel="stylesheet" href="css/text-layer.css">
+  <script type="importmap">
+    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js" } }
+  </script>
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <canvas id="screen" aria-hidden="true"></canvas>
+
+  <!-- Specimen content. This DOM is invisible: it provides layout, selection,
+       copy and find. Everything visible is redrawn by the WebGL renderer.
+       data-ink="phosphor|accent|dim" sets the drawing color role.
+       data-box draws an element's border; data-fill draws its background. -->
+  <main id="content">
+    <header class="status" data-box>
+      <span data-ink="accent">● LIVE</span>
+      <span>SESSION 01 / CONTEXT</span>
+      <span data-ink="dim">PAGE 001</span>
+    </header>
+
+    <section>
+      <p class="small" data-ink="dim">00 — SPECIMEN</p>
+      <h1>Code is an unlimited canvas.</h1>
+      <p>A prompt is a request. Code is a specification. The model is non-deterministic, but what it writes can be read, edited and run the same way every time. This page is a specimen for tuning how text, panels, diagrams and objects look on the emulated display.</p>
+    </section>
+
+    <section>
+      <h2>Heading level two</h2>
+      <p>Body copy should stay readable when projected. Drag the resolution down until it breaks, then back up until it holds. Select this sentence to check the highlight goes through the shaders.</p>
+      <h3>Heading level three</h3>
+      <ul>
+        <li>Lower-resolution emulation, nearest-neighbor upscale</li>
+        <li>Glow, and ghosting that grows with scroll speed</li>
+        <li>Scanline or pixel grid, with grid-snapped scroll</li>
+      </ul>
+      <p class="small" data-ink="dim">Small / caption text. Fig. 1 — the effects stack, in order of application.</p>
+    </section>
+
+    <section>
+      <h2>Panel and form</h2>
+      <div class="panel" data-box>
+        <p class="small" data-ink="dim">CONTEXT WINDOW</p>
+        <div class="row"><span>claude.md</span><span data-ink="dim">1.2k tokens</span></div>
+        <div class="row"><span>design/colors.md</span><span data-ink="dim">0.4k tokens</span></div>
+        <div class="row"><span>chat history</span><span data-ink="accent">48.9k tokens</span></div>
+        <div class="bar" data-box><div class="bar-fill" data-fill style="width: 62%"></div></div>
+        <div class="row"><span class="field" data-box>&gt; add a section about context</span><span class="key" data-box data-ink="accent">RUN</span></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Code</h2>
+      <pre><code>const square = {
+  width: 400,
+  height: 400,
+  fill: "#0050FF",   // same output every time
+};</code></pre>
+    </section>
+
+    <section>
+      <h2>Diagram</h2>
+      <svg class="diagram" viewBox="0 0 600 160" data-draw>
+        <rect x="10" y="50" width="120" height="60"/>
+        <rect x="240" y="50" width="120" height="60"/>
+        <rect x="470" y="50" width="120" height="60" data-ink="accent"/>
+        <line x1="130" y1="80" x2="240" y2="80"/>
+        <line x1="360" y1="80" x2="470" y2="80"/>
+        <polyline points="300,110 300,140 530,140 530,110" data-ink="dim"/>
+        <circle cx="185" cy="80" r="5" data-ink="accent"/>
+      </svg>
+      <div class="row diagram-labels"><span>prompt</span><span>context</span><span data-ink="accent">code</span></div>
+    </section>
+
+    <section>
+      <h2>Object</h2>
+      <div id="viewport3d" class="viewport3d" data-box></div>
+      <p class="small" data-ink="dim">Low-poly placeholder. Render style is still undecided.</p>
+    </section>
+
+    <section>
+      <h2>Long scroll</h2>
+      <p>Scroll quickly through this section to see the ghosting. With snap enabled the page moves in whole grid lines. Projected output usually loses contrast and fine detail, so the presenter preset should be heavier than feels right on a laptop.</p>
+      <p>Paperclip-punk is skimmable, diagrammatic and interactive. The display layer adds an uncanny quality: a precise interface rendered on hardware that should not exist.</p>
+      <p data-ink="dim">— end of specimen —</p>
+    </section>
+
+    <footer class="status" data-box>
+      <span data-ink="accent">F1</span><span>HELP</span>
+      <span data-ink="accent">F2</span><span>NEXT</span>
+      <span data-ink="accent">F3</span><span>BACK</span>
+    </footer>
+  </main>
+</body>
+</html>
