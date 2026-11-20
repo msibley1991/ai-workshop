@@ -1,8 +1,8 @@
-// layout.html only: the intro and the three tabs form an accordion driven by scroll.
+// layout.html only: the intro and the two tabs form an accordion driven by scroll.
 //
 // State is a weight per panel (intro, then each tab), summing to 1; layout.css
 // turns each weight (--w) into that panel's share of the free height. Scrolling
-// scrubs a position p from 0 (intro) to 3 (last tab): at p = 1.4 the first tab is
+// scrubs a position p from 0 (intro) to 2 (last tab): at p = 1.4 the first tab is
 // 0.6 open and the second 0.4. When the wheel goes quiet, p eases to a whole
 // section. Clicks, keys and the URL hash animate straight to a section instead.
 // Every change fires `lab:layout` so the raster re-measures (nothing resizes #content).

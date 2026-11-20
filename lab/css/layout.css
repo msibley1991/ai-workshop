@@ -35,8 +35,8 @@
   --radius: 8px;
   --line: 4px;        /* bars and tab outlines */
   --line-dashed: 1px; /* graphic frame */
-  /* Height an open panel gets: viewport minus bars, tab headers and the 5 gaps between 6 rows. */
-  --avail: calc(100dvh - 2 * var(--bar-height) - 3 * var(--tab-height) - 5 * var(--site-gap));
+  /* Height an open panel gets: viewport minus bars, tab headers and the 4 gaps between 5 rows. */
+  --avail: calc(100dvh - 2 * var(--bar-height) - 2 * var(--tab-height) - 4 * var(--site-gap));
 }
 
 #content.site {
