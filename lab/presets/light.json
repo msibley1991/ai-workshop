@@ -1,6 +1,6 @@
 {
   "resolution": {
-    "pixelScale": 2,
+    "pixelScale": 1,
     "hardText": 1
   },
   "glow": {
@@ -13,9 +13,9 @@
     "scrollGain": 0
   },
   "grid": {
-    "mode": "off",
-    "opacity": 0.1,
-    "pitch": 1,
+    "mode": "pixel grid",
+    "opacity": 0.22,
+    "pitch": 3,
     "snapScroll": true
   },
   "phosphor": {

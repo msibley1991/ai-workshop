@@ -2,7 +2,10 @@
 // measure() is expensive (one Range per word) and runs only when layout changes;
 // draw() runs every frame and only translates by the render scroll offset.
 
-const inkOf = (el) => el.closest?.("[data-ink]")?.dataset.ink ?? "phosphor";
+// Ink comes from the CSS custom property --ink (so states like :hover can set it),
+// else the nearest data-ink attribute, else phosphor.
+const inkOf = (el, style = getComputedStyle(el)) =>
+  style.getPropertyValue("--ink").trim() || el.closest?.("[data-ink]")?.dataset.ink || "phosphor";
 const ascentCache = new Map();
 
 function fontOf(style) {
@@ -20,8 +23,20 @@ function ascentOf(ctx, font) {
 // Document-space rects (client rect + scroll) so scrolling never requires re-measuring.
 const toDoc = (r) => ({ x: r.left + window.scrollX, y: r.top + window.scrollY, w: r.width, h: r.height });
 
+// [data-clip]: anything inside is drawn clipped to that element's rect.
+function clipper() {
+  const cache = new Map();
+  return (el) => {
+    const c = el.closest?.("[data-clip]");
+    if (!c) return null;
+    if (!cache.has(c)) cache.set(c, toDoc(c.getBoundingClientRect()));
+    return cache.get(c);
+  };
+}
+
 export function measure(root, ctx) {
   ascentCache.clear();
+  const clipOf = clipper();
   const words = [];
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   const range = document.createRange();
@@ -32,7 +47,8 @@ export function measure(root, ctx) {
     const style = getComputedStyle(parent);
     const font = fontOf(style);
     const ascent = ascentOf(ctx, font);
-    const ink = inkOf(parent);
+    const ink = inkOf(parent, style);
+    const clip = clipOf(parent);
     for (const m of node.data.matchAll(/\S+/g)) {
       range.setStart(node, m.index);
       range.setEnd(node, m.index + m[0].length);
@@ -40,7 +56,7 @@ export function measure(root, ctx) {
       if (!rects.length) continue;
       if (rects.length === 1) {
         const r = toDoc(rects[0]);
-        words.push({ text: m[0], x: r.x, baseline: r.y + ascent, font, ink });
+        words.push({ text: m[0], x: r.x, baseline: r.y + ascent, font, ink, clip });
         continue;
       }
       // Word wraps (e.g. at a hyphen): split it into one segment per line.
@@ -54,15 +70,48 @@ export function measure(root, ctx) {
         if (segment && Math.abs(segment.top - r.y) < 1) {
           segment.text += m[0][i];
         } else {
-          segment = { text: m[0][i], x: r.x, top: r.y, baseline: r.y + ascent, font, ink };
+          segment = { text: m[0][i], x: r.x, top: r.y, baseline: r.y + ascent, font, ink, clip };
           words.push(segment);
         }
       }
     }
   }
 
-  const boxes = [...root.querySelectorAll("[data-box]")].map((el) => ({ ...toDoc(el.getBoundingClientRect()), ink: inkOf(el) }));
-  const fills = [...root.querySelectorAll("[data-fill]")].map((el) => ({ ...toDoc(el.getBoundingClientRect()), ink: inkOf(el) }));
+  // Boxes pick up CSS border-radius and dashed borders.
+  const boxes = [...root.querySelectorAll("[data-box]")].map((el) => {
+    const style = getComputedStyle(el);
+    return {
+      ...toDoc(el.getBoundingClientRect()),
+      ink: inkOf(el, style),
+      clip: clipOf(el),
+      radius: parseFloat(style.borderTopLeftRadius) || 0,
+      line: parseFloat(style.borderTopWidth) || 1,
+      dashed: style.borderTopStyle === "dashed",
+    };
+  });
+  // img[data-draw]: the image is stretched to its box and tinted with its ink.
+  // Hidden images (display: none) have no size and are skipped.
+  const images = [...root.querySelectorAll("img[data-draw]")]
+    .map((el) => ({ ...toDoc(el.getBoundingClientRect()), el, ink: inkOf(el), clip: clipOf(el) }))
+    .filter((im) => im.w > 0 && im.h > 0);
+  const fills = [...root.querySelectorAll("[data-fill]")].map((el) => ({ ...toDoc(el.getBoundingClientRect()), ink: inkOf(el), clip: clipOf(el) }));
+
+  // [data-tab]: notched tab outline (see tabPath) sized to the element, so it grows
+  // with whatever the element holds. CSS --line sets the stroke, --tab-header the
+  // header strip height, --tab-flap where the notch ends (register it with
+  // @property as a <length> so it reads as px), and --tab-fill (an ink name)
+  // fills the header strip.
+  const tabs = [...root.querySelectorAll("[data-tab]")].map((el) => {
+    const style = getComputedStyle(el);
+    return {
+      ...toDoc(el.getBoundingClientRect()),
+      ink: inkOf(el, style),
+      line: parseFloat(style.getPropertyValue("--line")) || 1,
+      header: parseFloat(style.getPropertyValue("--tab-header")) || 64,
+      flap: parseFloat(style.getPropertyValue("--tab-flap")) || 452,
+      fill: style.getPropertyValue("--tab-fill").trim() || null,
+    };
+  });
 
   const bullets = [...root.querySelectorAll("li")].map((li) => {
     const r = toDoc(li.getBoundingClientRect());
@@ -98,7 +147,58 @@ export function measure(root, ctx) {
     paths.push({ points, ink: shape.dataset.ink ?? inkOf(shape.closest("svg")) });
   }
 
-  return { words: words.concat(bullets), boxes, fills, paths };
+  tintCache.clear();
+  return { words: words.concat(bullets), boxes, fills, paths, images, tabs };
+}
+
+// Tinted copies of data-draw images, keyed by source, size and color.
+const tintCache = new Map();
+function tinted(img, w, h, color) {
+  const key = `${img.src}|${w}|${h}|${color}`;
+  if (!tintCache.has(key)) {
+    const c = document.createElement("canvas");
+    c.width = Math.max(1, Math.ceil(w));
+    c.height = Math.max(1, Math.ceil(h));
+    const x = c.getContext("2d");
+    x.drawImage(img, 0, 0, c.width, c.height);
+    x.globalCompositeOperation = "source-in";
+    x.fillStyle = color;
+    x.fillRect(0, 0, c.width, c.height);
+    tintCache.set(key, c);
+  }
+  return tintCache.get(key);
+}
+
+// Tab outline from the Figma "Union" shape: the flap on the left is full height,
+// a slanted notch (45px wide) ending at x + flap drops the top edge to the
+// header's midline, and the bottom edge sits at h. Corners: 8px, notch 3px.
+const NOTCH = 45;
+function tabPath(ctx, x, y, w, h, header, flap) {
+  const mid = header / 2;
+  const pts = [
+    [x, y, 8], [x + flap - NOTCH, y, 3], [x + flap, y + mid, 3],
+    [x + w, y + mid, 8], [x + w, y + h, 8], [x, y + h, 8],
+  ];
+  ctx.beginPath();
+  ctx.moveTo((pts[0][0] + pts[1][0]) / 2, pts[0][1]);
+  for (let i = 1; i <= pts.length; i++) {
+    const [px, py, r] = pts[i % pts.length];
+    const [nx, ny] = pts[(i + 1) % pts.length];
+    ctx.arcTo(px, py, nx, ny, r);
+  }
+  ctx.closePath();
+}
+
+// Runs fn clipped to item.clip (document space), if it has one.
+function clipped(ctx, item, fn) {
+  if (!item.clip) return fn();
+  const c = item.clip;
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(c.x, c.y, c.w, c.h);
+  ctx.clip();
+  fn();
+  ctx.restore();
 }
 
 export function selectionRects() {
@@ -132,14 +232,44 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
   for (const f of layout.fills) {
     if (!visible(f.y, f.h)) continue;
     ctx.fillStyle = colors[f.ink];
-    ctx.fillRect(snap(f.x), snap(f.y), snap(f.w), snap(f.h));
+    clipped(ctx, f, () => ctx.fillRect(snap(f.x), snap(f.y), snap(f.w), snap(f.h)));
   }
 
-  ctx.lineWidth = ps;
+  for (const t of layout.tabs) {
+    if (!visible(t.y, t.h)) continue;
+    const x = snap(t.x), y = snap(t.y), w = snap(t.w), h = snap(t.h);
+    if (t.fill) {
+      ctx.fillStyle = colors[t.fill];
+      tabPath(ctx, x, y, w, Math.min(h, t.header), t.header, t.flap);
+      ctx.fill();
+    }
+    // Stroke inside the shape, rounded up to whole emulated pixels like boxes.
+    const lw = Math.max(1, Math.ceil(t.line / ps)) * ps;
+    ctx.lineWidth = lw;
+    ctx.strokeStyle = colors[t.ink];
+    tabPath(ctx, x + lw / 2, y + lw / 2, w - lw, h - lw, t.header - lw, t.flap);
+    ctx.stroke();
+  }
+
   for (const b of layout.boxes) {
     if (!visible(b.y, b.h)) continue;
+    // CSS border width, rounded up to whole emulated pixels (min 1), drawn inside the box.
+    const lw = Math.max(1, Math.ceil(b.line / ps)) * ps;
+    ctx.lineWidth = lw;
     ctx.strokeStyle = colors[b.ink];
-    ctx.strokeRect(snap(b.x) + ps / 2, snap(b.y) + ps / 2, snap(b.w) - ps, snap(b.h) - ps);
+    ctx.setLineDash(b.dashed ? [lw * 3, lw * 2] : []);
+    clipped(ctx, b, () => {
+      ctx.beginPath();
+      ctx.roundRect(snap(b.x) + lw / 2, snap(b.y) + lw / 2, snap(b.w) - lw, snap(b.h) - lw, b.radius);
+      ctx.stroke();
+    });
+  }
+  ctx.lineWidth = ps;
+  ctx.setLineDash([]);
+
+  for (const im of layout.images) {
+    if (!visible(im.y, im.h) || !im.el.complete || !im.el.naturalWidth) continue;
+    clipped(ctx, im, () => ctx.drawImage(tinted(im.el, im.w, im.h, colors[im.ink]), im.x, im.y, im.w, im.h));
   }
 
   for (const p of layout.paths) {
@@ -154,6 +284,6 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
     if (!visible(w.baseline - 200, 400)) continue;
     ctx.font = w.font;
     ctx.fillStyle = colors[w.ink];
-    ctx.fillText(w.text, w.x, w.baseline);
+    clipped(ctx, w, () => ctx.fillText(w.text, w.x, w.baseline));
   }
 }

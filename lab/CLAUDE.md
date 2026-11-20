@@ -9,14 +9,15 @@ Effects lab for the ai-workshop site: a sandbox for tuning a "pre-window UI" dis
 - Effects work in **ink space**: light themes are inverted so ink is always bright on dark, then inverted back in `display.js`.
 
 ## File map
-- `index.html`: specimen content. `data-ink="phosphor|accent|dim"` sets color, `data-box` draws a border, `data-fill` a fill, `svg[data-draw]` shapes are traced.
+- `index.html`: specimen content. `data-ink="phosphor|accent|dim|ground"` sets color (a CSS `--ink` custom property wins, so `:hover` rules can recolor; `ground` knocks text out of a fill), `data-box` draws a border (honors CSS `border-radius` and `dashed`), `data-fill` a fill, `svg[data-draw]` shapes are traced, `img[data-draw]` images are stretched to their box and tinted with their ink, `data-tab` draws the notched Figma tab outline sized to the element (CSS `--line`, `--tab-header`, `--tab-flap` for where the notch ends, and `--tab-fill` to fill the header strip), and anything inside `data-clip` is drawn clipped to that element.
+- `layout.html` + `css/layout.css` + `js/layout.js`: site layout test from the Figma frames "ref1" (home, node 313:125) and "ref2" (section view, node 313:148). The intro and tabs are an accordion: scrolling scrubs between them and snaps to a whole section; clicks, keys and the URL hash (`#foundations` etc.) animate straight there. Tab headers invert on hover/focus. Widths follow the 12-column grid tokens in `layout.css` (`--col`, `--span-N`, `.site-grid`). Pages fire `lab:layout` on `window` to force a re-measure when layout changes without a resize (here, every animation frame). `<body data-preset="light">` loads that preset on every load; `data-panel-id` keeps its dial values separate from the specimen's. Type is fixed in CSS (Eurostile, local font), so the Type dials don't apply.
 - `css/text-layer.css`: layout of the invisible DOM; type sizes are CSS variables set from the dials.
 - `js/params.js`: **all** dial definitions and defaults. Add new parameters here first.
 - `js/panel.js`: dialkit panel and preset actions. `js/scroll.js`: snapped render offset and scroll velocity.
 - `js/main.js`: frame loop.
-- `presets/*.json`: named presets (partial values are fine). Add the file name to `presets.file` options in `js/params.js`.
+- `presets/*.json`: named presets (partial values are fine). Add the file name to `presets.file` options in `js/params.js`. The panel's "Save to preset" overwrites the selected preset file with the current dials (needs `serve.py`, which accepts that PUT from this machine only).
 - `vendor/dialkit/`: vendored dialkit 2.1.0 (plain-JS build). three.js loads from jsdelivr via the import map.
 
 ## Conventions
-- Plain HTML + ES modules, no build step. Serve the repo root with `python3 -m http.server 8123` and open `/lab/`.
+- Plain HTML + ES modules, no build step. Serve the repo root with `python3 serve.py` (port 8123, no browser caching) and open `/lab/`.
 - Any new visual element must be drawable by `text-raster.js` (or the 3D pass), or it won't show.

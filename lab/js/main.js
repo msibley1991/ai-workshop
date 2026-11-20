@@ -49,6 +49,9 @@ function toHex(color) {
   return "#" + [r, g, b].map((n) => Math.round(n).toString(16).padStart(2, "0")).join("");
 }
 
+// Pages can pin a preset and keep their own saved dial values (see layout.html).
+const panelOptions = { id: document.body.dataset.panelId, preset: document.body.dataset.preset };
+
 createPanel((snapshot) => {
   const values = structuredClone(snapshot);
   for (const key of ["light", "dark"]) {
@@ -58,9 +61,11 @@ createPanel((snapshot) => {
   params = values;
   applyType(values.type);
   invalidate();
-});
+}, panelOptions);
 
 window.addEventListener("resize", invalidate);
+// Pages fire this when layout changes without a resize (view switches, hover states).
+window.addEventListener("lab:layout", invalidate);
 document.fonts.ready.then(invalidate);
 new ResizeObserver(invalidate).observe(content);
 document.addEventListener("selectionchange", () => (selection = selectionRects()));
@@ -75,8 +80,8 @@ function frame(t) {
   if (layoutDirty) {
     layout = measure(content, ctx);
     selection = selectionRects();
-    const r = viewportEl.getBoundingClientRect();
-    viewport = { x: r.left + window.scrollX, y: r.top + window.scrollY, w: r.width, h: r.height };
+    const r = viewportEl?.getBoundingClientRect();
+    viewport = r ? { x: r.left + window.scrollX, y: r.top + window.scrollY, w: r.width, h: r.height } : null;
     layoutDirty = false;
   }
 
@@ -86,6 +91,7 @@ function frame(t) {
     phosphor: theme.phosphor,
     accent: theme.accent,
     dim: mix(theme.ground, theme.phosphor, 0.55),
+    ground: theme.ground, // knock-out ink, e.g. text on a filled shape
   };
 
   draw(ctx, layout, selection, { pixelScale: ps, renderY, colors });

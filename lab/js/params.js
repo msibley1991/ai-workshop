@@ -60,6 +60,7 @@ export const config = {
     // To add one: drop a JSON file in presets/ and add its name here.
     file: { type: "select", options: ["light", "dark", "presenter", "reader"], default: "light" },
     load: { type: "action", label: "Load preset" },
+    save: { type: "action", label: "Save to preset" },
     exportJSON: { type: "action", label: "Export JSON" },
     importJSON: { type: "action", label: "Import JSON" },
   },
@@ -67,9 +68,20 @@ export const config = {
 
 // Named presets live as JSON in presets/ so they can be versioned and diffed.
 export async function loadPreset(name) {
-  const res = await fetch(`presets/${name}.json`);
+  const res = await fetch(`presets/${name}.json`, { cache: "no-store" });
   if (!res.ok) throw new Error(`Preset ${name} not found`);
   return res.json();
+}
+
+// Overwrites presets/<name>.json with the current values. Needs serve.py (the
+// plain `python3 -m http.server` can't write files).
+export async function savePreset(name, values) {
+  const res = await fetch(`presets/${name}.json`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(values),
+  });
+  if (!res.ok) throw new Error(res.status === 501 ? "Saving needs serve.py (python3 serve.py)" : `Save failed (${res.status})`);
 }
 
 export function exportJSON(values) {

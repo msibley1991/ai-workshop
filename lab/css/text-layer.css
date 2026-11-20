@@ -73,3 +73,17 @@ footer.status { margin: 0; }
 
 /* SVG shapes are read for geometry only. */
 .diagram * { fill: none; stroke: none; }
+
+/* Status message from the dial panel (js/panel.js). Real DOM, not drawn by the raster. */
+.lab-toast {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 10000;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #1b1d22;
+  color: #f4f4eb;
+  font: 13px/1.3 system-ui, sans-serif;
+}
+.lab-toast.is-error { background: #7a1f1f; }
