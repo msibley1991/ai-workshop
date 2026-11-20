@@ -32,7 +32,7 @@ git merge main
 Open `index.html` in a browser, or serve locally:
 
 ```sh
-python3 -m http.server 8123
+python3 serve.py
 ```
 
 Then visit http://localhost:8123.
@@ -42,7 +42,7 @@ Then visit http://localhost:8123.
 `lab/` is a playground for tuning the site's display effects with live sliders. There's nothing to install: dialkit is included in the repo, and three.js and the fonts load from the internet.
 
 ```sh
-python3 -m http.server 8123
+python3 serve.py
 ```
 
 Open http://localhost:8123/lab/.
