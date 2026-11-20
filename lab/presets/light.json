@@ -9,7 +9,7 @@
     "tintToPhosphor": 0.5
   },
   "ghost": {
-    "decay": 0.75,
+    "decay": 0.66,
     "scrollGain": 1,
     "blur": 3
   },

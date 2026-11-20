@@ -20,5 +20,5 @@ Purpose: _TBD_
 ## Docs
 
 - [docs/aesthetic-direction.md](docs/aesthetic-direction.md): visual direction and open questions (exploratory)
-- [docs/layout-grid.md](docs/layout-grid.md): layout grid and spacing scheme (exploratory, built in the lab layout page)
+- [docs/design-system/layout-grid.md](docs/design-system/layout-grid.md): layout grid and spacing scheme (exploratory, built in the lab layout page)
 - [docs/handoffs/](docs/handoffs/): session handoff notes, newest last

@@ -1,7 +1,7 @@
 /* Layout test page (layout.html). Overrides the specimen layout in
    text-layer.css; classes are prefixed site- so they don't collide with the
    specimen's (.bar, .panel, ...). Grid and spacing decisions live in
-   docs/layout-grid.md.
+   docs/design-system/layout-grid.md.
 
    Canvas: the page is one canvas, 1080 units tall, scaled to the screen
    height. --u is screen px per unit; every length below is N * var(--u). The
