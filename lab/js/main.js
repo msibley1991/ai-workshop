@@ -57,9 +57,10 @@ createPanel((snapshot) => {
   for (const key of ["light", "dark"]) {
     for (const role of ["ground", "phosphor", "accent"]) values.theme[key][role] = toHex(values.theme[key][role]);
   }
-  values.phosphor.persistenceColor = toHex(values.phosphor.persistenceColor);
+  for (const key of ["persistenceColor", "persistenceColor2", "persistenceColor3"]) values.phosphor[key] = toHex(values.phosphor[key]);
   params = values;
   applyType(values.type);
+  document.documentElement.style.setProperty("--line", `${values.outline.width}px`);
   invalidate();
 }, panelOptions);
 

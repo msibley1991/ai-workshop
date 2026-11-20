@@ -56,6 +56,11 @@ export function createRenderer(canvas, contentCanvas) {
     uDecay: { value: 0 },
     uShift: { value: 0 },
     uPersistInk: { value: new THREE.Vector3() },
+    uPersistInk2: { value: new THREE.Vector3() },
+    uPersistInk3: { value: new THREE.Vector3() },
+    uLayers: { value: 1 },
+    uLayerStep: { value: 1 },
+    uBands: { value: 0 },
     uGroundInk: { value: new THREE.Vector3() },
   });
   const blurMat = pass(blur, { tInput: { value: null }, uDirection: { value: new THREE.Vector2() } });
@@ -167,7 +172,13 @@ export function createRenderer(canvas, contentCanvas) {
       ghostMat.uniforms.tPrevious.value = ghostRead.texture;
       ghostMat.uniforms.uDecay.value = Math.min(params.ghost.decay + params.ghost.scrollGain * speed, 0.98);
       ghostMat.uniforms.uShift.value = params.phosphor.shift;
-      ghostMat.uniforms.uPersistInk.value = toInk(params.phosphor.persistenceColor);
+      const gu = ghostMat.uniforms;
+      gu.uPersistInk.value = toInk(params.phosphor.persistenceColor);
+      gu.uPersistInk2.value = toInk(params.phosphor.persistenceColor2);
+      gu.uPersistInk3.value = toInk(params.phosphor.persistenceColor3);
+      gu.uLayers.value = params.phosphor.layers;
+      gu.uLayerStep.value = 1 / params.phosphor.layerFrames;
+      gu.uBands.value = params.phosphor.layerMode === "bands" ? 1 : 0;
       ghostMat.uniforms.uGroundInk.value = groundInk;
       run(ghostMat, ghostWrite);
       [ghostRead, ghostWrite] = [ghostWrite, ghostRead];

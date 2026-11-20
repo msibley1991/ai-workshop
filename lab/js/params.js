@@ -27,7 +27,14 @@ export const config = {
     snapScroll: true,
   },
   phosphor: {
-    persistenceColor: "#F38020", // ghosts drift toward this color as they fade
+    persistenceColor: "#F38020", // ghosts drift toward this color as they fade (layer 1)
+    persistenceColor2: "#F3C020", // layer 2: reached as the ghost dims further
+    persistenceColor3: "#8A1A00", // layer 3: the faintest tail
+    layers: [1, 1, 3, 1],        // how many persistence colors to step through
+    // blend: colors drift in by shift while the ghost fades. bands: each layer
+    // switches in at full strength and holds brightness; only the last one fades.
+    layerMode: { type: "select", options: ["blend", "bands"], default: "blend" },
+    layerFrames: [2, 0.5, 30, 0.5], // frames a ghost spends on each layer before the next
     shift: [0.35, 0, 1],
     jitter: [0, 0, 3],           // horizontal row wobble, in emulated pixels
     flicker: [0.02, 0, 0.3],
@@ -36,6 +43,9 @@ export const config = {
     mode: { type: "select", options: ["light", "dark"], default: "light" },
     light: { ground: "#F4F4F0", phosphor: "#0050FF", accent: "#F38020", _collapsed: true },
     dark: { ground: "#0A0C10", phosphor: "#3D7BFF", accent: "#F38020", _collapsed: true },
+  },
+  outline: {
+    width: [4, 1, 16, 1],        // CSS px; sets --line (layout.html bars and tab outlines)
   },
   type: {
     family: {
