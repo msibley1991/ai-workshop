@@ -20,7 +20,8 @@ const invalidate = () => (layoutDirty = true);
 // body[data-canvas] (layout.html): the page is a scaled canvas measured in units
 // (CSS --u = screen px per unit). The emulated pixel is then pixelScale units,
 // snapped down to 1/2/4/8 so the 8-unit spacing lands on whole pixels, and
-// lines are counted in emulated pixels. Elsewhere pixelScale is screen px.
+// lines are counted in emulated pixels (rounded to whole device pixels in
+// frame()). Elsewhere pixelScale is screen px.
 const canvasMode = "canvas" in document.body.dataset;
 const readUnit = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--u")) || 1;
 let unit = canvasMode ? readUnit() : 1;
@@ -95,7 +96,13 @@ function frame(t) {
   requestAnimationFrame(frame);
   if (!params) return;
 
-  const ps = snapPixel(params.resolution.pixelScale) * unit;
+  // In canvas mode the emulated pixel is rounded to whole device pixels: a
+  // fractional size (1.034 CSS px per unit on a 1728x1117 screen) makes some
+  // rows and scanlines a device pixel taller, which reads as darker bands.
+  const dpr = window.devicePixelRatio || 1;
+  const ps = canvasMode
+    ? Math.max(1, Math.round(snapPixel(params.resolution.pixelScale) * unit * dpr)) / dpr
+    : params.resolution.pixelScale;
   renderer.resize(ps);
 
   if (layoutDirty) {

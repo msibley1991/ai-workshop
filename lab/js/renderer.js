@@ -81,6 +81,11 @@ export function createRenderer(canvas, contentCanvas) {
     uJitter: { value: 0 },
     uFlicker: { value: 0 },
     uTime: { value: 0 },
+    uWarpStrength: { value: 0 },
+    uWarpSize: { value: 0.15 },
+    uWarpPeriod: { value: 0 },
+    uWarpSpeed: { value: 2.5 },
+    uWarpRandom: { value: 0 },
     uGridMode: { value: 0 },
     uGridOpacity: { value: 0 },
     uGridPitch: { value: 1 },
@@ -210,6 +215,11 @@ export function createRenderer(canvas, contentCanvas) {
       u.uJitter.value = params.phosphor.jitter;
       u.uFlicker.value = params.phosphor.flicker;
       u.uTime.value = time;
+      u.uWarpStrength.value = params.warp.strength;
+      u.uWarpSize.value = params.warp.size;
+      u.uWarpPeriod.value = params.warp.frequency > 0 ? 60 / params.warp.frequency : 0;
+      u.uWarpSpeed.value = params.warp.speed;
+      u.uWarpRandom.value = params.warp.randomness;
       u.uGridMode.value = GRID_MODES[params.grid.mode];
       u.uGridOpacity.value = params.grid.opacity;
       u.uGridPitch.value = params.grid.pitch;

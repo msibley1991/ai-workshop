@@ -40,6 +40,15 @@ export const config = {
     jitter: [0, 0, 3],           // horizontal row wobble, in emulated pixels
     flicker: [0.02, 0, 0.3],
   },
+  // Rolling wave (CRT / tape tracking): a band that shears rows sideways as it
+  // rolls from the top of the screen to the bottom. Scanlines stay put.
+  warp: {
+    strength: [0, 0, 40, 0.5],   // how far the band pushes rows, in emulated pixels (0 = off)
+    size: [0.15, 0.02, 1, 0.01], // band height, as a fraction of the screen height
+    frequency: [6, 0, 30, 0.5],  // waves per minute
+    speed: [2.5, 0.5, 10, 0.1],  // seconds for a wave to roll top to bottom
+    randomness: [0.3, 0, 1],     // 0 = identical, evenly spaced waves; more varies timing, size, strength and adds a ragged edge
+  },
   theme: {
     mode: { type: "select", options: ["light", "dark"], default: "light" },
     light: { ground: "#F4F4F0", phosphor: "#0050FF", accent: "#F38020", _collapsed: true },

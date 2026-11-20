@@ -25,7 +25,7 @@ Status: **exploration**. Decided in the first design-system grilling session (20
 
 ## Frame and rows
 - **Outer margin:** 8 on all four sides, equal to the row gap, so every box has the same thin sliver of ground all round.
-- **Rows:** bars 32, tab headers 64, gaps 8. The open panel gets 1080 − 16 − 64 − 128 − 32 = 840.
+- **Rows:** bars 32, tab headers 64, gaps 8. The open intro gets 1080 − 16 − 64 − 128 − 32 = 840. When a tab is open, the closed intro's gap collapses, so the first tab sits 8 under the top bar and an open tab body gets 848.
 
 ## Columns
 - The grid lives **inside each box**: box edge → 24 inset → 12 columns with 24 gutters.
@@ -34,6 +34,6 @@ Status: **exploration**. Decided in the first design-system grilling session (20
 
 ## Type and lines
 - **Line-heights:** multiples of 8 (4 allowed for small text). No strict baseline grid. Type sizes wait for the type session.
-- **Emulated pixel:** measured in units and limited to 1, 2, 4 or 8, so spacing lands on whole pixels and the look is the same on every screen.
+- **Emulated pixel:** measured in units and limited to 1, 2, 4 or 8, then rounded to whole device pixels so scanlines and pixel rows stay even. Spacing can be off by one emulated pixel on screens where a unit isn't a whole number of device pixels.
 - **Lines:** counted in emulated pixels, outline 2 and dashed 1.
 - **Radius:** 8 units.

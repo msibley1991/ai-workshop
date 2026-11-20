@@ -1,21 +1,21 @@
 {
   "resolution": {
     "pixelScale": 1,
-    "hardText": 0.56
+    "hardText": 0.22
   },
   "glow": {
-    "intensity": 1,
-    "radius": 1,
-    "tintToPhosphor": 0
+    "intensity": 0.8,
+    "radius": 1.5,
+    "tintToPhosphor": 0.5
   },
   "ghost": {
     "decay": 0.75,
-    "scrollGain": 0,
-    "blur": 1.5
+    "scrollGain": 1,
+    "blur": 3
   },
   "grid": {
     "mode": "scanlines",
-    "opacity": 0.22,
+    "opacity": 1,
     "pitch": 2,
     "snapScroll": true
   },
@@ -25,15 +25,22 @@
     "persistenceColor3": "#8A1A00",
     "layers": 2,
     "layerMode": "blend",
-    "layerFrames": 10,
-    "shift": 1,
+    "layerFrames": 7.5,
+    "shift": 0.5,
     "jitter": 1,
-    "flicker": 0.05
+    "flicker": 0
+  },
+  "warp": {
+    "strength": 4,
+    "size": 0.05,
+    "frequency": 4,
+    "speed": 5.5,
+    "randomness": 0.67
   },
   "theme": {
     "mode": "light",
     "light": {
-      "ground": "#f4f4eb",
+      "ground": "#f2f6ff",
       "phosphor": "#00010f",
       "accent": "#F38020"
     },

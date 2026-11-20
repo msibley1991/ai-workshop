@@ -101,7 +101,8 @@ export function measure(root, ctx) {
       const alpha = parseFloat(style.getPropertyValue("--fill-alpha"));
       return { ...toDoc(el.getBoundingClientRect()), ink: inkOf(el, style), clip: clipOf(el), alpha: Number.isNaN(alpha) ? 1 : alpha };
     })
-    .filter((f) => f.w > 0 && f.h > 0 && f.alpha > 0);
+    .filter((f) => f.w > 0 && f.h > 0 && f.alpha > 0)
+    .sort((a, b) => (b.alpha < 1) - (a.alpha < 1)); // translucent first, under solid fills
 
   // [data-tab]: notched tab outline (see tabPath) sized to the element, so it grows
   // with whatever the element holds. CSS --line sets the stroke, --tab-header the
@@ -238,11 +239,20 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
 
   for (const f of layout.fills) {
     if (!visible(f.y, f.h)) continue;
-    ctx.fillStyle = colors[f.ink];
-    ctx.globalAlpha = f.alpha;
-    clipped(ctx, f, () => ctx.fillRect(snap(f.x), snap(f.y), snap(f.w), snap(f.h)));
+    const rect = [snap(f.x), snap(f.y), snap(f.w), snap(f.h)];
+    clipped(ctx, f, () => {
+      // Translucent fills are drawn opaque, pre-blended over the ground, so the
+      // hardText threshold (which drops coverage under 50%) keeps them.
+      if (f.alpha < 1) {
+        ctx.fillStyle = colors.ground;
+        ctx.fillRect(...rect);
+        ctx.globalAlpha = f.alpha;
+      }
+      ctx.fillStyle = colors[f.ink];
+      ctx.fillRect(...rect);
+      ctx.globalAlpha = 1;
+    });
   }
-  ctx.globalAlpha = 1;
 
   for (const t of layout.tabs) {
     if (!visible(t.y, t.h)) continue;

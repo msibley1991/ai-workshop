@@ -109,6 +109,10 @@
   min-height: 0;
   overflow: hidden;
 }
+/* As the intro closes, its gap closes with it, so the first tab sits one row
+   gap under the top bar, the same as above the bottom bar. (.site prefix beats
+   the `.site section` margin reset.) */
+.site .site-intro { margin-bottom: calc(-1 * var(--row-gap) * (1 - var(--w, 0))); }
 
 .site-tab {
   --tab-header: var(--tab-height);
@@ -155,8 +159,8 @@
 }
 .site-split .site-graphic { grid-column: 1 / 5; }
 .site-split > :last-child { grid-column: 5 / -1; }
-/* Inside a tab the bottom outline needs room. */
-.site-tab-body .site-split { height: calc(var(--avail) - var(--line)); }
+/* An open tab also gets the intro's collapsed gap; its bottom outline needs room. */
+.site-tab-body .site-split { height: calc(var(--avail) + var(--row-gap) - var(--line)); }
 
 .site-graphic {
   border: var(--line-dashed) dashed;
