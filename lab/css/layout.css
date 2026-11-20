@@ -1,54 +1,90 @@
 /* Layout test page (layout.html). Overrides the specimen layout in
    text-layer.css; classes are prefixed site- so they don't collide with the
-   specimen's (.bar, .panel, ...). Sizes come from the Figma frames "ref1"
-   (intro) and "ref2" (open section), 1440 wide: 20px page margins, 8px gaps.
+   specimen's (.bar, .panel, ...). Grid and spacing decisions live in
+   docs/layout-grid.md.
 
-   The page is one column locked to the viewport: bars and the three 64px tab
-   headers are fixed; the intro and the tab bodies share the rest. js/layout.js
-   sets --w (0..1, summing to 1) on each panel and flex-grow hands out the free
-   height in that proportion, so one closes as the next opens. Panel content is
-   laid out at the full open height (--avail) and clipped, so it never reflows
-   mid-animation; big type scales with that height (container units).
+   Canvas: the page is one canvas, 1080 units tall, scaled to the screen
+   height. --u is screen px per unit; every length below is N * var(--u). The
+   width follows the screen's shape, clamped to 1440-1920 units (4:3 to 16:9):
+   narrower windows scale by width, wider ones centre the canvas.
 
-   Widths come from the Figma grid "Web / Desktop 12-col fluid": 12 columns,
-   20px margins and gutters. --col is one column; span N columns with
+   Rows: bars and the two tab headers are fixed; the intro and the tab bodies
+   share the rest. js/layout.js sets --w (0..1, summing to 1) on each panel and
+   flex-grow hands out the free height in that proportion, so one closes as the
+   next opens. Panel content is laid out at the full open height (--avail) and
+   clipped, so it never reflows mid-animation.
+
+   Grid: lives inside each box. Box edge -> --box-inset -> 12 columns with
+   --grid-gutter. --col is one column; span N with
    calc(N * var(--col) + (N - 1) * var(--grid-gutter)), or lay children on
    .site-grid and use grid-column. The tab flap ends at 4 columns.
 
+   Lines (--line, --line-dashed) are set by js/main.js in emulated pixels.
    Type is fixed here, so the panel's Type dials don't apply.
    Eurostile is a local system font on this Mac; elsewhere falls back. */
+
+/* Registered so they resolve to px: the raster and main.js read them. */
+@property --u { syntax: "<length>"; inherits: true; initial-value: 1px; }
+@property --line { syntax: "<length>"; inherits: true; initial-value: 2px; }
+@property --tab-header { syntax: "<length>"; inherits: true; initial-value: 64px; }
+@property --tab-flap { syntax: "<length>"; inherits: true; initial-value: 453px; }
+
 :root {
-  /* 12-column fluid grid (Figma "Web / Desktop 12-col fluid"). */
+  --u: min(100dvh / 1080, 100vw / 1440);
+  --canvas-h: calc(1080 * var(--u));
+  --canvas-w: min(100vw, 1920 * var(--u));
+
+  /* Spacing scale (units). */
+  --space-4: calc(4 * var(--u));
+  --space-8: calc(8 * var(--u));
+  --space-16: calc(16 * var(--u));
+  --space-24: calc(24 * var(--u));
+  --space-32: calc(32 * var(--u));
+  --space-48: calc(48 * var(--u));
+  --space-64: calc(64 * var(--u));
+  --space-96: calc(96 * var(--u));
+  --space-128: calc(128 * var(--u));
+
+  /* Content gaps by relationship. */
+  --gap-tight: var(--space-8);     /* label and value, lines in a list */
+  --gap-related: var(--space-16);  /* headline -> sub-headline */
+  --gap-group: var(--space-32);    /* sub-headline -> body, between paragraphs */
+  --gap-section: var(--space-64);  /* between major blocks in a panel */
+
+  /* Frame. */
+  --frame-margin: var(--space-8);  /* canvas edge -> box edge */
+  --row-gap: var(--space-8);       /* between stacked rows */
+  --bar-height: var(--space-32);
+  --tab-height: var(--space-64);
+  --box-inset: var(--space-24);    /* box edge -> grid */
+  --radius: var(--space-8);
+  --line-dashed: 1px;              /* overwritten by main.js */
+
+  /* 12-column grid inside a box. */
   --grid-columns: 12;
-  --grid-margin: 20px;
-  --grid-gutter: 20px;
-  --col: calc((100vw - 2 * var(--grid-margin) - (var(--grid-columns) - 1) * var(--grid-gutter)) / var(--grid-columns));
+  --grid-gutter: var(--space-24);
+  --col: calc((var(--canvas-w) - 2 * var(--frame-margin) - 2 * var(--box-inset) - (var(--grid-columns) - 1) * var(--grid-gutter)) / var(--grid-columns));
   --span-4: calc(4 * var(--col) + 3 * var(--grid-gutter));
   --span-6: calc(6 * var(--col) + 5 * var(--grid-gutter));
 
-  --site-margin: var(--grid-margin);
-  --site-gap: 8px;     /* vertical gap between rows */
-  --site-inset: 16px;  /* content inset inside frames */
+  /* Height an open panel gets: canvas minus top/bottom margin, bars, tab headers and the 4 gaps between 5 rows (840 units). */
+  --avail: calc(var(--canvas-h) - 2 * var(--frame-margin) - 2 * var(--bar-height) - 2 * var(--tab-height) - 4 * var(--row-gap));
+
   --site-font: "Eurostile", sans-serif;
-  --bar-height: 40px;
-  --tab-height: 64px;
-  --radius: 8px;
-  --line: 4px;        /* bars and tab outlines */
-  --line-dashed: 1px; /* graphic frame */
-  /* Height an open panel gets: viewport minus bars, tab headers and the 4 gaps between 5 rows. */
-  --avail: calc(100dvh - 2 * var(--bar-height) - 2 * var(--tab-height) - 4 * var(--site-gap));
 }
 
 #content.site {
+  box-sizing: border-box;
+  width: var(--canvas-w);
   max-width: none;
-  margin: 0;
-  padding: 0 var(--site-margin);
-  height: 100vh;
-  height: 100dvh;
+  height: var(--canvas-h);
+  /* Centred both ways when the clamp leaves ground around the canvas. */
+  margin: calc((100dvh - var(--canvas-h)) / 2) auto 0;
+  padding: var(--frame-margin);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: var(--site-gap);
+  gap: var(--row-gap);
   font-family: var(--site-font);
 }
 
@@ -61,16 +97,11 @@
   border-radius: var(--radius);
   display: flex;
   align-items: center;
-  font-size: 16px;
+  padding: 0 var(--box-inset);
+  font-size: var(--space-16);
   font-weight: 500;
   line-height: 1;
 }
-/* Figma: top bar runs edge to edge, bottom bar sits 4px in from the edges. */
-.site-bar-top {
-  margin: 0 calc(-1 * var(--site-margin));
-  padding: 0 calc(var(--site-margin) + 32px);
-}
-.site-bar-bottom { margin: 0 calc(4px - var(--site-margin)); }
 
 /* Panels: the intro and each tab grow by their --w share of the free height. */
 .site-intro {
@@ -78,12 +109,10 @@
   min-height: 0;
   overflow: hidden;
 }
-/* Registered so the raster reads it as resolved px (see [data-tab] in text-raster.js). */
-@property --tab-flap { syntax: "<length>"; inherits: true; initial-value: 453px; }
 
 .site-tab {
   --tab-header: var(--tab-height);
-  --tab-flap: var(--span-4); /* the notch ends at 4 columns */
+  --tab-flap: calc(var(--box-inset) + var(--span-4)); /* the notch ends at 4 columns */
   flex: var(--w, 0) 1 var(--tab-height);
   min-height: var(--tab-height);
   display: flex;
@@ -94,8 +123,8 @@
   width: var(--tab-flap);
   display: flex;
   align-items: center;
-  padding: 0 32px;
-  font-size: 24px;
+  padding: 0 var(--box-inset);
+  font-size: var(--space-24);
   line-height: 1;
   font-weight: 700;
 }
@@ -110,23 +139,22 @@
 .site-tab:has(> .site-tab-label:is(:hover, :focus-visible)) { --tab-fill: phosphor; }
 .site-tab-label:is(:hover, :focus-visible) span { --ink: ground; }
 
-/* The page grid as a layout: children place themselves with grid-column. */
+/* The box grid: inset from the box edge, then 12 columns. Children place
+   themselves with grid-column. */
 .site-grid {
   display: grid;
   grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
   column-gap: var(--grid-gutter);
+  padding-inline: var(--box-inset);
 }
 
 /* Graphic (columns 1-4) | text (5-12), at full open height whatever the panel's current size. */
 .site-split {
   height: var(--avail);
-  padding: var(--site-inset) 0;
+  padding-block: var(--box-inset);
 }
 .site-split .site-graphic { grid-column: 1 / 5; }
 .site-split > :last-child { grid-column: 5 / -1; }
-/* Inside a tab, keep clear of the outline; edges facing the gutter stay on the grid. */
-.site-tab-body .site-split .site-graphic { margin-left: var(--site-inset); }
-.site-tab-body .site-split > :last-child { padding-right: var(--site-inset); }
 /* Inside a tab the bottom outline needs room. */
 .site-tab-body .site-split { height: calc(var(--avail) - var(--line)); }
 
@@ -136,56 +164,81 @@
   min-height: 0;
   display: grid;
   place-items: center;
-  font-size: 32px;
+  font-size: var(--space-32);
   font-weight: 700;
 }
 
 .site-hero-text,
 .site-section-text {
-  container-type: size;
   min-width: 0;
   min-height: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 10px 0;
 }
 
-/* Intro text (ref1): 128px title, 64px subtitle. */
+/* Type: fixed sizes for now (the type session decides them); line-heights on the 8 grid. */
 .site h1 {
   margin: 0;
-  font-size: clamp(32px, min(14cqw, 28cqh), 128px);
-  line-height: 1;
+  font-size: var(--space-128);
+  line-height: var(--space-128);
   font-weight: 700;
 }
 .site .site-hero-sub {
-  margin: 0.5em 0 0;
-  font-size: clamp(20px, min(7cqw, 14cqh), 64px);
-  line-height: 1.15;
+  margin: var(--gap-related) 0 0;
+  font-size: var(--space-64);
+  line-height: calc(72 * var(--u));
 }
 
-/* Section text (ref2): 64px headline and sub-headline, 32px body at 696/913 width. */
-.site-section-text { gap: clamp(16px, 9cqh, 64px); }
+.site-section-text { gap: var(--gap-related); }
 .site .site-headline {
   margin: 0;
-  font-size: clamp(24px, min(7cqw, 9cqh), 64px);
-  line-height: 1;
+  font-size: var(--space-64);
+  line-height: var(--space-64);
   font-weight: 700;
 }
 .site-section-content {
   display: flex;
   flex-direction: column;
-  gap: clamp(8px, 4.5cqh, 32px);
+  gap: var(--gap-group);
 }
 .site .site-subheadline {
   margin: 0;
-  font-size: clamp(20px, min(7cqw, 9cqh), 64px);
-  line-height: 1;
+  font-size: var(--space-64);
+  line-height: var(--space-64);
 }
 .site .site-body {
   margin: 0;
   max-width: var(--span-6);
-  font-size: clamp(14px, min(3.5cqw, 4.4cqh), 32px);
-  line-height: 1.1;
+  font-size: var(--space-32);
+  line-height: calc(40 * var(--u));
 }
+
+/* Bottom bar: column-grid toggle. Its text sits on the box inset; hover/focus
+   inverts it (the fill is invisible until then). */
+.site-bar-bottom { padding: 0 calc(var(--box-inset) - var(--space-8)); }
+.site-grid-toggle {
+  --fill-alpha: 0;
+  align-self: stretch;
+  margin: 0;
+  padding: 0 var(--space-8);
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.site-grid-toggle:focus-visible { outline: none; }
+.site-grid-toggle:is(:hover, :focus-visible) { --fill-alpha: 1; }
+.site-grid-toggle:is(:hover, :focus-visible) span { --ink: ground; }
+
+/* Column-grid overlay: the box grid's columns over the full canvas, at 25% of the primary ink. */
+.site-grid-overlay {
+  position: absolute;
+  inset: var(--frame-margin) 0;
+  padding-inline: calc(var(--frame-margin) + var(--box-inset));
+  pointer-events: none;
+}
+.site-grid-overlay[hidden] { display: none; }
+.site-grid-overlay > div { --fill-alpha: 0.25; }

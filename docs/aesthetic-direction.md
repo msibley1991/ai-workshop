@@ -32,7 +32,7 @@ Elena Burger, ["Toward a working definition of paperclip-punk"](https://www.virt
 - How the 3D is rendered: technical-illustration outlines, wireframe, solid, or something else.
 - Palette, and the light vs. dark default.
 - Typefaces and type scale.
-- Layout and grid.
+- Layout and grid: first pass in [layout-grid.md](layout-grid.md).
 - Flow and pacing of the scroll presentation.
 - Contained graphics: diagrams, illustrations, 3D.
 - Whether the display effects stay, and how strong they are.

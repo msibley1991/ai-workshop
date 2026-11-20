@@ -16,8 +16,9 @@
 <!-- Layout from Figma frames "ref1" (intro, node 313:125) and "ref2" (open
      section, node 313:148), rendered through the effects pipeline. The tabs are
      an accordion driven by scroll (js/layout.js). data-preset loads that preset
-     on every page load. -->
-<body data-preset="light" data-panel-id="effects-lab-layout">
+     on every page load. data-canvas scales the emulated pixel and lines with the
+     canvas unit (js/main.js). -->
+<body data-preset="light" data-panel-id="effects-lab-layout" data-canvas>
   <canvas id="screen" aria-hidden="true"></canvas>
 
   <main id="content" class="site">
@@ -70,7 +71,16 @@
       </div>
     </article>
 
-    <footer class="site-bar site-bar-bottom" data-box></footer>
+    <footer class="site-bar site-bar-bottom" data-box>
+      <button class="site-grid-toggle" type="button" aria-pressed="false" data-fill><span>Grid: off</span></button>
+    </footer>
+
+    <!-- Column-grid overlay, shown by the bottom-bar toggle (js/layout.js). -->
+    <div class="site-grid-overlay site-grid" aria-hidden="true" hidden>
+      <div data-fill></div><div data-fill></div><div data-fill></div><div data-fill></div>
+      <div data-fill></div><div data-fill></div><div data-fill></div><div data-fill></div>
+      <div data-fill></div><div data-fill></div><div data-fill></div><div data-fill></div>
+    </div>
   </main>
 </body>
 </html>

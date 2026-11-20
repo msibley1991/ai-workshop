@@ -139,10 +139,27 @@ const KEYS = { ArrowDown: 1, PageDown: 1, " ": 1, ArrowUp: -1, PageUp: -1 };
 document.addEventListener("keydown", (e) => {
   if (!(e.key in KEYS) || e.altKey || e.ctrlKey || e.metaKey) return;
   if (!site.contains(e.target) && e.target !== document.body) return; // leave the dial panel alone
+  if (e.target.closest("button")) return; // let buttons take Space
   e.preventDefault();
   const dir = e.key === " " && e.shiftKey ? -1 : KEYS[e.key];
   animateTo((anim ? anim.target : settled) + dir, GOTO_MS);
 });
+
+// ---- Column-grid toggle (bottom bar) ------------------------------------------
+const gridToggle = site.querySelector(".site-grid-toggle");
+const gridOverlay = site.querySelector(".site-grid-overlay");
+const GRID_KEY = "lab-layout-grid";
+
+function showGrid(on) {
+  gridOverlay.hidden = !on;
+  gridToggle.setAttribute("aria-pressed", String(on));
+  gridToggle.firstElementChild.textContent = on ? "Grid: on" : "Grid: off";
+  try { localStorage.setItem(GRID_KEY, on ? "1" : "0"); } catch {}
+  relayout();
+}
+gridToggle.addEventListener("click", () => showGrid(gridOverlay.hidden));
+for (const type of ["pointerenter", "pointerleave", "focus", "blur"]) gridToggle.addEventListener(type, relayout);
+try { if (localStorage.getItem(GRID_KEY) === "1") showGrid(true); } catch {}
 
 const indexFromHash = () => Math.max(0, ids.indexOf(location.hash.slice(1)));
 window.addEventListener("hashchange", () => animateTo(indexFromHash(), GOTO_MS));

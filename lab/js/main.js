@@ -17,6 +17,23 @@ let layoutDirty = true;
 
 const invalidate = () => (layoutDirty = true);
 
+// body[data-canvas] (layout.html): the page is a scaled canvas measured in units
+// (CSS --u = screen px per unit). The emulated pixel is then pixelScale units,
+// snapped down to 1/2/4/8 so the 8-unit spacing lands on whole pixels, and
+// lines are counted in emulated pixels. Elsewhere pixelScale is screen px.
+const canvasMode = "canvas" in document.body.dataset;
+const readUnit = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--u")) || 1;
+let unit = canvasMode ? readUnit() : 1;
+const snapPixel = (v) => (canvasMode ? [8, 4, 2, 1].find((n) => n <= v) ?? 1 : v);
+
+function applyLines(values) {
+  const root = document.documentElement.style;
+  if (!canvasMode) return root.setProperty("--line", `${values.outline.width}px`);
+  const px = snapPixel(values.resolution.pixelScale);
+  root.setProperty("--line", `calc(${values.outline.width * px} * var(--u))`);
+  root.setProperty("--line-dashed", `calc(${px} * var(--u))`);
+}
+
 // Type dials drive CSS variables, so the invisible DOM lays out exactly what gets drawn.
 function applyType(type) {
   const root = document.documentElement.style;
@@ -60,11 +77,14 @@ createPanel((snapshot) => {
   for (const key of ["persistenceColor", "persistenceColor2", "persistenceColor3"]) values.phosphor[key] = toHex(values.phosphor[key]);
   params = values;
   applyType(values.type);
-  document.documentElement.style.setProperty("--line", `${values.outline.width}px`);
+  applyLines(values);
   invalidate();
 }, panelOptions);
 
-window.addEventListener("resize", invalidate);
+window.addEventListener("resize", () => {
+  if (canvasMode) unit = readUnit();
+  invalidate();
+});
 // Pages fire this when layout changes without a resize (view switches, hover states).
 window.addEventListener("lab:layout", invalidate);
 document.fonts.ready.then(invalidate);
@@ -75,7 +95,7 @@ function frame(t) {
   requestAnimationFrame(frame);
   if (!params) return;
 
-  const ps = params.resolution.pixelScale;
+  const ps = snapPixel(params.resolution.pixelScale) * unit;
   renderer.resize(ps);
 
   if (layoutDirty) {

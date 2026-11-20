@@ -94,7 +94,14 @@ export function measure(root, ctx) {
   const images = [...root.querySelectorAll("img[data-draw]")]
     .map((el) => ({ ...toDoc(el.getBoundingClientRect()), el, ink: inkOf(el), clip: clipOf(el) }))
     .filter((im) => im.w > 0 && im.h > 0);
-  const fills = [...root.querySelectorAll("[data-fill]")].map((el) => ({ ...toDoc(el.getBoundingClientRect()), ink: inkOf(el), clip: clipOf(el) }));
+  // [data-fill]: CSS --fill-alpha (0..1, default 1) sets its opacity. Hidden fills are skipped.
+  const fills = [...root.querySelectorAll("[data-fill]")]
+    .map((el) => {
+      const style = getComputedStyle(el);
+      const alpha = parseFloat(style.getPropertyValue("--fill-alpha"));
+      return { ...toDoc(el.getBoundingClientRect()), ink: inkOf(el, style), clip: clipOf(el), alpha: Number.isNaN(alpha) ? 1 : alpha };
+    })
+    .filter((f) => f.w > 0 && f.h > 0 && f.alpha > 0);
 
   // [data-tab]: notched tab outline (see tabPath) sized to the element, so it grows
   // with whatever the element holds. CSS --line sets the stroke, --tab-header the
@@ -232,8 +239,10 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
   for (const f of layout.fills) {
     if (!visible(f.y, f.h)) continue;
     ctx.fillStyle = colors[f.ink];
+    ctx.globalAlpha = f.alpha;
     clipped(ctx, f, () => ctx.fillRect(snap(f.x), snap(f.y), snap(f.w), snap(f.h)));
   }
+  ctx.globalAlpha = 1;
 
   for (const t of layout.tabs) {
     if (!visible(t.y, t.h)) continue;
@@ -244,7 +253,7 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
       ctx.fill();
     }
     // Stroke inside the shape, rounded up to whole emulated pixels like boxes.
-    const lw = Math.max(1, Math.ceil(t.line / ps)) * ps;
+    const lw = Math.max(1, Math.ceil(t.line / ps - 0.01)) * ps;
     ctx.lineWidth = lw;
     ctx.strokeStyle = colors[t.ink];
     tabPath(ctx, x + lw / 2, y + lw / 2, w - lw, h - lw, t.header - lw, t.flap);
@@ -254,7 +263,7 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
   for (const b of layout.boxes) {
     if (!visible(b.y, b.h)) continue;
     // CSS border width, rounded up to whole emulated pixels (min 1), drawn inside the box.
-    const lw = Math.max(1, Math.ceil(b.line / ps)) * ps;
+    const lw = Math.max(1, Math.ceil(b.line / ps - 0.01)) * ps;
     ctx.lineWidth = lw;
     ctx.strokeStyle = colors[b.ink];
     ctx.setLineDash(b.dashed ? [lw * 3, lw * 2] : []);
