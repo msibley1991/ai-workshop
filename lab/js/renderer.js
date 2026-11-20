@@ -61,6 +61,8 @@ export function createRenderer(canvas, contentCanvas) {
     uLayers: { value: 1 },
     uLayerStep: { value: 1 },
     uBands: { value: 0 },
+    uBlur: { value: 0 },
+    uTexel: { value: new THREE.Vector2() },
     uGroundInk: { value: new THREE.Vector3() },
   });
   const blurMat = pass(blur, { tInput: { value: null }, uDirection: { value: new THREE.Vector2() } });
@@ -179,6 +181,8 @@ export function createRenderer(canvas, contentCanvas) {
       gu.uLayers.value = params.phosphor.layers;
       gu.uLayerStep.value = 1 / params.phosphor.layerFrames;
       gu.uBands.value = params.phosphor.layerMode === "bands" ? 1 : 0;
+      gu.uBlur.value = params.ghost.blur;
+      gu.uTexel.value.set(1 / size.bw, 1 / size.bh);
       ghostMat.uniforms.uGroundInk.value = groundInk;
       run(ghostMat, ghostWrite);
       [ghostRead, ghostWrite] = [ghostWrite, ghostRead];

@@ -17,6 +17,8 @@ export const ghost = /* glsl */ `
   uniform float uLayers;
   uniform float uLayerStep;
   uniform float uBands;
+  uniform float uBlur;
+  uniform vec2 uTexel;
   uniform vec3 uGroundInk;
   varying vec2 vUv;
   vec3 persistInk(float age) {
@@ -24,9 +26,31 @@ export const ghost = /* glsl */ `
     vec3 c = mix(uPersistInk, uPersistInk2, clamp(t, 0.0, 1.0));
     return mix(c, uPersistInk3, clamp(t - 1.0, 0.0, 1.0));
   }
+  // Previous frame, softened by uBlur (strength up to 1 px, then wider taps).
+  // Only ghosts (age > 0) spread. A neighbor that isn't a ghost (still ink or
+  // bare ground) stands in as bare ground for a ghost, and as the pixel itself
+  // otherwise, so still content is left exactly as it was and never bleeds.
+  vec4 previous() {
+    vec4 c = texture2D(tPrevious, vUv);
+    if (uBlur <= 0.0) return c;
+    bool centerGhost = c.a > 1e-4;
+    vec3 fallback = centerGhost ? uGroundInk : c.rgb;
+    vec3 sum = c.rgb * 0.4;
+    float age = 0.0;
+    for (int i = 0; i < 8; i++) {
+      float a = float(i) * 0.785398;
+      vec2 dir = vec2(cos(a), sin(a));
+      vec4 s = texture2D(tPrevious, vUv + dir * max(uBlur, 1.0) * uTexel);
+      bool ghost = s.a > 1e-4;
+      sum += (ghost ? s.rgb : fallback) * 0.075;
+      if (ghost) age = max(age, s.a);
+    }
+    vec4 blurred = vec4(sum, centerGhost ? c.a : age);
+    return mix(c, blurred, clamp(uBlur, 0.0, 1.0));
+  }
   void main() {
     vec3 cur = texture2D(tCurrent, vUv).rgb;
-    vec4 last = texture2D(tPrevious, vUv);
+    vec4 last = previous();
     vec3 prev = max(last.rgb - uGroundInk, 0.0);
     // Fresh ink at least as bright as the ghost restarts the clock.
     bool fresh = luma(max(cur - uGroundInk, 0.0)) >= luma(prev * uDecay);

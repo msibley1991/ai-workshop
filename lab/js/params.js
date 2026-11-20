@@ -19,6 +19,7 @@ export const config = {
   ghost: {
     decay: [0.55, 0, 0.98],      // persistence while still
     scrollGain: [0.35, 0, 1],    // extra persistence while scrolling fast
+    blur: [0, 0, 3, 0.05],       // trail spread per frame, in emulated pixels (compounds as trails age)
   },
   grid: {
     mode: { type: "select", options: ["scanlines", "pixel grid", "off"], default: "scanlines" },

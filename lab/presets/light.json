@@ -4,19 +4,20 @@
     "hardText": 0.56
   },
   "glow": {
-    "intensity": 1.2,
+    "intensity": 1,
     "radius": 1,
     "tintToPhosphor": 0
   },
   "ghost": {
     "decay": 0.75,
-    "scrollGain": 0
+    "scrollGain": 0,
+    "blur": 1.5
   },
   "grid": {
     "mode": "scanlines",
     "opacity": 0.22,
-    "pitch": 3,
-    "snapScroll": false
+    "pitch": 2,
+    "snapScroll": true
   },
   "phosphor": {
     "persistenceColor": "#ff0088",
@@ -26,7 +27,7 @@
     "layerMode": "blend",
     "layerFrames": 10,
     "shift": 1,
-    "jitter": 0,
+    "jitter": 1,
     "flicker": 0.05
   },
   "theme": {
