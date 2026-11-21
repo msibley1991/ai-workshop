@@ -335,10 +335,13 @@ function paint(m, vals, st, { f, ox, oy, now, blinkOn, flowing }) {
     if (!on.has(l.id) || !l.anchor) continue;
     const a = anchors.get(l.id) ?? resolve(l.anchor), b = P(...labelPoint(scene, l)), pts = route(a, b, l.id);
     for (let i = 0; i + 1 < pts.length; i++) r.line(pts[i], pts[i + 1], 0, LINE + 2 * CASING, { clear: true });
+    // Squares of exactly n pixels (the fill includes pixels on both edges).
+    const square = (half) => { const lo = -half, hi = half - 1e-3; return [[a[0] + lo, a[1] + lo], [a[0] + hi, a[1] + lo], [a[0] + hi, a[1] + hi], [a[0] + lo, a[1] + hi]]; };
+    const d = DOT / 2;
+    own(r.fill(square(d + CASING), 0), null); // the dot is cased too
     const id = own(r.count++, l.for);
     for (let i = 0; i + 1 < pts.length; i++) r.line(pts[i], pts[i + 1], id, LINE);
-    const d = DOT / 2;
-    own(r.fill([[a[0] - d, a[1] - d], [a[0] + d, a[1] - d], [a[0] + d, a[1] + d], [a[0] - d, a[1] + d]], 1), l.for);
+    own(r.fill(square(d), 1), l.for);
   }
 }
 
