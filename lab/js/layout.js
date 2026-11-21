@@ -15,6 +15,7 @@ const SNAP_MS = 250;
 const GOTO_MS = 500;
 import { viewer } from "./viewer.js";
 import { stepGraphics, setMotion, graphicSpan } from "./graphic.js";
+import { genie } from "./genie-play.js";
 
 // Motion off (viewer controls; it starts off when the OS asks for reduced motion)
 // makes the accordion and the controls panel jump instead of animating.
@@ -159,6 +160,17 @@ document.addEventListener("keydown", (e) => {
   if (e.altKey || e.ctrlKey || e.metaKey) return;
   if (!site.contains(e.target) && e.target !== document.body) return; // leave the dial panel alone
   if (stepGraphics(e.key === "ArrowRight" ? 1 : -1)) e.preventDefault();
+});
+
+// ---- Text genie: l funnels the open panel's text into its sink square and back --
+// (js/genie-play.js, settled defaults). On genie.html, js/genie.js takes these
+// keys first, in the capture phase.
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "l" && e.key !== "L") return;
+  if (e.altKey || e.ctrlKey || e.metaKey) return;
+  if (!site.contains(e.target) && e.target !== document.body) return; // leave the dial panel alone
+  e.preventDefault();
+  genie("toggle");
 });
 
 // ---- Column-grid toggle (bottom bar) ------------------------------------------

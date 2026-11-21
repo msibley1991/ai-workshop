@@ -1,12 +1,12 @@
 // genie.html only: the "Genie" dial panel, the curvature graphs and the keys.
 // → (or l, which toggles) genies the open panel's text block into the panel's
-// bottom-right corner, ← pours it back out, g shows or hides the graph editor
+// sink (the ink square near its bottom-right corner), ← pours it back out, g shows or hides the graph editor
 // (js/genie-graphs.js). The warp is js/genie-warp.js; the rules are in
 // docs/design-system/motion.md. The other dial panels start collapsed.
 import { createDialKit, DialStore } from "../vendor/dialkit/index.js";
-import { settings, play, genieT, totalFor, lineT, lineCount } from "./genie-warp.js";
+import { settings, genieT, lineT, lineCount } from "./genie-warp.js";
+import { genie, openBlock } from "./genie-play.js";
 import { mountGraphs } from "./genie-graphs.js";
-import { viewer } from "./viewer.js";
 
 const S = settings;
 const config = {
@@ -22,7 +22,6 @@ const config = {
     p75: [S.p75, 0, 1.2, 0.01],
     slit: [S.slit, 0, 1, 0.01],
     rowBand: [S.rowBand, 1, 8, 1],
-    sinkWidth: [S.sinkWidth, 8, 256, 8],      // units, at the panel's corner
   },
   spine: {
     arc: [S.arc, -240, 240, 4],              // maximum swing, units (scaled by the arc graph)
@@ -45,32 +44,8 @@ const config = {
 };
 
 const site = document.getElementById("content");
-const blocks = [...site.querySelectorAll("[data-genie]")];
 
-// The text block of the panel that's open (its accordion weight is over half).
-function openBlock() {
-  return blocks.find((el) => parseFloat(el.closest(".site-panel")?.style.getPropertyValue("--w") || "0") > 0.5) ?? null;
-}
-
-// Moves the open block out (1), in (0), or toggles it. Motion off cuts.
-// Genied-out text is hidden from selection and find; it's shown again as it
-// starts back.
-const timers = new Map();
-function genie(to) {
-  const el = openBlock();
-  if (!el) return;
-  if (to === "toggle") to = genieT(el) < 0.5 ? 1 : 0;
-  const motion = viewer.get().motion;
-  const dur = S.duration;
-  if (!motion) S.duration = 0;
-  play(el, to);
-  S.duration = dur;
-  clearTimeout(timers.get(el));
-  if (to === 0) el.style.visibility = "";
-  else timers.set(el, setTimeout(() => { if (genieT(el) >= 1) el.style.visibility = "hidden"; }, motion ? totalFor(el) : 0));
-}
-
-const KEYS = ["duration", "follow", "curve", "slideStart", "p25", "p50", "p75", "slit", "rowBand", "sinkWidth", "arc", "bends", "severity", "trailBoost"];
+const KEYS = ["duration", "follow", "curve", "slideStart", "p25", "p50", "p75", "slit", "rowBand", "arc", "bends", "severity", "trailBoost"];
 const flat = (v) => ({ ...v.timing, ...v.funnel, ...v.spine, ...v.trail, ...v.inspect });
 const valuesText = (v) => { const f = flat(v); return JSON.stringify({ ...Object.fromEntries(KEYS.map((k) => [k, f[k]])), graphs: S.graphs }); };
 

@@ -17,7 +17,8 @@
 </head>
 <!-- Genie test (docs/design-system/motion.md): a copy of layout.html, with the
      same display layer and controls. Text blocks marked data-genie funnel into
-     their panel's bottom-right corner on -> (or l) and pour back out on <-; the
+     their panel's sink, a small ink square near its bottom-right corner
+     (data-genie-sink), on -> (or l) and pour back out on <-; the
      "Genie" dial panel and the curvature graphs (g) tune the warp (js/genie.js).
      Layout from Figma frames "ref1" (intro, node 313:125) and "ref2" (open
      section, node 313:148), rendered through the effects pipeline. The tabs are
@@ -42,6 +43,7 @@
           <p class="site-hero-sub">LLM-assisted coding in design</p>
         </div>
       </div>
+      <span class="genie-sink" data-genie-sink data-fill aria-hidden="true"></span>
     </section>
 
     <!-- Tabs: each opens in place; its outline grows around its body. Placeholder copy. -->
@@ -58,6 +60,7 @@
             </div>
           </div>
         </div>
+        <span class="genie-sink" data-genie-sink data-fill aria-hidden="true"></span>
       </div>
     </article>
 
@@ -75,6 +78,7 @@
             </div>
           </div>
         </div>
+        <span class="genie-sink" data-genie-sink data-fill aria-hidden="true"></span>
       </div>
     </article>
 

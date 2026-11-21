@@ -66,16 +66,18 @@ All are sine waves unless noted. The size is the travel from rest to the peak, o
 - Rapid presses skip everything to the end state.
 
 ## Genie (text)
-- **Exit only for text:** text that a step removes funnels into the **bottom-right corner of its panel's box**, just inside the line. Stepping back reverses it: the text pours out of the corner into place.
+- **The sink:** an **8 × 8 ink square** near the bottom-right corner of each panel that has genie text, one box inset (24) in from the right and bottom, so it sits on the grid's right edge. It stays for as long as that tab or intro screen is in use, because every slide's text in the panel comes and goes through it.
+- **Exit only for text:** text that a step removes funnels into the square. Stepping back reverses it: the text pours out of the square into place.
 - **Line by line:** the bottom line goes out first, so on the way back the top line comes in first. Each line starts halfway through the previous line's run.
 - **Funnel with full slit-scan:**
   - Within a line, every row runs at its own moment in time, with lower rows well ahead, so the text smears and stretches as it goes.
-  - The sides pull in quickly near the top and hold most of the way down, landing 8 units wide in the corner.
+  - The sides pull in quickly near the top and hold most of the way down.
+  - **Landing:** over the funnel's last 15%, the sides always close onto the square and the swing dies out, whatever the graphs say, so the text visibly goes into it.
   - The spine swings 48 units to the left at most, in three S-bends down the funnel.
 - **Curvature over time:** two bezier graphs, each played over a line's own run, set how much the funnel curves at each moment. They're edited on the genie page (g).
   - **arc:** eases up to the full swing by three quarters of the run, then holds.
   - **narrowing:** stays wide until about a sixth of the run, then pulls in gradually, reaching full only at the end.
-- **Slide:** a row holds in place while it bends, then slides down into the corner from two thirds of its time, on ease.
+- **Slide:** a row holds in place while it bends, then slides down into the square from two thirds of its time, on ease.
 - **Trail:** no extra phosphor trail beyond the display layer's own ghosting.
 - Section changes keep the accordion as it is; the genie is for steps.
 
@@ -88,10 +90,10 @@ From the genie test page ([`lab/genie.html`](../../lab/genie.html)). They're the
 | follow | −0.5 | each line starts 0.5 × duration after the previous one (−1 together, 0 one after another, 1 a pause of one duration) |
 | curve | ease | each row's slide |
 | slideStart | 0.67 | when, in a row's time, the slide begins |
-| p25 / p50 / p75 | 0.8 / 0.79 / 0.77 | how far the sides have narrowed at 25 / 50 / 75% of the way down (1 = the sink's width) |
+| p25 / p50 / p75 | 0.8 / 0.79 / 0.77 | how far the sides have narrowed at 25 / 50 / 75% of the way down (1 = the square's width) |
 | slit | 1 | slit-scan spread within a line (the maximum) |
 | rowBand | 1 | emulated pixel rows per step of the sides |
-| sinkWidth | 8 units | the funnel's width at the corner |
+| sink | 8 × 8 units | the ink square the funnel lands in; it sets the funnel's final width |
 | arc / bends / severity | −48 units / 3 / 0 | the maximum spine swing (negative swings left), S-bends, rounded (0) to kinked (1) |
 | arc graph | 0 → 1 by 0.75, then holds | the swing's level over a line's run |
 | narrow graph | 0 until 0.16, then up to 1 at the end | how far the sides have pulled in over a line's run |
@@ -101,10 +103,10 @@ From the genie test page ([`lab/genie.html`](../../lab/genie.html)). They're the
 - **The 300 ms per line is genie-specific.** It isn't one of the named durations.
 
 ## Built so far
-- **Built:** step tweens (ease, 400/800), blink, flow, the drag spring, and the genie on its test page (tuned).
+- **Built:** step tweens (ease, 400/800), blink, flow, the drag spring, and the genie (tuned on its test page, and **settled**: on the layout page too, with its sink squares, toggled by l while there are no text steps yet).
 - **Not built yet:**
   - a shared curves module (out, settle, drop)
   - the enter/exit and loop motions on graphics (rise, fall, grow, shrink, bob, sway, spin, pulse)
   - stagger
   - the chrome timings above (the accordion jump is still 500, and the snap and panels still use ease)
-  - the genie in the real layout
+  - the genie fired by steps that remove text (the layout page has none yet, so l toggles it)

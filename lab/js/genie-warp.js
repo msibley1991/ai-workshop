@@ -1,5 +1,5 @@
-// Genie: a text block funnels into the bottom-right corner of its panel's box
-// and pours back out of it. Rules are in docs/design-system/motion.md; the test
+// Genie: a text block funnels into its panel's sink, a small ink square near
+// the panel's bottom-right corner ([data-genie-sink]), and pours back out of it. Rules are in docs/design-system/motion.md; the test
 // page is genie.html (js/genie.js, graph editor in js/genie-graphs.js).
 //
 // text-raster.js draws a genie block's words into an offscreen canvas at the
@@ -13,13 +13,13 @@
 //     line's top row, 1 at its bottom row). Rows pull apart as they travel,
 //     and each one stretches to fill the gap below it: the smear.
 //   - narrowing: the narrow graph (over tRow) sets how far the funnel's sides
-//     have pulled in toward the sink's width, shaped down the funnel by the
+//     have pulled in toward the sink square's width, shaped down the funnel by the
 //     edge profile through (0, 0), (0.25, p25), (0.5, p50), (0.75, p75), (1, 1)
 //   - arc: the arc graph (over tRow) sets how far the funnel's spine swings
 //     sideways, up to `arc` units, in `bends` S-bends down the funnel (0 at
 //     both ends), from a rounded sine (severity 0) to a kinked triangle (1)
 //   - slide: from slideStart on, the row travels down the funnel into the
-//     sink; rows past the sink are hidden
+//     sink; rows past the square's top edge are hidden
 // Rows are emulated pixels; rowBand groups them so the funnel's sides step.
 
 // A graph: anchors sorted by x (0..1, a row's time), y the level. Segments are
@@ -51,7 +51,6 @@ export const settings = {
   p75: 0.77,         //   ... three quarters
   slit: 1,           // slit-scan spread: how far ahead rows lower in a line run
   rowBand: 1,        // emulated pixel rows per step of the funnel's sides
-  sinkWidth: 8,      // units: the funnel's width where it meets the panel's corner
   arc: -48,          // maximum spine swing, units (scaled by the arc graph)
   bends: 3,          // S-bends along the spine
   severity: 0,       // 0 rounded .. 1 kinked
@@ -67,6 +66,7 @@ const CURVES = {
   out: (p) => 1 - (1 - p) ** 3,
 };
 const clamp01 = (v) => Math.min(1, Math.max(0, v));
+const LANDING = 0.15; // last share of the funnel where the sides close onto the sink
 
 // ---------- graphs ----------
 
@@ -179,17 +179,11 @@ function spine(v) {
   return sine + (tri - sine) * settings.severity;
 }
 
-// The sink for a block, from its panel's box (any pixel units): the panel's
-// inner bottom-right corner, sinkWidth wide. unitPx converts units.
-export function sinkOf(panel, line, unitPx) {
-  const x1 = panel.x + panel.w - line;
-  return { x0: x1 - settings.sinkWidth * unitPx, x1, y: panel.y + panel.h - line };
-}
-
 // Copies the warped block from `src` (an offscreen canvas the size of dst's
 // canvas, same transform) into dst. Everything is in low-res pixels:
 // B = { x0, x1, y0, y1, lines: [{ y0, y1 }] } the block's text box and line
-// bands, T = { x0, x1, y } the sink, arcPx the maximum spine swing.
+// bands, T = { x0, x1, y } the sink square's width and top edge, arcPx the
+// maximum spine swing.
 export function warpBlock(dst, src, B, T, t, arcPx = 0) {
   if (t <= 0) return dst.drawImage(src, 0, 0);
   if (t >= 1) return;
@@ -226,7 +220,11 @@ export function warpBlock(dst, src, B, T, t, arcPx = 0) {
       for (let yy = y0; yy < y1 && yy < T.y; yy++) {
         const ey = yy - ((yy - top) % band); // the funnel's sides step per band
         const v = clamp01((ey - top) / D);
-        const k = profile(v) * narrow, shift = arcPx * swing * spine(v);
+        // Landing: over the funnel's last stretch the sides always close onto
+        // the sink and the swing dies out, whatever the graphs say, so the
+        // text goes into the square.
+        const land = clamp01((v - (1 - LANDING)) / LANDING), close = land * land * (3 - 2 * land);
+        const k = profile(v) * narrow + (1 - profile(v) * narrow) * close, shift = arcPx * swing * spine(v) * (1 - close);
         const L = Math.round(B.x0 + (T.x0 - B.x0) * k + shift), R = Math.round(B.x1 + (T.x1 - B.x1) * k + shift);
         if (R - L >= 1) dst.drawImage(src, B.x0, r, bw, 1, L, yy, R - L, 1);
       }

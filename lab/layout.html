@@ -18,7 +18,9 @@
      an accordion driven by scroll (js/layout.js). data-preset loads that preset
      on every page load. data-canvas scales the emulated pixel and lines with the
      canvas unit (js/main.js). data-viewer turns on the viewer controls panel
-     (palette, motion, blur; js/viewer.js), opened with [c]. -->
+     (palette, motion, blur; js/viewer.js), opened with [c]. Text blocks
+     marked data-genie funnel into their panel's sink square (data-genie-sink)
+     and back with the settled genie (js/genie-play.js); l toggles the open one. -->
 <body data-preset="light" data-panel-id="effects-lab-layout" data-canvas data-viewer>
   <canvas id="screen" aria-hidden="true"></canvas>
 
@@ -31,11 +33,12 @@
     <section class="site-intro site-panel" data-panel="" data-clip>
       <div class="site-split site-grid">
         <div class="site-graphic" data-graphic="exploded-stack"></div>
-        <div class="site-hero-text">
+        <div class="site-hero-text" data-genie>
           <h1>how (did you [make] this?)</h1>
           <p class="site-hero-sub">LLM-assisted coding in design</p>
         </div>
       </div>
+      <span class="genie-sink" data-genie-sink data-fill aria-hidden="true"></span>
     </section>
 
     <!-- Tabs: each opens in place; its outline grows around its body. Placeholder copy. -->
@@ -44,7 +47,7 @@
       <div class="site-tab-body" data-clip>
         <div class="site-split site-grid">
           <div class="site-graphic" data-graphic="page-layout"></div>
-          <div class="site-section-text">
+          <div class="site-section-text" data-genie>
             <h2 class="site-headline">Foundations</h2>
             <div class="site-section-content">
               <p class="site-subheadline">Sub-Headline</p>
@@ -52,6 +55,7 @@
             </div>
           </div>
         </div>
+        <span class="genie-sink" data-genie-sink data-fill aria-hidden="true"></span>
       </div>
     </article>
 
@@ -61,7 +65,7 @@
       <div class="site-tab-body" data-clip>
         <div class="site-split site-grid">
           <div class="site-graphic"></div>
-          <div class="site-section-text">
+          <div class="site-section-text" data-genie>
             <h2 class="site-headline">Advanced Topics</h2>
             <div class="site-section-content">
               <p class="site-subheadline">Sub-Headline</p>
@@ -69,6 +73,7 @@
             </div>
           </div>
         </div>
+        <span class="genie-sink" data-genie-sink data-fill aria-hidden="true"></span>
       </div>
     </article>
 

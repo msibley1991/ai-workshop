@@ -3,7 +3,7 @@
 // draw() runs every frame and only translates by the render scroll offset.
 
 import { mountGraphic, drawGraphic } from "./graphic.js";
-import { genieT, warpBlock, setLines, sinkOf, settings as genieSettings } from "./genie-warp.js";
+import { genieT, warpBlock, setLines, settings as genieSettings } from "./genie-warp.js";
 
 // Ink comes from the CSS custom property --ink (so states like :hover can set it),
 // else the nearest data-ink attribute, else phosphor.
@@ -72,8 +72,8 @@ export function measure(root, ctx) {
   const words = [];
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   const range = document.createRange();
-  // [data-genie]: a text block that can genie into its panel's bottom-right
-  // corner (js/genie-warp.js). Its words carry the block's index.
+  // [data-genie]: a text block that can genie into its panel's sink, the
+  // [data-genie-sink] square (js/genie-warp.js). Its words carry the block's index.
   const genieEls = [...root.querySelectorAll("[data-genie]")];
   const genieOf = (el) => genieEls.indexOf(el.closest("[data-genie]"));
 
@@ -209,8 +209,7 @@ export function measure(root, ctx) {
 
   // Genie blocks: the box around their text (not the element, which may be a
   // wide grid cell), its line bands (each text node's line fragments, merged
-  // by top), and its panel's box and line width (the sink is the panel's
-  // inner bottom-right corner).
+  // by top), and its panel's sink square.
   const genies = genieEls.map((el) => {
     range.selectNodeContents(el);
     const box = toDoc(range.getBoundingClientRect());
@@ -227,10 +226,9 @@ export function measure(root, ctx) {
     }
     lines.sort((a, b) => a.y0 - b.y0);
     setLines(el, lines.length);
-    const panelEl = el.closest(".site-panel") ?? el;
-    const panel = toDoc(panelEl.getBoundingClientRect());
-    const line = parseFloat(getComputedStyle(panelEl).getPropertyValue("--line")) || 1;
-    return { el, ...box, lines, panel, line };
+    const sinkEl = (el.closest(".site-panel") ?? root).querySelector("[data-genie-sink]");
+    const sink = sinkEl ? toDoc(sinkEl.getBoundingClientRect()) : null;
+    return { el, ...box, lines, sink };
   });
   const u = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--u")) || 1;
 
@@ -411,17 +409,17 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
 
   layout.genies?.forEach((g, i) => {
     const t = genieTs[i];
-    if (t <= 0 || t >= 1) return;
+    if (t <= 0 || t >= 1 || !g.sink) return;
     const off = offscreen(ctx.canvas);
     off.setTransform(1, 0, 0, 1, 0, 0);
     off.clearRect(0, 0, width, height);
     off.setTransform(1 / ps, 0, 0, 1 / ps, 0, -renderY / ps);
     drawWords((w) => colors[w.ink], (w) => w.genie === i, off);
     const toPx = (x) => x / ps, toPy = (y) => (y - renderY) / ps;
-    const S = sinkOf({ x: toPx(g.panel.x), y: toPy(g.panel.y), w: g.panel.w / ps, h: g.panel.h / ps }, g.line / ps, layout.u / ps);
+    const S = g.sink;
     warpBlock(ctx, off.canvas,
       { x0: toPx(g.x), x1: toPx(g.x + g.w), y0: toPy(g.y), y1: toPy(g.y + g.h), lines: g.lines.map((l) => ({ y0: toPy(l.y0), y1: toPy(l.y1) })) },
-      { x0: S.x0, x1: S.x1, y: Math.round(S.y) }, t, (genieSettings.arc * layout.u) / ps);
+      { x0: toPx(S.x), x1: toPx(S.x + S.w), y: Math.round(toPy(S.y)) }, t, (genieSettings.arc * layout.u) / ps);
   });
 
   // Selection is the inverse: a block of the main ink with the selected text
