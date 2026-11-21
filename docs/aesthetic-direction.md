@@ -25,7 +25,7 @@ Elena Burger, ["Toward a working definition of paperclip-punk"](https://www.virt
 ## Context of use
 - A long, multi-section scroll page that doubles as the presentation, with scroll-animated elements.
 - Key commands for the two presenters only.
-- **Projector first** (a presenter preset that survives wash-out), web second (a calmer reader preset).
+- **Projector first,** web second. One look serves both, tested on a projector; viewers calm it with the controls ([design-system/display.md](design-system/display.md)).
 - Light and dark grounds both stay in play until tested.
 
 ## Open questions
@@ -35,5 +35,5 @@ Elena Burger, ["Toward a working definition of paperclip-punk"](https://www.virt
 - Layout and grid: first pass in [design-system/layout-grid.md](design-system/layout-grid.md).
 - Flow and pacing of the scroll presentation.
 - Contained graphics: diagrams, illustrations, 3D.
-- Whether the display effects stay, and how strong they are.
-- How the shader layer carries over to the real site. The lab uses an invisible DOM text layer under a WebGL render, so text stays selectable.
+- ~~Whether the display effects stay, and how strong they are~~: they stay, as one tuned look, in [design-system/display.md](design-system/display.md).
+- ~~How the shader layer carries over to the real site~~: the renderer moves into the site with one frozen look and no dial panel, and the DOM shows as plain text without WebGL ([design-system/display.md](design-system/display.md)).

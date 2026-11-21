@@ -1,10 +1,10 @@
-// Viewer controls: palette, motion and blur, chosen by whoever is looking at
+// Viewer controls: palette, motion, blur and scanlines, chosen by whoever is looking at
 // the page (layout.html's controls panel). main.js applies them to the render;
 // layout.js drives the panel. Pages opt in with <body data-viewer>; elsewhere
 // nothing here changes the render.
 //
 // A palette writes its colours into the effects dials (so they can still be
-// tuned by dial). Motion and blur are overrides applied on top of the dials,
+// tuned by dial). Motion, blur and scanlines are overrides applied on top of the dials,
 // so turning them back on restores the tuned look.
 
 // Palettes live in presets/palettes.json (edited with the Palette dial panel,
@@ -23,7 +23,7 @@ const KEY = "lab-viewer";
 export const enabled = "viewer" in document.body.dataset;
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-let state = { palette: "ink", motion: !reduceMotion, blur: true };
+let state = { palette: "ink", motion: !reduceMotion, blur: true, scanlines: true };
 try {
   const saved = JSON.parse(localStorage.getItem(KEY) || "null");
   if (saved) state = { ...state, ...saved };
@@ -81,7 +81,9 @@ export function applyViewer(params) {
     out.glow.intensity = 0;
     out.ghost.blur = 0;
     out.resolution.hardText = 0; // standard softening: plain antialiased text
-    out.grid.mode = "off";       // no scanlines or pixel grid (scroll snapping stays)
   }
+  // Scanlines off: no scanlines or pixel grid (scroll snapping stays). Its own
+  // switch, for projectors that rescale the image and turn the lines to moiré.
+  if (!state.scanlines) out.grid.mode = "off";
   return out;
 }

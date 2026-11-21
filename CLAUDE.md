@@ -25,4 +25,5 @@ Purpose: _TBD_
 - [docs/design-system/palettes.md](docs/design-system/palettes.md): viewer-selectable palettes and the controls panel (exploratory, built in the lab layout page)
 - [docs/design-system/graphics.md](docs/design-system/graphics.md): flat and isometric graphics, hatch shading, line weights, accent as focus (exploration, built in the lab shading and layout pages)
 - [docs/design-system/motion.md](docs/design-system/motion.md): motion rules: curves, named durations and sizes, loops, enter/exit, the text genie (exploration; genie built in the lab genie page)
+- [docs/design-system/display.md](docs/design-system/display.md): the display layer: one tuned look, ambient effects, viewer overrides, the DOM fallback, the projector test (exploration; tuned on the lab layout page)
 - [docs/handoffs/](docs/handoffs/): session handoff notes, newest last

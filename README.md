@@ -47,7 +47,7 @@ python3 serve.py
 
 Open http://localhost:8123/lab/.
 
-- **Presets → Load preset** loads a saved look (`light`, `dark`, `presenter`, `reader`).
+- **Presets → Load preset** loads the saved look, `light`: the one tuned display look (see `docs/design-system/display.md`).
 - Slider changes are remembered in your browser only.
 - Loading a preset overwrites whichever version (V1, V2…) is selected at the top of the panel. Save a new version first if you want to keep the current one.
 - To share a look: **Presets → Export JSON**, save the file into `lab/presets/`, add its name to the `presets.file` list in `lab/js/params.js`, then commit and push.

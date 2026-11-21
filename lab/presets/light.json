@@ -76,9 +76,5 @@
       "lineHeight": 1.4
     },
     "gap": 32
-  },
-  "object": {
-    "style": "edges + faces",
-    "spin": 0.3
   }
 }

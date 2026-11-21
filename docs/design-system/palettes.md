@@ -27,8 +27,9 @@ A palette changes **colours only**: the ground, the ink (the "phosphor" dial), t
 - **Controls:**
   1. **Palette:** Ink · Blueprint · Plasma · Vector.
   2. **Motion: on/off.** Off removes ghost trails, jitter, warp and flicker, and the tab accordion and the panel jump instead of animating. It starts off when the device asks for reduced motion (`prefers-reduced-motion`).
-  3. **Blur: on/off.** Off removes the glow halo, the ghost-trail blur and the scanlines (or pixel grid), and sets text to a standard softening: hardText 0, plain antialiased text. Scroll snapping stays.
-- **Labels:** group headings are bracketed (`[Palette]`, `[Display]`). Settings under a heading are plain rows, `Motion on / off` and `Blur on / off`, and only the chosen option is highlighted.
+  3. **Blur: on/off.** Off removes the glow halo and the ghost-trail blur, and sets text to a standard softening: hardText 0, plain antialiased text.
+  4. **Scanlines: on/off.** Off removes the scanlines (or pixel grid). Scroll snapping stays. It's a separate switch for screens and projectors that rescale the image and turn the lines into moiré (see [display.md](display.md)).
+- **Labels:** group headings are bracketed (`[Palette]`, `[Display]`). Settings under a heading are plain rows, `Motion on / off`, `Blur on / off` and `Scanlines on / off`, and only the chosen option is highlighted.
 - **Remembered:** each viewer's choices are saved in their browser (`localStorage` key `lab-viewer`).
 
 ## How it works in the lab
@@ -38,7 +39,7 @@ A palette changes **colours only**: the ground, the ink (the "phosphor" dial), t
   - **Save palettes** writes all four to the file (needs `serve.py`). Unsaved edits are lost on reload.
 - **Ghost history:** a ground change (a palette switch or a ground edit) clears the trail history for two frames, so old trails don't smear over the new ground.
 - **Effects dials:** the active palette is written into the effects dials after the page's pinned preset loads. Don't tune colour in the Effects Lab's Theme folder on this page, because the palette overwrites it on reload. In that folder, the palette's ink is the `phosphor` colour.
-- Motion and blur are **overrides applied on top of the dials** at render time. Switching them back on restores the tuned values.
+- Motion, blur and scanlines are **overrides applied on top of the dials** at render time. Switching them back on restores the tuned values.
 
 ## Open
 - Tune each palette's ghost colours and check the dark palettes against the light-tuned effect preset. Dark grounds may want different glow.

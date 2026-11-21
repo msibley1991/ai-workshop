@@ -18,7 +18,7 @@
      an accordion driven by scroll (js/layout.js). data-preset loads that preset
      on every page load. data-canvas scales the emulated pixel and lines with the
      canvas unit (js/main.js). data-viewer turns on the viewer controls panel
-     (palette, motion, blur; js/viewer.js), opened with [c]. Text blocks
+     (palette, motion, blur, scanlines; js/viewer.js), opened with [c]. Text blocks
      marked data-genie funnel into their panel's sink square (data-genie-sink)
      and back with the settled genie (js/genie-play.js); l toggles the open one. -->
 <body data-preset="light" data-panel-id="effects-lab-layout" data-canvas data-viewer>
@@ -107,6 +107,12 @@
             <button class="site-bar-button" type="button" data-setting="blur" data-value="on" aria-pressed="true" data-fill><span>on</span></button>
             <span>/</span>
             <button class="site-bar-button" type="button" data-setting="blur" data-value="off" aria-pressed="false" data-fill><span>off</span></button>
+          </div>
+          <div class="site-controls-setting" role="group" aria-label="Scanlines">
+            <span>Scanlines</span>
+            <button class="site-bar-button" type="button" data-setting="scanlines" data-value="on" aria-pressed="true" data-fill><span>on</span></button>
+            <span>/</span>
+            <button class="site-bar-button" type="button" data-setting="scanlines" data-value="off" aria-pressed="false" data-fill><span>off</span></button>
           </div>
         </div>
         <p class="site-controls-hint">[c] or Esc to close</p>

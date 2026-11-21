@@ -79,7 +79,7 @@ export const config = {
   },
   presets: {
     // To add one: drop a JSON file in presets/ and add its name here.
-    file: { type: "select", options: ["light", "dark", "presenter", "reader"], default: "light" },
+    file: { type: "select", options: ["light"], default: "light" },
     load: { type: "action", label: "Load preset" },
     save: { type: "action", label: "Save to preset" },
     exportJSON: { type: "action", label: "Export JSON" },
