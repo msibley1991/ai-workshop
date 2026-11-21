@@ -4,14 +4,14 @@
     "hardText": 0.22
   },
   "glow": {
-    "intensity": 0.8,
+    "intensity": 0.5,
     "radius": 1.5,
-    "tintToPhosphor": 0.5
+    "tintToPhosphor": 0
   },
   "ghost": {
-    "decay": 0.66,
+    "decay": 0.85,
     "scrollGain": 1,
-    "blur": 3
+    "blur": 2.5
   },
   "grid": {
     "mode": "scanlines",
@@ -20,12 +20,12 @@
     "snapScroll": true
   },
   "phosphor": {
-    "persistenceColor": "#ff0088",
-    "persistenceColor2": "#00c7f7",
-    "persistenceColor3": "#8A1A00",
+    "persistenceColor": "#00fec2",
+    "persistenceColor2": "#2291ff",
+    "persistenceColor3": "#5A1A00",
     "layers": 2,
     "layerMode": "blend",
-    "layerFrames": 7.5,
+    "layerFrames": 13,
     "shift": 0.5,
     "jitter": 1,
     "flicker": 0
@@ -38,16 +38,16 @@
     "randomness": 0.67
   },
   "theme": {
-    "mode": "light",
+    "mode": "dark",
     "light": {
-      "ground": "#f2f6ff",
-      "phosphor": "#00010f",
+      "ground": "#F4F4F0",
+      "phosphor": "#0050FF",
       "accent": "#F38020"
     },
     "dark": {
-      "ground": "#0A0C10",
-      "phosphor": "#3D7BFF",
-      "accent": "#F38020"
+      "ground": "#120A04",
+      "phosphor": "#FF8A1F",
+      "accent": "#3D7BFF"
     }
   },
   "outline": {

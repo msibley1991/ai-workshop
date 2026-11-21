@@ -54,7 +54,11 @@ export const ghost = /* glsl */ `
     vec3 prev = max(last.rgb - uGroundInk, 0.0);
     // Fresh ink at least as bright as the ghost restarts the clock.
     bool fresh = luma(max(cur - uGroundInk, 0.0)) >= luma(prev * uDecay);
-    float age = fresh ? 0.0 : min(last.a + uLayerStep, 2.0);
+    // Fresh ink replaces the ghost outright. A per-channel max with the tinted
+    // ghost would re-tint still ink every frame: harmless for neutral ink, but
+    // it muddies coloured ink (e.g. blue on a light ground) toward the ghost colour.
+    if (fresh) { gl_FragColor = vec4(cur, 0.0); return; }
+    float age = min(last.a + uLayerStep, 2.0);
     // Bands hold brightness until the last layer; blend fades from the start.
     bool hold = uBands > 0.5 && age < uLayers - 1.0;
     prev *= hold ? 1.0 : uDecay;

@@ -30,7 +30,7 @@ Elena Burger, ["Toward a working definition of paperclip-punk"](https://www.virt
 
 ## Open questions
 - How the 3D is rendered: technical-illustration outlines, wireframe, solid, or something else.
-- Palette, and the light vs. dark default.
+- Palette, and the light vs. dark default: viewers choose from four palettes (two light, two dark), first pass in [design-system/palettes.md](design-system/palettes.md).
 - ~~Typefaces and type scale~~: settled in [design-system/typography.md](design-system/typography.md) (Chakra Petch, JetBrains Mono for code).
 - Layout and grid: first pass in [design-system/layout-grid.md](design-system/layout-grid.md).
 - Flow and pacing of the scroll presentation.

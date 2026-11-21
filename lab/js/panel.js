@@ -8,7 +8,7 @@ function settingsOnly(values) {
 }
 
 // Brief status message under the panel (e.g. "Saved to light").
-function toast(text, isError = false) {
+export function toast(text, isError = false) {
   const el = document.createElement("div");
   el.className = "lab-toast" + (isError ? " is-error" : "");
   el.textContent = text;
@@ -44,6 +44,9 @@ export function createPanel(onChange, { id = "effects-lab", preset } = {}) {
   });
 
   kit.subscribe((values) => onChange(settingsOnly(values)));
-  if (preset) loadPreset(preset).then((values) => kit.setValues(values)).catch((err) => console.error("[lab]", err));
+  // kit.ready resolves once the page's pinned preset (if any) has loaded.
+  kit.ready = preset
+    ? loadPreset(preset).then((values) => kit.setValues(values)).catch((err) => console.error("[lab]", err))
+    : Promise.resolve();
   return kit;
 }

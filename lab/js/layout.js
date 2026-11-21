@@ -13,7 +13,11 @@ const SNAP_BIAS = 0.2;       // move this far from the start of a gesture to adv
 const QUIET_MS = 150;        // no wheel input this long = gesture over, snap
 const SNAP_MS = 250;
 const GOTO_MS = 500;
-const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+import { viewer } from "./viewer.js";
+
+// Motion off (viewer controls; it starts off when the OS asks for reduced motion)
+// makes the accordion and the controls panel jump instead of animating.
+const reduceMotion = () => !viewer.get().motion;
 
 const site = document.getElementById("content");
 const panels = [...site.querySelectorAll(".site-panel")]; // intro first, then tabs
@@ -55,7 +59,7 @@ function settle(index) {
 // Tween the weights to a target (whole section index or, for snapping, the same).
 function animateTo(index, dur) {
   index = clamp(index);
-  if (reduceMotion || dur === 0) {
+  if (reduceMotion() || dur === 0) {
     anim = null;
     apply(weightsAt(index));
     settle(index);
@@ -138,6 +142,7 @@ site.querySelector(".site-title").addEventListener("click", (e) => {
 const KEYS = { ArrowDown: 1, PageDown: 1, " ": 1, ArrowUp: -1, PageUp: -1 };
 document.addEventListener("keydown", (e) => {
   if (!(e.key in KEYS) || e.altKey || e.ctrlKey || e.metaKey) return;
+  if (controlsPanel.contains(e.target)) return; // the panel's own buttons take Space
   if (!site.contains(e.target) && e.target !== document.body) return; // leave the dial panel alone
   if (e.target.closest("button")) return; // let buttons take Space
   e.preventDefault();
@@ -160,6 +165,70 @@ function showGrid(on) {
 gridToggle.addEventListener("click", () => showGrid(gridOverlay.hidden));
 for (const type of ["pointerenter", "pointerleave", "focus", "blur"]) gridToggle.addEventListener(type, relayout);
 try { if (localStorage.getItem(GRID_KEY) === "1") showGrid(true); } catch {}
+
+// ---- Viewer controls panel ([c]) -------------------------------------------------
+// Opening tweens --controls-open 0 -> 1, which pushes the panels left by the
+// panel's width (layout.css) and slides the panel in.
+const CONTROLS_MS = 250;
+const root = document.documentElement;
+const controlsPanel = site.querySelector(".site-controls");
+const controlsToggle = site.querySelector(".site-controls-toggle");
+const paletteButtons = [...controlsPanel.querySelectorAll("[data-palette]")];
+const settingButtons = [...controlsPanel.querySelectorAll("[data-setting]")];
+let controlsOpen = 0;   // current 0..1
+let controlsTarget = 0;
+let controlsAnim = 0;
+
+function setControlsOpen(v) {
+  controlsOpen = v;
+  root.style.setProperty("--controls-open", v.toFixed(4));
+  relayout();
+}
+
+function toggleControls(open = controlsTarget === 0) {
+  controlsTarget = open ? 1 : 0;
+  controlsPanel.inert = !open;
+  controlsToggle.setAttribute("aria-expanded", String(open));
+  cancelAnimationFrame(controlsAnim);
+  if (reduceMotion()) return setControlsOpen(controlsTarget);
+  const from = controlsOpen;
+  const start = performance.now();
+  const step = (now) => {
+    const t = Math.min(1, (now - start) / CONTROLS_MS);
+    setControlsOpen(from + (controlsTarget - from) * ease(t));
+    if (t < 1) controlsAnim = requestAnimationFrame(step);
+  };
+  controlsAnim = requestAnimationFrame(step);
+  if (open) controlsPanel.querySelector("[aria-pressed='true']")?.focus({ preventScroll: true });
+}
+
+function showViewer(state) {
+  paletteButtons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.palette === state.palette)));
+  for (const b of settingButtons) {
+    const on = state[b.dataset.setting];
+    b.setAttribute("aria-pressed", String((b.dataset.value === "on") === on));
+  }
+  relayout();
+}
+
+controlsToggle.addEventListener("click", () => toggleControls());
+paletteButtons.forEach((b) => b.addEventListener("click", () => viewer.set({ palette: b.dataset.palette })));
+settingButtons.forEach((b) => b.addEventListener("click", () => viewer.set({ [b.dataset.setting]: b.dataset.value === "on" })));
+viewer.subscribe(showViewer);
+showViewer(viewer.get());
+for (const b of [controlsToggle, ...paletteButtons, ...settingButtons]) {
+  for (const type of ["pointerenter", "pointerleave", "focus", "blur"]) b.addEventListener(type, relayout);
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.altKey || e.ctrlKey || e.metaKey) return;
+  if (!site.contains(e.target) && e.target !== document.body) return; // leave the dial panel alone
+  if (e.key === "c" || e.key === "C") toggleControls();
+  else if (e.key === "Escape" && controlsTarget === 1) {
+    toggleControls(false);
+    controlsToggle.focus({ preventScroll: true });
+  }
+});
 
 const indexFromHash = () => Math.max(0, ids.indexOf(location.hash.slice(1)));
 window.addEventListener("hashchange", () => animateTo(indexFromHash(), GOTO_MS));

@@ -2,6 +2,8 @@ import { createPanel } from "./panel.js";
 import { createRenderer } from "./renderer.js";
 import { measure, selectionRects, draw } from "./text-raster.js";
 import { updateScroll } from "./scroll.js";
+import { viewer, enabled as viewerEnabled, applyViewer } from "./viewer.js";
+import { createPalettePanel } from "./palette-panel.js";
 
 const content = document.getElementById("content");
 const viewportEl = document.getElementById("viewport3d");
@@ -70,17 +72,39 @@ function toHex(color) {
 // Pages can pin a preset and keep their own saved dial values (see layout.html).
 const panelOptions = { id: document.body.dataset.panelId, preset: document.body.dataset.preset };
 
-createPanel((snapshot) => {
+// dialValues: the effects dials as set. params: what renders, with the viewer's
+// motion and blur choices on top (js/viewer.js; only on pages with data-viewer).
+let dialValues = null;
+// A new ground (palette switch, mode or ground dial) clears the ghost history
+// for a couple of frames: trails carried across a ground change smear the old
+// ground over the whole screen.
+let groundKey = "";
+let clearGhostFrames = 0;
+const kit = createPanel((snapshot) => {
   const values = structuredClone(snapshot);
   for (const key of ["light", "dark"]) {
     for (const role of ["ground", "phosphor", "accent"]) values.theme[key][role] = toHex(values.theme[key][role]);
   }
   for (const key of ["persistenceColor", "persistenceColor2", "persistenceColor3"]) values.phosphor[key] = toHex(values.phosphor[key]);
-  params = values;
+  const key = `${values.theme.mode} ${values.theme[values.theme.mode].ground}`;
+  if (groundKey && key !== groundKey) clearGhostFrames = 2;
+  groundKey = key;
+  dialValues = values;
+  params = applyViewer(values);
   applyType(values.type);
   applyLines(values);
   invalidate();
 }, panelOptions);
+
+if (viewerEnabled) {
+  // Palettes write into the effects dials (js/palette-panel.js); motion and
+  // blur re-apply as overrides.
+  createPalettePanel(kit);
+  viewer.subscribe((state, patch) => {
+    if (!("palette" in patch) && dialValues) params = applyViewer(dialValues);
+    invalidate();
+  });
+}
 
 window.addEventListener("resize", () => {
   if (canvasMode) unit = readUnit();
@@ -123,7 +147,12 @@ function frame(t) {
   };
 
   draw(ctx, layout, selection, { pixelScale: ps, renderY, colors });
-  renderer.render({ params, renderY, velocity, time: t / 1000, viewport });
+  let renderParams = params;
+  if (clearGhostFrames > 0) {
+    clearGhostFrames--;
+    renderParams = { ...params, ghost: { ...params.ghost, decay: 0, scrollGain: 0 } };
+  }
+  renderer.render({ params: renderParams, renderY, velocity, time: t / 1000, viewport });
 }
 
 requestAnimationFrame(frame);

@@ -68,7 +68,13 @@
   /* 12-column grid inside a box. */
   --grid-columns: 12;
   --grid-gutter: var(--space-24);
-  --col: calc((var(--canvas-w) - 2 * var(--frame-margin) - 2 * var(--box-inset) - (var(--grid-columns) - 1) * var(--grid-gutter)) / var(--grid-columns));
+  /* Viewer controls panel: --controls-open (0..1, set by js/layout.js) pushes
+     the panels left by the panel plus one row gap. Bars stay full width. */
+  --controls-w: calc(384 * var(--u));
+  --controls-open: 0;
+  --controls-push: calc((var(--controls-w) + var(--row-gap)) * var(--controls-open));
+  --box-w: calc(var(--canvas-w) - 2 * var(--frame-margin) - var(--controls-push)); /* a panel's width */
+  --col: calc((var(--box-w) - 2 * var(--box-inset) - (var(--grid-columns) - 1) * var(--grid-gutter)) / var(--grid-columns));
   --span-4: calc(4 * var(--col) + 3 * var(--grid-gutter));
   --span-6: calc(6 * var(--col) + 5 * var(--grid-gutter));
 
@@ -79,6 +85,7 @@
 }
 
 #content.site {
+  position: relative; /* the grid overlay and controls panel sit inside it */
   box-sizing: border-box;
   width: var(--canvas-w);
   max-width: none;
@@ -109,6 +116,7 @@
 }
 
 /* Panels: the intro and each tab grow by their --w share of the free height. */
+.site .site-panel { margin-right: var(--controls-push); } /* beats the `.site section` reset */
 .site-intro {
   flex: var(--w, 0) 1 0;
   min-height: 0;
@@ -253,7 +261,70 @@
   position: absolute;
   inset: var(--frame-margin) 0;
   padding-inline: calc(var(--frame-margin) + var(--box-inset));
+  padding-right: calc(var(--frame-margin) + var(--box-inset) + var(--controls-push));
   pointer-events: none;
 }
 .site-grid-overlay[hidden] { display: none; }
 .site-grid-overlay > div { --fill-alpha: 0.25; }
+
+/* Bar and panel buttons: like the grid toggle; pressed ones stay inverted. */
+.site-bar-button {
+  --fill-alpha: 0;
+  align-self: stretch;
+  margin: 0;
+  padding: 0 var(--space-8);
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.site-bar-button:focus-visible { outline: none; }
+.site-bar-button:is(:hover, :focus-visible, [aria-pressed="true"]) { --fill-alpha: 1; }
+.site-bar-button:is(:hover, :focus-visible, [aria-pressed="true"]) span { --ink: ground; }
+.site-controls-toggle { margin-left: auto; }
+.site-controls-toggle[aria-expanded="true"] { --fill-alpha: 1; }
+.site-controls-toggle[aria-expanded="true"] span { --ink: ground; }
+
+/* Controls panel: 384 wide, between the bars, at the right frame margin. It
+   slides in from the right as --controls-open goes 0 -> 1. */
+.site-controls-clip {
+  position: absolute;
+  top: calc(var(--frame-margin) + var(--bar-height) + var(--row-gap));
+  bottom: calc(var(--frame-margin) + var(--bar-height) + var(--row-gap));
+  right: var(--frame-margin);
+  width: var(--controls-w);
+  overflow: hidden;
+  pointer-events: none;
+}
+.site-controls {
+  position: absolute;
+  inset: 0;
+  transform: translateX(calc((1 - var(--controls-open)) * (100% + var(--frame-margin))));
+  border: var(--line) solid;
+  border-radius: var(--radius);
+  padding: var(--box-inset);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-group);
+  pointer-events: auto;
+  font-size: var(--space-24);       /* label role */
+  line-height: var(--space-32);
+  font-weight: 500;
+}
+.site-controls p { margin: 0; }
+.site-controls-title { font-weight: 700; }
+.site-controls-group { display: flex; flex-direction: column; gap: var(--gap-tight); }
+.site-controls-group .site-bar-button {
+  align-self: stretch;
+  padding: 0 var(--space-8);
+  margin: 0 calc(-1 * var(--space-8));
+}
+.site-controls-heading { margin-bottom: var(--gap-tight); }
+/* A setting row: "Motion on / off"; only the chosen option is highlighted. */
+.site-controls-setting { display: flex; align-items: stretch; gap: var(--space-8); }
+.site-controls-setting > span { padding-block: 0; }
+.site-controls-setting > span:first-child { min-width: calc(128 * var(--u)); }
+.site-controls-group .site-controls-setting .site-bar-button { margin: 0; align-self: auto; }
+.site-controls-hint { margin-top: auto; font-size: var(--space-16); line-height: var(--space-24); }
