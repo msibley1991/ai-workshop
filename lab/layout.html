@@ -20,7 +20,9 @@
      canvas unit (js/main.js). data-viewer turns on the viewer controls panel
      (palette, motion, blur, scanlines; js/viewer.js), opened with [c]. Text blocks
      marked data-genie funnel into their panel's sink square (data-genie-sink)
-     and back with the settled genie (js/genie-play.js); l toggles the open one. -->
+     and back with the settled genie (js/genie-play.js). Tab 2 holds placeholder
+     slides (js/slides.js): ← and → step every slide's beats and flow on across
+     sections and tabs. -->
 <body data-preset="light" data-panel-id="effects-lab-layout" data-canvas data-viewer>
   <canvas id="screen" aria-hidden="true"></canvas>
 
@@ -60,20 +62,68 @@
     </article>
 
 
+    <!-- Tab 2: placeholder slides, one or two per template, in three made-up
+         sections (docs/design-system/slide-templates.md; js/slides.js). Each
+         statement sentence is a genie block revealed one per beat; a graphic's
+         data-states lists its scene state for each beat. -->
     <article class="site-tab site-panel" data-tab data-panel="advanced-topics">
       <a class="site-tab-label" href="#advanced-topics"><span>Advanced Topics</span></a>
       <div class="site-tab-body" data-clip>
-        <div class="site-split site-grid">
-          <div class="site-graphic"></div>
-          <div class="site-section-text" data-genie>
-            <h2 class="site-headline">Advanced Topics</h2>
-            <div class="site-section-content">
-              <p class="site-subheadline">Sub-Headline</p>
-              <p class="site-body">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, <a href="https://www.virtualelena.co/p/toward-a-working-definition-of-paperclip">dictum est a</a>, mattis tellus. Sed dignissim, metus nec fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus elit sed risus. Maecenas eget condimentum velit, sit amet feugiat lectus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.</p>
-            </div>
+        <div class="slides">
+          <div data-section="Placeholder section one">
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement">
+                <p data-genie>Text: the statement alone, set at 64 across eight columns.</p>
+                <p data-genie>Each beat pours the next sentence out of the sink.</p>
+              </div>
+            </section>
+            <section class="slide" data-slide data-template="split" data-split="6">
+              <div class="slide-statement">
+                <p data-genie>Split 6: the statement leads on six columns.</p>
+                <p data-genie>The visual takes the other six.</p>
+              </div>
+              <div class="slide-visual"><div data-graphic="page-layout" data-fit="box" data-align="top" data-states="0,1,2"></div></div>
+            </section>
           </div>
+          <div data-section="Placeholder section two">
+            <section class="slide" data-slide data-template="split" data-split="4">
+              <div class="slide-statement">
+                <p data-genie>Split 4: a short statement.</p>
+              </div>
+              <div class="slide-visual"><div data-graphic="exploded-stack" data-fit="box" data-align="top" data-states="0,1"></div></div>
+            </section>
+            <section class="slide" data-slide data-template="wide">
+              <div class="slide-statement">
+                <p data-genie>Wide: one visual across the grid.</p>
+                <p data-genie>The stack is carried over and moves to its new box.</p>
+              </div>
+              <div class="slide-visual"><div data-graphic="exploded-stack" data-fit="box" data-align="top" data-states="1,2"></div></div>
+            </section>
+            <section class="slide" data-slide data-template="row">
+              <div class="slide-statement">
+                <p data-genie>Row: three visuals side by side.</p>
+              </div>
+              <div class="slide-visual"><div data-graphic="page-layout" data-fit="box" data-align="top" data-states="0"></div></div>
+              <div class="slide-visual"><div data-graphic="exploded-stack" data-fit="box" data-align="top" data-states="2"></div></div>
+              <div class="slide-visual"><div data-graphic="page-layout" data-fit="box" data-align="top" data-states="4"></div></div>
+            </section>
+          </div>
+          <div data-section="Placeholder section three">
+            <section class="slide" data-slide data-template="row">
+              <div class="slide-statement">
+                <p data-genie>Row: two visuals for a comparison.</p>
+                <p data-genie>A new section, so the title in the footer changes.</p>
+              </div>
+              <div class="slide-visual"><div data-graphic="page-layout" data-fit="box" data-align="top" data-states="0,1"></div></div>
+              <div class="slide-visual"><div data-graphic="page-layout" data-fit="box" data-align="top" data-states="4,3"></div></div>
+            </section>
+            <section class="slide" data-slide data-template="visual">
+              <div class="slide-visual"><div data-graphic="exploded-stack" data-fit="box" data-align="bottom" data-states="0,1,0"></div></div>
+            </section>
+          </div>
+          <footer class="slide-footer" data-clip><p class="slide-section-title">Placeholder section one</p></footer>
+          <span class="genie-sink" data-genie-sink data-fill aria-hidden="true"></span>
         </div>
-        <span class="genie-sink" data-genie-sink data-fill aria-hidden="true"></span>
       </div>
     </article>
 

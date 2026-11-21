@@ -42,6 +42,7 @@ const mounts = new Map(); // el -> mount
 
 // A scene's span range in columns, for the page's reflow; null if none mounts here.
 export function graphicSpan(el) { return SCENES[el?.dataset.graphic]?.span ?? null; }
+export function graphicStates(el) { return SCENES[el?.dataset.graphic]?.states?.length ?? 1; }
 
 // ---------- mounting ----------
 
@@ -51,7 +52,7 @@ export function mountGraphic(el) {
   if (!scene) { console.warn("[graphic] unknown scene", el.dataset.graphic); return null; }
   const m = {
     el, scene, index: 0, tween: null, spin: new Spin(), hover: null,
-    canvas: document.createElement("canvas"), raster: null, image: null, key: null,
+    canvas: null, looks: [], raster: null, image: null, alignT: null, flows: [],
     labels: new Map(), owners: [], accent: [], geom: null,
   };
   mounts.set(el, m);
@@ -151,6 +152,40 @@ function step(m, dir) {
   return true;
 }
 
+// Moves one graphic to state `index` (slides, js/slides.js): tweened unless
+// animate is false or motion is off. A tween in progress skips to its end first.
+export function setGraphicState(el, index, animate = true) {
+  const m = mountGraphic(el);
+  if (!m) return;
+  const count = m.scene.states?.length ?? 1;
+  const next = Math.max(0, Math.min(count - 1, index));
+  if (next === m.index && !m.tween) return;
+  const from = m.tween ? m.tween.to : valuesOf(stateAt(m, m.index));
+  const dur = animate && motion ? (stateAt(m, Math.max(m.index, next)).duration ?? 400) : 0;
+  m.index = next;
+  m.tween = dur > 0 ? { from, to: valuesOf(stateAt(m, next)), t0: performance.now(), dur } : null;
+  if (m.tween) { m.spin.release(); m.spin.yaw = m.spin.pitch = m.spin.vy = m.spin.vp = 0; m.drag = null; }
+  syncLabels(m);
+}
+
+// Overrides where a box-fitted graphic sits in its box: 0 hangs from the top,
+// 1 stands on the bottom, null goes back to data-align. A carried graphic's
+// move interpolates it (js/slides.js).
+export function setGraphicAlign(el, a) {
+  const m = mountGraphic(el);
+  if (m) m.alignT = a;
+}
+export const graphicAlign = (el) => mounts.get(el)?.alignT ?? (el.dataset.align === "bottom" ? 1 : 0);
+
+// A carried graphic (the same scene on the next slide) starts where the old one is.
+export function copyGraphicState(fromEl, toEl) {
+  const a = mountGraphic(fromEl), b = mountGraphic(toEl);
+  if (!a || !b) return;
+  b.index = a.index;
+  b.tween = null;
+  syncLabels(b);
+}
+
 function currentValues(m, now) {
   if (!m.tween) return valuesOf(stateAt(m, m.index));
   const p = Math.min(1, (now - m.tween.t0) / m.tween.dur);
@@ -245,14 +280,21 @@ function captionWidths(m, u) {
 // Scale s and offset (units, in the element) that map the design box onto the
 // element: caption lines sit a caption (plus gap) in from each edge; a side
 // without captions maps the design box's edge onto the element's edge.
-function fit(m, W, H, u) {
+// box (slides: data-fit="box"): the element is a box of columns x row fields,
+// so the scale also stops at the box's height, and the drawing hangs from the
+// box's top (data-align="top") or stands on its bottom ("bottom"). Without a
+// box the drawing is fitted by width and centred vertically.
+function fit(m, W, H, u, box = null) {
   const scene = m.scene, caps = captionWidths(m, u);
   const cols = captionLines(scene);
   const dL = caps.left != null ? cols.left : 0, dR = caps.right != null ? cols.right : scene.size[0];
   const aL = caps.left != null ? caps.left + CAPTION_GAP : 0;
   const aR = W - (caps.right != null ? caps.right + CAPTION_GAP : 0);
-  const s = Math.max(0.05, (aR - aL) / (dR - dL));
-  return { s, ox: aL - dL * s, oy: (H - scene.size[1] * s) / 2 };
+  let s = (aR - aL) / (dR - dL);
+  if (box) s = Math.min(s, H / scene.size[1]);
+  s = Math.max(0.05, s);
+  const slack = H - scene.size[1] * s;
+  return { s, ox: aL - dL * s, oy: box ? slack * box.align : slack / 2 };
 }
 
 // ---------- drawing ----------
@@ -267,33 +309,49 @@ export function drawGraphic(ctx, item, ps, u, colors) {
   const bw = Math.max(1, Math.round(item.w / ps)), bh = Math.max(1, Math.round(item.h / ps));
   if (!m.raster || m.raster.w !== bw || m.raster.h !== bh) {
     m.raster = new Raster(bw, bh);
-    m.canvas.width = bw; m.canvas.height = bh;
-    m.image = m.canvas.getContext("2d").createImageData(bw, bh);
-    m.key = null;
+    m.image = new ImageData(bw, bh);
+    m.looks = [];
   }
   const vals = currentValues(m, now), st = stateAt(m, m.index);
-  const { s, ox, oy } = fit(m, item.w / u, item.h / u, u); // design units -> element units
+  const box = item.el.dataset.fit === "box" ? { align: m.alignT ?? (item.el.dataset.align === "bottom" ? 1 : 0) } : null;
+  const { s, ox, oy } = fit(m, item.w / u, item.h / u, u, box); // design units -> element units
   const f = u / ps; // buffer px per unit
   m.geom = { ps, bw, bh, ox, oy, f, s, u };
   placeLabels(m, ox, oy, s);
 
+  // A look is one painted image. Painting is the expensive part, so the last
+  // two looks are kept: a blink alternates between them without repainting,
+  // and flow packets are drawn over the look each frame instead of in it.
   const blinkOn = !motion || st.loop !== "blink" || Math.floor(now / BLINK_MS) % 2 === 0;
   const flowing = motion && (st.flow?.length ?? 0) > 0;
   const key = [bw, bh, ox, oy, f, s, m.index, vals.explode, m.spin.yaw, m.spin.pitch, m.hover, blinkOn,
-    flowing ? Math.floor(now / 16) : 0, colors.phosphor, colors.accent, colors.ground].join("|");
-  if (key !== m.key) {
-    m.key = key;
-    paint(m, vals, st, { f, s, ox, oy, now, blinkOn, flowing });
+    colors.phosphor, colors.accent, colors.ground].join("|");
+  let look = m.looks.find((l) => l.key === key);
+  if (!look) {
+    look = m.looks.length < 2 ? { canvas: document.createElement("canvas") } : m.looks.shift();
+    look.key = key;
+    look.canvas.width = bw; look.canvas.height = bh;
+    m.canvas = look.canvas;
+    paint(m, vals, st, { f, s, ox, oy, now, blinkOn });
     compose(m, rgb(colors.phosphor), rgb(colors.accent), rgb(colors.ground));
+    look.accent = m.accent;
+    look.flows = m.flows;
+    m.looks.push(look);
   }
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(m.canvas, item.x, item.y, bw * ps, bh * ps);
+  ctx.drawImage(look.canvas, item.x, item.y, bw * ps, bh * ps);
+  if (flowing) {
+    for (const fl of look.flows) {
+      ctx.fillStyle = look.accent[fl.id] ? colors.accent : colors.phosphor;
+      packet(fl.pts, now, (x, y, w, h) => ctx.fillRect(item.x + x * ps, item.y + y * ps, w * ps, h * ps), bw, bh);
+    }
+  }
 }
 
-function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn, flowing }) {
+function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
   const r = m.raster, scene = m.scene;
   r.clear();
-  m.owners = []; m.accent = [];
+  m.owners = []; m.accent = []; m.flows = [];
   const focus = blinkOn ? st.focus ?? null : null;
   const own = (id, part) => { m.owners[id] = { part }; m.accent[id] = focus != null && part === focus; return id; };
   const P = (x, y) => [(ox + x * scale) * f, (oy + y * scale) * f]; // design units -> buffer px
@@ -382,7 +440,7 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn, flowing }) {
     const id = own(r.count++, c.part ?? c.id);
     for (let i = 0; i + 1 < pts.length; i++) r.line(pts[i], pts[i + 1], id, LINE, { dash: c.dashed ? DASH : null });
     if (c.end === "arrow") own(arrowhead(r, pts[pts.length - 2], pts[pts.length - 1]), c.part ?? c.id);
-    if (flowing && st.flow.includes(c.id)) packet(r, pts, now, id);
+    if (st.flow?.includes(c.id)) m.flows.push({ pts, id }); // packets: drawn over the look (drawGraphic)
   }
 
   // Leader lines for shown labels: cased in ground, square dot on the object.
@@ -475,7 +533,10 @@ function arrowhead(r, from, to) {
   return r.fill([[to[0] + ux, to[1] + uy], [back[0] - uy * W, back[1] + ux * W], [back[0] + uy * W, back[1] - ux * W]], 1);
 }
 
-function packet(r, pts, now, id) {
+// The flow packet on a connector at time `now`: a short solid segment, pw
+// pixels wide, stamped along the line from its tail to its head (as r.line
+// would) and handed to rect(x, y, w, h) in buffer px.
+function packet(pts, now, rect, bw, bh) {
   const segs = [];
   let total = 0;
   for (let i = 0; i + 1 < pts.length; i++) {
@@ -492,7 +553,21 @@ function packet(r, pts, now, id) {
     return pts[pts.length - 1];
   };
   if (head <= 0 || tail >= total) return;
-  r.line(at(tail), at(head), id, pw);
+  const [ax, ay] = at(tail), [cx, cy] = at(head);
+  const o0 = -(pw >> 1);
+  let x = Math.floor(ax), y = Math.floor(ay);
+  const x2 = Math.floor(cx), y2 = Math.floor(cy);
+  const dx = Math.abs(x2 - x), dy = -Math.abs(y2 - y), sx = x < x2 ? 1 : -1, sy = y < y2 ? 1 : -1;
+  let err = dx + dy;
+  for (let guard = 0; guard < 10000; guard++) {
+    const px = Math.max(0, x + o0), py = Math.max(0, y + o0);
+    const qx = Math.min(bw, x + o0 + pw), qy = Math.min(bh, y + o0 + pw);
+    if (qx > px && qy > py) rect(px, py, qx - px, qy - py);
+    if (x === x2 && y === y2) break;
+    const e2 = 2 * err;
+    if (e2 >= dy) { err += dy; x += sx; }
+    if (e2 <= dx) { err += dx; y += sy; }
+  }
 }
 
 function compose(m, ink, accent, ground) {

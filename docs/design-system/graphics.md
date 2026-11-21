@@ -69,7 +69,7 @@ All in emulated pixels:
   - On each side, the longest caption's outer edge lands on the span's edge. Left captions all start on the span's left edge, and the drawing is fitted to the longest one.
   - The drawing fills the rest of the span, scaled to fit between the caption lines. Line weights and the hatch spacing stay fixed (see Lines), so only the geometry scales.
   - **A graphic with no captions** spans whole columns itself: its drawing runs edge to edge.
-- **Boxes (proposed in [slide-templates.md](slide-templates.md)):** a visual fits a box of columns × row fields, scaled to whichever side runs out first and hung from the box's top-left. Captions still end on column edges.
+- **Boxes ([slide-templates.md](slide-templates.md), built in the lab):** a visual fits a box of columns × row fields, scaled to whichever side runs out first and hung from the box's top-left. Captions still end on column edges.
 - **Variable span:** each graphic declares a range in columns (for example, 3–4). It can be as wide as all 12 columns, with the text above or below it.
 - **Panels open:** when a panel (controls, nav) covers columns, the text reflows first. The graphic keeps its widest span until the text would go under 4 columns. Only then does the graphic drop to fewer columns, down to its minimum. The grid and panel rules are in [layout-grid.md](layout-grid.md).
 - **Square corners** on flat graphic shapes. The 8 radius belongs to the interface chrome, which keeps UI and content distinct. Rounding can still carry a meaning, such as a process, when a graphic calls for it.

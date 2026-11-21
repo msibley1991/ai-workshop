@@ -1,16 +1,17 @@
 # Slide templates
 
-Status: **exploration**, from the slide-templates grilling session (2026-11-21). The approach is built on Swiss modernist layout principles. Not built yet: the lab layout page still has the older Split, with the graphic on the left (see "Not built yet").
+Status: **exploration**, from the slide-templates grilling session (2026-11-21). The approach is built on Swiss modernist layout principles. **Built in the lab** on [`lab/layout.html`](../../lab/layout.html): tab 2 holds placeholder slides for every template, driven by [`lab/js/slides.js`](../../lab/js/slides.js) (see "In the lab").
 
 ## Sections, slides and beats
-- **Section:** a tab in the accordion. Its name shows small in the footer strip (see "Footer strip"), not as a Headline at the top of the slide.
+- **Tab:** one presenter's part. Tab 1 is Nora's and tab 2 is Max's.
+- **Section:** a group of slides within a tab, from the script's `##` titles. Its name shows small in the footer strip (see "Footer strip"), not as a Headline at the top of the slide.
 - **Slide:** each bullet in the script is a full slide. It uses **one template** for all its beats.
 - **Beat:** one press of →. A beat changes only what's inside the slide's regions: the statement gains its next sentence, or a visual steps to its next state (see [graphics.md](graphics.md), "Presentation steps").
 - **A slide may hold more than one visual.** The visuals aren't settled, so templates describe regions on the grid, not kinds of visual. Any visual can go in any visual region.
 
 ## Swiss principles applied
 - **Scale, not width:** a text-only slide gets bigger type, not longer lines. Lines stay around 30 characters.
-- **One text axis:** the statement always hangs from the first open column, normally column 1, at the top of row 1. Text sits in the same place on every slide, so when the template changes, only the visuals move.
+- **One text axis:** the statement always starts on the first open column, normally column 1. In Text and Split it hangs from the top of row 1. In Wide and Row it stands on the base line under the visuals, so the genie funnels straight down into the sink (bottom left) instead of over them.
 - **Asymmetry:** nothing is centred. Empty columns are part of the composition. Text is flush left with a ragged right, and hierarchy comes from size and weight, never colour.
 - **A modular grid:** columns and rows. Visuals fill boxes of fields. Text flows freely from the top using the typography gaps.
 
@@ -23,7 +24,8 @@ Status: **exploration**, from the slide-templates grilling session (2026-11-21).
 
 ## Footer strip
 - **One line along the bottom of the content area,** 32 tall, with a 16 gap above row 6. Its bottom is the content's bottom line, one box inset (24) above the panel's edge.
-- **The section title** sits on the left, at the text axis (column 1). It's set in the **Section title** style, 24/32 at weight 700, in sentence case. The names come from the script's `##` titles:
+- **The genie's sink** sits on the left, at the text axis (column 1), on the content's bottom line. Text always hangs from the left, so it funnels down its own side of the slide instead of over the visuals. The spine's swing is mirrored to match, swinging right, away from the sink's side.
+- **The section title** sits on the right, ending on the last column's edge. It's set in the **Section title** style, 24/32 at weight 700, in sentence case. The names come from the script's `##` titles:
   - On creative decisions
   - State of digital media
   - Coding agents
@@ -32,22 +34,25 @@ Status: **exploration**, from the slide-templates grilling session (2026-11-21).
   - MCPs
   - Make your own tools
   - Conclusion
-- **The genie's sink** sits on the right, on the same bottom line. So a small bold name bottom left balances the sink square bottom right, a Swiss running head.
-- **The title belongs to the section, not the slide.** It stays still through all the section's slides, with no genie, and changes when the accordion moves to the next tab.
+- So the sink square bottom left balances a small bold name bottom right, a Swiss running head.
+- **The strip belongs to the tab's open layout:** the title is clipped to its tab, so it never shows over a closed one.
+- **The title belongs to the section, not the slide.** It stays still through all the section's slides, with no genie. When the section changes within a tab, the old title falls out of the strip and the new one rises in, during the visuals phase (400 on ease, clipped to the strip). Between tabs it's set before the accordion moves.
 - The hero has no section title.
 
 ## Templates
 | Template | Statement | Visuals |
 |---|---|---|
 | **Text** | 64/72, weight 500, columns 1–8 | none |
-| **Split** | 48/56, columns 1–4 or 1–6 | one, from the column after the text to the edge, rows 1–6, within its declared span |
-| **Wide** | 48/56, columns 1–6 | one, columns 1–12, from the first free row under the full statement to row 6 |
-| **Row** | 48/56, columns 1–6 | 2 (6 columns each) or 3 (4 each), placed like Wide, each with its captions inside its own box |
+| **Split** | 48/56, columns 1–4 or 1–6 | one, from the column after the text to the edge, rows 1–6 |
+| **Wide** | 48/56, columns 1–6, on the base line | one, columns 1–12, from row 1 down to the row above the statement |
+| **Row** | 48/56, columns 1–6, on the base line | 2 (6 columns each) or 3 (4 each), placed like Wide, each with its captions inside its own box |
 | **Visual** | none | one, columns 1–12 × rows 1–6 |
 
 - **Split's proportions:** text on 4 columns when the visual is the main event and the statement is short, and on 6 when the statement leads. The visual takes the rest (8 or 6 columns on the full grid).
-- **First free row:** the statement's height is measured at its full length, every sentence included, from the slide's first beat. The visuals start at the next row below it.
-- **The statement is always on top.** There's no "statement below" variant, because it would move text from slide to slide.
+- **Spans:** a scene's declared minimum span still holds when panels cover columns. Its declared maximum doesn't cap a visual in a template, because the box fit already limits the size.
+- **How visuals sit in their box:** in Split, Wide and Row, a visual hangs from the top of its box (row 1). In Visual it stands on the base line.
+- **Rows for the statement (Wide and Row):** the statement's height is measured at its full length, every sentence included, from the slide's first beat. It takes as many bottom row fields as that needs, set on the base line, and the visuals take the rows above it.
+- **Why text goes below in Wide and Row** (changed 2026-11-22): with the sink bottom left, a statement above full-width visuals funnels down across them. Below them, it drops straight into the sink.
 - **Hero:** the intro screen keeps its own arrangement, a graphic beside the Display title. It's slide zero.
 - **New templates** are added only when a slide doesn't fit these five, the same "named, not free" rule as motion's values. Left out for now: a mirrored Split (it breaks the text axis) and an unequal Row.
 
@@ -62,43 +67,62 @@ Status: **exploration**, from the slide-templates grilling session (2026-11-21).
 - The statement's region is sized for its full text from the first beat, so sentences never push each other around.
 
 ## Changing slides
-Three phases, in order:
+Each step starts only when the one before has finished, so nothing new appears until the old slide has gone:
 1. **Text out:** the statement funnels into the sink, bottom line first (200 ms per line, follow −0.5; see [motion.md](motion.md)).
-2. **Visuals,** all starting together:
-   - **A carried visual,** the same scene on both slides (for example the project folder), **moves** to its new box on ease, 400 ms, and steps to its new state on the way. It's matched by its scene name.
-   - **Other visuals leave and arrive.** The default entrance is **rise**, and exits reverse their entrance. A slide can name another motion from motion.md (grow, fall, cut).
-3. **Text in:** the new statement's first sentence pours out of the sink.
+2. **Exits:** the old visuals that aren't carried leave, and the old section title with them if the section changes. Exits reverse their entrance, so a risen visual falls out.
+3. **Moves:** each **carried visual**, the same scene on both slides (for example the project folder), moves to its new box on ease and steps to its new state on the way. It's matched by its scene name, in order.
+4. **Entrances:** the new visuals arrive, and the new section title rises into the strip. The default entrance is **rise**, and a slide can name another motion from motion.md (grow, fall, cut).
+5. **Text in:** the new statement's first sentence pours out of the sink.
 
-- **Back:** the same phases in reverse.
+- Steps 2–4 are 400 ms each on ease, and an empty step is skipped.
+- **Back:** the same steps, to the previous slide's final state.
 - **Rapid presses** skip to the end state. **Motion off** cuts everything.
-- A 2-line slide change with one moving visual takes about 300 + 400 + 300 = 1 s.
+- A 2-line slide change with exits, one move and entrances takes about 300 + 400 + 400 + 400 + 300 = 1.8 s. With only a move, it's about 1 s.
 
-## Between sections
-- **→ on a section's last beat** runs the text-out phase, then the accordion jumps to the next tab (400 on ease), and its first slide comes in: visuals, then text.
-- **← on a section's first beat** reverses this, back to the previous section's last slide in its final state.
-- **Jumping to a tab directly** (a click, the URL hash, or the left nav later) lands on that section's first slide.
-- **The hero is slide zero:** → from it opens the first section.
+## Between sections and tabs
+- **Within a tab,** a new section is an ordinary slide change. The footer title changes during the visuals phase.
+- **→ on a tab's last beat** runs text out, then the old visuals fall out, then the accordion jumps to the next tab (400 on ease), and its first slide comes in: visuals, then text. Nothing is carried between tabs.
+- **← on a tab's first beat** reverses this, back to the previous tab's last slide in its final state.
+- **Jumping to a tab directly** (a click, the URL hash, a scroll snap, or the left nav later) lands on that tab's first slide.
+- **The hero is slide zero:** → from it opens tab 1.
 
-## Authoring (proposed)
-A slide is a DOM element that names its template, for example:
+## Authoring
+As built on the lab layout page:
 
 ```html
-<section data-slide data-template="split" data-split="4">
-  <p data-statement>…</p>
-  <div data-graphic="project-folder"></div>
-</section>
+<div class="slides">
+  <div data-section="Coding agents">
+    <section class="slide" data-slide data-template="split" data-split="4">
+      <div class="slide-statement">
+        <p data-genie>First sentence.</p>
+        <p data-genie>Second sentence, on the next beat.</p>
+      </div>
+      <div class="slide-visual">
+        <div data-graphic="project-folder" data-fit="box" data-align="top" data-states="0,2"></div>
+      </div>
+    </section>
+  </div>
+</div>
+<footer class="slide-footer" data-clip><p class="slide-section-title">Coding agents</p></footer>
 ```
 
-- Each sentence of a building statement is its own element, revealed one per beat.
-- A graphic's states line up with the slide's beats.
-- The format gets settled when it's built.
+- `data-template`: text, split, wide, row or visual. `data-split`: 4 or 6.
+- Each sentence is its own `[data-genie]` block, revealed one per beat.
+- `data-states` lists the graphic's scene state for each beat. Without it, the graphic steps through every state in order. A slide has as many beats as its longest list.
+- `data-fit="box"` fits the graphic to its region; `data-align` is `top` for Split, Wide and Row, and `bottom` for Visual.
+- A carried visual is the same scene on consecutive slides in one tab, matched in order.
+
+## In the lab
+- **`lab/layout.html`, tab 2:** seven placeholder slides in three made-up sections: Text, Split 6, Split 4, Wide, Row 3, Row 2 and Visual. The exploded stack is carried from Split 4 into Wide and Row, and the page layouts from Row 3 into Row 2.
+- **Hero and tab 1** (the placeholder for Nora's part) keep their old layout. Each counts as one slide, and its graphic's states are its beats.
+- **Keys:** ← and → step beats and flow on across slides, sections and tabs. Clicking a tab, the URL hash or a scroll snap lands on that tab's first slide. The old l toggle is off on this page; the genie page still has it.
+- **Rendering cost:** painting a graphic is the expensive step, so the lab keeps its last two painted looks and draws flow packets on top instead of repainting. A carried move or an explode tween still repaints its graphic every frame.
+- **Code:** `lab/js/slides.js` (stops, beats, the phases, template placement); box fitting, `setGraphicState()` and `copyGraphicState()` in `lab/js/graphic.js`; the slide grid and footer strip in `lab/css/layout.css`.
 
 ## Not built yet
-- The row fields and box fitting (`fit()` in `lab/js/graphic.js` fits a width today).
-- Split flipped to text on the left (the layout page draws the graphic first).
-- The Text template's 64/72 statement.
-- Slides, beats and the three-phase slide change. Text entering from the sink.
-- → and ← flowing across sections.
+- Real slides from the script.
+- The left nav, and the axis moving to column 3 with it (the code reads `--nav-cols`).
+- Reader mode.
 
 ## Open
 - The accordion's tab headers also show section names, so they appear twice. That belongs with the left nav and chrome.

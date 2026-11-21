@@ -33,7 +33,7 @@ Status: **exploration**. Decided in the first design-system grilling session (20
 - The bottom bar's **Grid** toggle overlays the columns at 25% of the primary ink, across the whole canvas and over the panels.
 
 ## Rows
-- An open tab's 800-unit content area ends in a **footer strip**: 32 for the section title and the sink, with a 16 gap above it.
+- An open tab's 800-unit content area ends in a **footer strip**: 32 for the sink (left) and the section title (right), with a 16 gap above it.
 - **6 row fields of 112, with 16 gutters,** fill the remaining 752. Visuals snap to them, and text flows freely. The bottom of row 6 is the visuals' base line. The templates that use them are in [slide-templates.md](slide-templates.md).
 
 ## Panels on the grid

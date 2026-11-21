@@ -66,14 +66,14 @@ All are sine waves unless noted. The size is the travel from rest to the peak, o
 - Rapid presses skip everything to the end state.
 
 ## Genie (text)
-- **The sink:** an **8 × 8 ink square** near the bottom-right corner of each panel that has genie text, one box inset (24) in from the right and bottom, so it sits on the grid's right edge. It stays for as long as that tab or intro screen is in use, because every slide's text in the panel comes and goes through it.
+- **The sink:** an **8 × 8 ink square** one box inset (24) in from a bottom corner of each panel that has genie text. On slides it's the **bottom-left** corner, under the text axis, so text funnels down its own side and not over the visuals ([slide-templates.md](slide-templates.md)). The hero, tab 1 and the genie page still have text on the right and keep it bottom right. It stays for as long as that tab or intro screen is in use, because every slide's text in the panel comes and goes through it.
 - **Text's only enter and exit:** text that a step removes funnels into the square, and stepping back pours it out again. New text pours out of the square on a forward step too.
 - **Line by line:** the bottom line goes out first, so on the way back the top line comes in first. Each line starts halfway through the previous line's run.
 - **Funnel with full slit-scan:**
   - Within a line, every row runs at its own moment in time, with lower rows well ahead, so the text smears and stretches as it goes.
   - The sides pull in quickly near the top and hold most of the way down.
   - **Landing:** over the funnel's last 15%, the sides always close onto the square and the swing dies out, whatever the graphs say, so the text visibly goes into it.
-  - The spine swings 48 units to the left at most, in three S-bends down the funnel.
+  - The spine swings 48 units at most, away from the sink's side (left for a sink on the right, right for one on the left), in three S-bends down the funnel.
 - **Curvature over time:** two bezier graphs, each played over a line's own run, set how much the funnel curves at each moment. They're edited on the genie page (g).
   - **arc:** eases up to the full swing by three quarters of the run, then holds.
   - **narrowing:** stays wide until about a sixth of the run, then pulls in gradually, reaching full only at the end.

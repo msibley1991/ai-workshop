@@ -55,26 +55,39 @@ function ascentOf(ctx, font) {
 // Document-space rects (client rect + scroll) so scrolling never requires re-measuring.
 const toDoc = (r) => ({ x: r.left + window.scrollX, y: r.top + window.scrollY, w: r.width, h: r.height });
 
-// [data-clip]: anything inside is drawn clipped to that element's rect.
+// [data-clip]: anything inside is drawn clipped to that element's rect, and
+// to every [data-clip] around it (a footer strip inside a closing tab body).
 function clipper() {
   const cache = new Map();
-  return (el) => {
+  const clipOf = (el) => {
     const c = el.closest?.("[data-clip]");
     if (!c) return null;
-    if (!cache.has(c)) cache.set(c, toDoc(c.getBoundingClientRect()));
+    if (!cache.has(c)) {
+      const r = toDoc(c.getBoundingClientRect()), outer = clipOf(c.parentElement);
+      if (!outer) cache.set(c, r);
+      else {
+        const x = Math.max(r.x, outer.x), y = Math.max(r.y, outer.y);
+        const x1 = Math.min(r.x + r.w, outer.x + outer.w), y1 = Math.min(r.y + r.h, outer.y + outer.h);
+        cache.set(c, { x, y, w: Math.max(0, x1 - x), h: Math.max(0, y1 - y) });
+      }
+    }
     return cache.get(c);
   };
+  return clipOf;
 }
 
 export function measure(root, ctx) {
   ascentCache.clear();
   const clipOf = clipper();
   const words = [];
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  // Hidden subtrees ([hidden], e.g. slides not on screen) are skipped whole.
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, (n) =>
+    n.nodeType === 1 ? (n.hidden ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_SKIP) : NodeFilter.FILTER_ACCEPT);
+  const shown = (el) => !el.closest("[hidden]");
   const range = document.createRange();
   // [data-genie]: a text block that can genie into its panel's sink, the
   // [data-genie-sink] square (js/genie-warp.js). Its words carry the block's index.
-  const genieEls = [...root.querySelectorAll("[data-genie]")];
+  const genieEls = [...root.querySelectorAll("[data-genie]")].filter(shown);
   const genieOf = (el) => genieEls.indexOf(el.closest("[data-genie]"));
 
   for (let node = walker.nextNode(); node; node = walker.nextNode()) {
@@ -165,7 +178,7 @@ export function measure(root, ctx) {
 
   // [data-graphic]: a scene graphic (js/graphic.js, scenes in js/graphics/).
   // CSS --u (px per layout unit) sizes it; it falls back to 1.
-  const graphics = [...root.querySelectorAll("[data-graphic]")]
+  const graphics = [...root.querySelectorAll("[data-graphic]")].filter(shown)
     .map((el) => {
       mountGraphic(el);
       const u = parseFloat(getComputedStyle(el).getPropertyValue("--u")) || 1;
@@ -417,9 +430,12 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
     drawWords((w) => colors[w.ink], (w) => w.genie === i, off);
     const toPx = (x) => x / ps, toPy = (y) => (y - renderY) / ps;
     const S = g.sink;
+    // The spine swings away from the sink's side: as tuned for a sink on the
+    // right, mirrored for one on the left (slides, under the text axis).
+    const side = S.x + S.w / 2 < g.x + g.w / 2 ? -1 : 1;
     warpBlock(ctx, off.canvas,
       { x0: toPx(g.x), x1: toPx(g.x + g.w), y0: toPy(g.y), y1: toPy(g.y + g.h), lines: g.lines.map((l) => ({ y0: toPy(l.y0), y1: toPy(l.y1) })) },
-      { x0: toPx(S.x), x1: toPx(S.x + S.w), y: Math.round(toPy(S.y)) }, t, (genieSettings.arc * layout.u) / ps);
+      { x0: toPx(S.x), x1: toPx(S.x + S.w), y: Math.round(toPy(S.y)) }, t, (side * genieSettings.arc * layout.u) / ps);
   });
 
   // Selection is the inverse: a block of the main ink with the selected text

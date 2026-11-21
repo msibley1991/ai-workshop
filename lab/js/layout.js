@@ -16,6 +16,7 @@ const GOTO_MS = 500;
 import { viewer } from "./viewer.js";
 import { stepGraphics, setMotion, graphicSpan } from "./graphic.js";
 import { genie } from "./genie-play.js";
+import { createSlides } from "./slides.js";
 
 // Motion off (viewer controls; it starts off when the OS asks for reduced motion)
 // makes the accordion and the controls panel jump instead of animating.
@@ -51,8 +52,13 @@ function apply(w) {
   relayout();
 }
 
+// goPanel (slides.js) moves the accordion itself; any other landing (a click,
+// the hash, a scroll snap) sends the slides to that panel's first slide.
+let silentTarget = -1;
 function settle(index) {
   p = settled = index;
+  if (index !== silentTarget) slides?.land(index);
+  silentTarget = -1;
   const hash = ids[index] ? `#${ids[index]}` : "";
   if (location.hash !== hash) history.replaceState(null, "", hash || location.pathname + location.search);
   labels.forEach((a, i) => (i + 1 === index ? a.setAttribute("aria-current", "true") : a.removeAttribute("aria-current")));
@@ -152,20 +158,33 @@ document.addEventListener("keydown", (e) => {
   animateTo((anim ? anim.target : settled) + dir, GOTO_MS);
 });
 
-// ---- Graphic steps: ← and → move the graphics on screen between states --------
+// ---- Steps: ← and → -----------------------------------------------------------
+// With slides on the page (js/slides.js), they step through every slide's beats
+// and on across sections and tabs. Without (genie.html), they step the graphics
+// on screen between states.
+const slides = createSlides({
+  site, panels, relayout,
+  goPanel(index, dur) {
+    silentTarget = index;
+    animateTo(index, dur);
+    return new Promise((r) => setTimeout(r, reduceMotion() || dur === 0 ? 0 : dur + 16));
+  },
+});
 setMotion(viewer.get().motion);
 viewer.subscribe((state) => setMotion(state.motion));
 document.addEventListener("keydown", (e) => {
   if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
   if (e.altKey || e.ctrlKey || e.metaKey) return;
   if (!site.contains(e.target) && e.target !== document.body) return; // leave the dial panel alone
-  if (stepGraphics(e.key === "ArrowRight" ? 1 : -1)) e.preventDefault();
+  const dir = e.key === "ArrowRight" ? 1 : -1;
+  if (slides.enabled ? slides.step(dir) : stepGraphics(dir)) e.preventDefault();
 });
 
 // ---- Text genie: l funnels the open panel's text into its sink square and back --
 // (js/genie-play.js, settled defaults). On genie.html, js/genie.js takes these
 // keys first, in the capture phase.
 document.addEventListener("keydown", (e) => {
+  if (slides.enabled) return; // slides fire the genie themselves
   if (e.key !== "l" && e.key !== "L") return;
   if (e.altKey || e.ctrlKey || e.metaKey) return;
   if (!site.contains(e.target) && e.target !== document.body) return; // leave the dial panel alone
@@ -209,8 +228,10 @@ function reflow() {
     graphic.style.gridColumn = `${1 + left} / span ${span}`;
     text.style.gridColumn = `${1 + left + span} / ${COLUMNS + 1 - coverRight}`;
   }
+  slides.reflow(left, coverRight);
   relayout();
 }
+window.addEventListener("resize", () => reflow());
 reflow();
 
 // ---- Viewer controls panel ([c]) -------------------------------------------------

@@ -183,7 +183,7 @@ export class Raster {
     this.fid = new Int32Array(n); this.edge = new Int32Array(n); // edge: owner id + 1
     this.clear();
   }
-  clear() { this.tone.fill(-1); this.fid.fill(-1); this.edge.fill(0); this.count = 0; }
+  clear() { this.tone.fill(-1); this.fid.fill(-1); this.edge.fill(0); this.count = 0; this.boxes = []; }
 
   // pts in buffer px; basis maps buffer px to face-local coords; edgeWidth is the
   // outline in pixels. Returns the shape id.
@@ -195,25 +195,53 @@ export class Raster {
       const [nx, ny] = pts[(i + 1) % pts.length];
       area += x * ny - nx * y;
     });
-    const sign = area >= 0 ? 1 : -1;
-    for (let y = Math.max(0, Math.floor(y0)); y <= Math.min(h - 1, Math.ceil(y1)); y++) {
-      for (let x = Math.max(0, Math.floor(x0)); x <= Math.min(w - 1, Math.ceil(x1)); x++) {
-        const px = x + 0.5, py = y + 0.5;
-        let inside = true;
-        for (let i = 0; i < pts.length && inside; i++) {
-          const [ax, ay] = pts[i], [cx, cy] = pts[(i + 1) % pts.length];
-          if (sign * ((cx - ax) * (py - ay) - (cy - ay) * (px - ax)) < 0) inside = false;
+    const sign = area >= 0 ? 1 : -1, n = pts.length;
+    // A pixel is inside when its centre is on the inner side of every edge
+    // (convex polygons). Each edge is a linear test in x, so each row is one
+    // span; only the pixels at the span's ends are tested exactly.
+    const inside = (px, py) => {
+      for (let i = 0; i < n; i++) {
+        const a = pts[i], c = pts[(i + 1) % n];
+        if (sign * ((c[0] - a[0]) * (py - a[1]) - (c[1] - a[1]) * (px - a[0])) < 0) return false;
+      }
+      return true;
+    };
+    const bx0 = Math.max(0, Math.floor(x0)), bx1 = Math.min(w - 1, Math.ceil(x1));
+    const by0 = Math.max(0, Math.floor(y0)), by1 = Math.min(h - 1, Math.ceil(y1));
+    for (let y = by0; y <= by1; y++) {
+      const py = y + 0.5;
+      let lo = -Infinity, hi = Infinity;
+      for (let i = 0; i < n && lo <= hi; i++) {
+        const a = pts[i], c = pts[(i + 1) % n];
+        // sign * ((cx - ax) * (py - ay) - (cy - ay) * (px - ax)) >= 0, i.e. A * px + B >= 0
+        const A = -sign * (c[1] - a[1]), B = sign * ((c[0] - a[0]) * (py - a[1]) + (c[1] - a[1]) * a[0]);
+        if (A > 0) lo = Math.max(lo, -B / A);
+        else if (A < 0) hi = Math.min(hi, -B / A);
+        else if (B < 0) { lo = Infinity; break; }
+      }
+      if (!(lo <= hi + 2)) continue;
+      const xa = Math.max(bx0, Math.ceil(lo - 0.5) - 1), xb = Math.min(bx1, Math.floor(hi - 0.5) + 1);
+      // Exact test at the span's ends; the pixels between are inside.
+      let xs = xa, xe = xb;
+      while (xs <= xe && (xs <= xa + 1) && !inside(xs + 0.5, py)) xs++;
+      while (xe >= xs && (xe >= xb - 1) && !inside(xe + 0.5, py)) xe--;
+      if (xs > xe) continue;
+      const row = y * w;
+      tone.fill(t, row + xs, row + xe + 1);
+      fid.fill(id, row + xs, row + xe + 1);
+      edge.fill(0, row + xs, row + xe + 1);
+      if (basis) {
+        const dy = py - basis.oy, cu = basis.inv[1] * dy, cv = basis.inv[3] * dy;
+        for (let x = xs, i = row + xs; x <= xe; x++, i++) {
+          const dx = x + 0.5 - basis.ox;
+          U[i] = (basis.inv[0] * dx + cu) * basis.la;
+          V[i] = (basis.inv[2] * dx + cv) * basis.lb;
         }
-        if (!inside) continue;
-        const i = y * w + x;
-        tone[i] = t; fid[i] = id; edge[i] = 0;
-        if (basis) {
-          const dx = px - basis.ox, dy = py - basis.oy;
-          U[i] = (basis.inv[0] * dx + basis.inv[1] * dy) * basis.la;
-          V[i] = (basis.inv[2] * dx + basis.inv[3] * dy) * basis.lb;
-        } else { U[i] = px; V[i] = py; }
+      } else {
+        for (let x = xs, i = row + xs; x <= xe; x++, i++) { U[i] = x + 0.5; V[i] = py; }
       }
     }
+    this.boxes[id] = [bx0, by0, bx1, by1];
     if (edges) for (let i = 0; i < pts.length; i++) this.line(pts[i], pts[(i + 1) % pts.length], id, edgeWidth);
     return id;
   }
@@ -247,38 +275,63 @@ export class Raster {
   }
 
   // Filled interiors of shapes `ids` (true edges, not the edge strokes).
+  // Only the union of the shapes' boxes is scanned; mask.box is that union.
   interior(ids) {
-    const set = new Set(ids), { tone, fid } = this, mask = new Uint8Array(tone.length);
-    for (let i = 0; i < mask.length; i++) mask[i] = tone[i] >= 0 && set.has(fid[i]) ? 1 : 0;
+    const { tone, fid, w } = this, mask = new Uint8Array(tone.length);
+    const on = new Uint8Array(this.count + 1);
+    let x0 = Infinity, y0 = Infinity, x1 = -1, y1 = -1;
+    for (const id of ids) {
+      on[id] = 1;
+      const b = this.boxes[id];
+      if (b) { x0 = Math.min(x0, b[0]); y0 = Math.min(y0, b[1]); x1 = Math.max(x1, b[2]); y1 = Math.max(y1, b[3]); }
+    }
+    for (let y = y0; y <= y1; y++) for (let x = x0, i = y * w + x0; x <= x1; x++, i++) {
+      if (tone[i] >= 0 && on[fid[i]]) mask[i] = 1;
+    }
+    mask.box = x1 < 0 ? null : [x0, y0, x1, y1];
     return mask;
   }
 
   // mask dilated by a (2·d+1) square, separably (rows, then columns), in linear
   // time: distance to the nearest mask pixel along each line, both directions.
+  // Works only inside the mask's box (from interior()) grown by d; out.box is that area.
   grow(mask, d) {
-    const { w, h } = this;
-    const pass = (src, len, count, at) => {
-      const out = new Uint8Array(src.length), left = new Float32Array(len);
-      for (let k = 0; k < count; k++) {
-        let run = Infinity;
-        for (let j = 0; j < len; j++) { run = src[at(k, j)] ? 0 : run + 1; left[j] = run; }
-        run = Infinity;
-        for (let j = len - 1; j >= 0; j--) {
-          run = src[at(k, j)] ? 0 : run + 1;
-          if (Math.min(left[j], run) <= d) out[at(k, j)] = 1;
-        }
+    const { w, h } = this, b = mask.box ?? [0, 0, w - 1, h - 1];
+    const x0 = Math.max(0, b[0] - d), y0 = Math.max(0, b[1] - d), x1 = Math.min(w - 1, b[2] + d), y1 = Math.min(h - 1, b[3] + d);
+    const rows = new Uint8Array(mask.length), out = new Uint8Array(mask.length);
+    const left = new Float32Array(Math.max(w, h));
+    for (let y = y0; y <= y1; y++) {
+      const base = y * w;
+      let run = Infinity;
+      for (let x = x0; x <= x1; x++) { run = mask[base + x] ? 0 : run + 1; left[x] = run; }
+      run = Infinity;
+      for (let x = x1; x >= x0; x--) {
+        run = mask[base + x] ? 0 : run + 1;
+        if ((left[x] < run ? left[x] : run) <= d) rows[base + x] = 1;
       }
-      return out;
-    };
-    return pass(pass(mask, w, h, (y, x) => y * w + x), h, w, (x, y) => y * w + x);
+    }
+    for (let x = x0; x <= x1; x++) {
+      let run = Infinity;
+      for (let y = y0; y <= y1; y++) { run = rows[y * w + x] ? 0 : run + 1; left[y] = run; }
+      run = Infinity;
+      for (let y = y1; y >= y0; y--) {
+        const i = y * w + x;
+        run = rows[i] ? 0 : run + 1;
+        if ((left[y] < run ? left[y] : run) <= d) out[i] = 1;
+      }
+    }
+    out.box = [x0, y0, x1, y1];
+    return out;
   }
 
   // Outline of the union of shapes `ids`, lw pixels wide, grown outward from
   // their filled interiors: every pixel within lw (Chebyshev) becomes edge.
   silhouette(ids, lw, ownerId = ids[0]) {
     if (lw < 1 || !ids.length) return;
-    const mask = this.interior(ids), grown = this.grow(mask, lw), owner = ownerId + 1;
-    for (let i = 0; i < mask.length; i++) if (grown[i] && !mask[i]) this.edge[i] = owner;
+    const mask = this.interior(ids);
+    if (!mask.box) return;
+    const grown = this.grow(mask, lw), owner = ownerId + 1, [x0, y0, x1, y1] = grown.box, w = this.w;
+    for (let y = y0; y <= y1; y++) for (let x = x0, i = y * w + x0; x <= x1; x++, i++) if (grown[i] && !mask[i]) this.edge[i] = owner;
   }
 }
 
