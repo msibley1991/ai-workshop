@@ -27,10 +27,14 @@ The full spec is in [docs/design-system/graphics.md](../design-system/graphics.m
 - **Frames and corners:** graphics have no frame (the dashed box was a wireframe and is removed) and sit on the column grid. Shapes have square corners.
 - **Connectors:** horizontal, vertical or 45°, with solid arrowheads. Dashed means hypothetical.
 - **Leader lines:**
-  - They end in a square dot on the object and are cased in ground.
+  - They end in a square dot on the object. The line and the dot are both cased in ground, 2 pixels each side.
   - They always bend: 45° out of the anchor, then horizontal into the label.
   - On iso parts, the dot lands on the part's most visible plane.
   - Captions align per side.
+- **Rejected: figure numbering.**
+  - **What it was:** captions like "fig 1.a - Pin", lettered per slide by focus order then height, with 5-column slots to fit them.
+  - **Why:** too much textual noise, so it was reverted.
+  - **Dropped with it:** the definition of a slide (everything visible before the next set of graphics and text, the old "sub-section"). Re-add it to the docs on its own if needed.
 
 **Labels, focus and steps**
 - **Labels:** never on hatching. Hover can reveal labels, but never focus.
@@ -71,10 +75,17 @@ The full spec is in [docs/design-system/graphics.md](../design-system/graphics.m
   - caption columns
   - no console errors
 
-  You haven't reviewed the latest leader and caption changes full-screen.
+  You've looked at the leader dots, their casing and the caption alignment on the page.
 - **Scene size:** scenes are a fixed 520 units wide, about 4 columns on the MacBook. They're centred in their slot, never scaled, and may crop on other widths.
 - **Labels move when needed:** the layout page re-measures the DOM every frame, so labels can move. A page that doesn't do that would need `lab:layout` events, which the engine fires when labels show or hide.
-- **`lab/presets/dark.json`:** has uncommitted changes from outside this session (ghost blur and persistence colours). They're left out of this commit.
+- **`lab/presets/dark.json`:** committed as it stood. The light and dark presets no longer matter, since colour now comes from the palettes.
+- **Commits:**
+  - `a9ebd53`: graphics, the engine and this handoff.
+  - `a9afe59`: leader-dot casing.
+  - `8dbf2cf`: the dark preset.
+  - This handoff update.
+
+  Everything is pushed to `origin/main`, and the tree is clean.
 
 ## Working preferences (from this session)
 - Grill one question at a time with a recommendation. Build a test page when the user wants to compare options.
