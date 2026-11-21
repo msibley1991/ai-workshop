@@ -86,7 +86,7 @@ From the genie test page ([`lab/genie.html`](../../lab/genie.html)). They're the
 
 | Setting | Value | Meaning |
 |---|---|---|
-| duration | 300 ms | one line's run |
+| duration | 200 ms | one line's run |
 | follow | −0.5 | each line starts 0.5 × duration after the previous one (−1 together, 0 one after another, 1 a pause of one duration) |
 | curve | ease | each row's slide |
 | slideStart | 0.67 | when, in a row's time, the slide begins |
@@ -99,8 +99,8 @@ From the genie test page ([`lab/genie.html`](../../lab/genie.html)). They're the
 | narrow graph | 0 until 0.16, then up to 1 at the end | how far the sides have pulled in over a line's run |
 | trailBoost | 0 | extra ghost decay while it runs |
 
-- **The whole run** is 300 × (1 + (lines − 1) × 0.5) ms. An 11-line block takes 1800 ms.
-- **The 300 ms per line is genie-specific.** It isn't one of the named durations.
+- **The whole run** is 200 × (1 + (lines − 1) × 0.5) ms. An 11-line block takes 1200 ms.
+- **The 200 ms per line is genie-specific.** It isn't one of the named durations.
 
 ## Built so far
 - **Built:** step tweens (ease, 400/800), blink, flow, the drag spring, and the genie (tuned on its test page, and **settled**: on the layout page too, with its sink squares, toggled by l while there are no text steps yet).

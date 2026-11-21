@@ -42,7 +42,7 @@ const DEFAULT_GRAPHS = {
 export const defaultGraph = (key) => structuredClone(DEFAULT_GRAPHS[key]);
 
 export const settings = {
-  duration: 300,     // ms per line
+  duration: 200,     // ms per line
   follow: -0.5,      // -1 all lines together .. 0 one after another .. 1 a duration's pause between
   curve: "ease",     // ease (in-out cubic) | out (decelerating), for each row's slide
   slideStart: 0.67,  // when, in a row's time, the slide down the funnel begins
