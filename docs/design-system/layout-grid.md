@@ -32,6 +32,10 @@ Status: **exploration**. Decided in the first design-system grilling session (20
 - Content boxes put their content on this grid. The tab flap ends at column 4 (inset + 4 columns).
 - The bottom bar's **Grid** toggle overlays the columns at 25% of the primary ink, across the whole canvas and over the panels.
 
+## Rows
+- An open tab's 800-unit content area ends in a **footer strip**: 32 for the section title and the sink, with a 16 gap above it.
+- **6 row fields of 112, with 16 gutters,** fill the remaining 752. Visuals snap to them, and text flows freely. The bottom of row 6 is the visuals' base line. The templates that use them are in [slide-templates.md](slide-templates.md).
+
 ## Panels on the grid
 - **Panels cover whole columns, at most 2 each.** The viewer controls cover columns 11–12. The planned left nav will cover columns 1–2.
 - **Box lines:** a panel's box runs from the start of its first column out to the frame margin. The content box's outline stops 8 before it, so content in the last open column sits 16 from the content box's line instead of 24. A panel's own contents sit 24 inside its line, so they're off the column lines.

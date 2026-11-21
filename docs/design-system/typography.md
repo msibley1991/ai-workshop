@@ -51,11 +51,14 @@ The rejected candidates stay in `lab/fonts/` for the specimen.
 | Display | 128/128 | 700 |
 | Headline | 64/64 | 700 |
 | Statement | 48/56 | 500 |
+| Statement, Text template | 64/72 | 500 |
+| Section title | 24/32 | 700 |
 | Body | 32/40 | 400 |
 | Label | 24/32 | 500 |
 | Bar text | 16/24 | 500 |
 | Code (JetBrains Mono) | 24/32 | 400 |
 
+- **Added 2026-11-21** (slide-templates session): the Text template, a slide with no visual, sets its statement at 64/72 across 8 columns, so it has presence at the same ~30-character line. Slides show **no Headline**. Instead, the section's name runs small in the footer strip as a **Section title** (24/32, weight 700), so the Headline role is unused on slides and kept for now. See [slide-templates.md](slide-templates.md).
 - **Three weights:** 700 (Display, Headline), 500 (Statement, Label, bar text) and 400 (Body, Code). 300 and 600 aren't used. 300 breaks up on the low-res raster and washes out on a projector, and dropping 600 gives each weight one job.
 - **Emphasis** in running text (the script's `*italic*`) steps up to 700, with no italic and no colour. It needs no extra files, holds up on the raster, and leaves colour to the palette session.
 - **Measure:** Statement and Body both run at most 6 columns, so they share one right edge.

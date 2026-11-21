@@ -1,4 +1,4 @@
-## 1. Recap of prev. / Intro to creative decisions
+## 1. On Creative Decisions
 - spoken: Now before we get very technical, I would like to speak a bit broadly about how we make creative decisions. Nora showed how the more specific instructions you give an LLM are, the more specific your results will be. 
   text: Specific Instructions = specific results.
   *visual: generic vs detailed prompt*
@@ -77,7 +77,7 @@
   *visual: needed*
 - *TODO: example link (new tab): graphics playground*
 
-## 8. Conclusion: Taste
+## 8. Conclusion
 - spoken: So, hopefully you have an idea of what is now possible. As you can imagine, we're in very uncharted territory, and there's a good chance everything *technical* we've gone through will be very different in a few months. I originally was going to spend 10 minutes talking about how to use Claude Code in the command line but frankly that isn't really necessary anymore. But what will *always* matter are your ideas, what you want to make and how you think it should function. Consider this: When Shakespeare was working, generously speaking, 40% of people could read and write in Europe. Now 99% of people can do both, and the general consensus is still that he was *The Best Writer*. My point is capability is not what matters. You could be the best technical illustrator in the world, and still make absolute dog shit. Your ability to create something meaningful is all that matters.
   
   Now if you want to see how this was really set up, I've provided this website's repo for download. Feel free to poke around.

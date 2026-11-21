@@ -67,7 +67,7 @@ All are sine waves unless noted. The size is the travel from rest to the peak, o
 
 ## Genie (text)
 - **The sink:** an **8 × 8 ink square** near the bottom-right corner of each panel that has genie text, one box inset (24) in from the right and bottom, so it sits on the grid's right edge. It stays for as long as that tab or intro screen is in use, because every slide's text in the panel comes and goes through it.
-- **Exit only for text:** text that a step removes funnels into the square. Stepping back reverses it: the text pours out of the square into place.
+- **Text's only enter and exit:** text that a step removes funnels into the square, and stepping back pours it out again. New text pours out of the square on a forward step too.
 - **Line by line:** the bottom line goes out first, so on the way back the top line comes in first. Each line starts halfway through the previous line's run.
 - **Funnel with full slit-scan:**
   - Within a line, every row runs at its own moment in time, with lower rows well ahead, so the text smears and stretches as it goes.
@@ -79,6 +79,7 @@ All are sine waves unless noted. The size is the travel from rest to the peak, o
   - **narrowing:** stays wide until about a sixth of the run, then pulls in gradually, reaching full only at the end.
 - **Slide:** a row holds in place while it bends, then slides down into the square from two thirds of its time, on ease.
 - **Trail:** no extra phosphor trail beyond the display layer's own ghosting.
+- **Text enters from the sink too:** a new sentence pours out of the square into its place, the reverse of the exit. The order of a slide change (text out, visuals, text in) is in [slide-templates.md](slide-templates.md).
 - Section changes keep the accordion as it is; the genie is for steps.
 
 ### Tuned values
