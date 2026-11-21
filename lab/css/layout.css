@@ -177,13 +177,18 @@
 /* An open tab also gets the intro's collapsed gap; its bottom outline needs room. */
 .site-tab-body .site-split { height: calc(var(--avail) + var(--row-gap) - var(--line)); }
 
+/* Graphic slot: no frame. Real graphics are sized and placed per slide on the
+   column grid; this slot is just where the test object mounts. */
 .site-graphic {
-  border: var(--line-dashed) dashed;
   min-width: 0;
   min-height: 0;
-  display: grid;
-  place-items: center;
-  font-size: var(--space-24);   /* label role */
+}
+
+/* Scene graphic labels (js/graphic.js): label role, placed by the engine. */
+.graphic-label {
+  position: absolute;
+  white-space: nowrap;
+  font-size: var(--space-24);
   line-height: var(--space-32);
   font-weight: 500;
 }

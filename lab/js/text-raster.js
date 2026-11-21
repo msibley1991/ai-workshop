@@ -2,6 +2,8 @@
 // measure() is expensive (one Range per word) and runs only when layout changes;
 // draw() runs every frame and only translates by the render scroll offset.
 
+import { mountGraphic, drawGraphic } from "./graphic.js";
+
 // Ink comes from the CSS custom property --ink (so states like :hover can set it),
 // else the nearest data-ink attribute, else phosphor.
 const inkOf = (el, style = getComputedStyle(el)) =>
@@ -155,6 +157,16 @@ export function measure(root, ctx) {
     };
   });
 
+  // [data-graphic]: a scene graphic (js/graphic.js, scenes in js/graphics/).
+  // CSS --u (px per layout unit) sizes it; it falls back to 1.
+  const graphics = [...root.querySelectorAll("[data-graphic]")]
+    .map((el) => {
+      mountGraphic(el);
+      const u = parseFloat(getComputedStyle(el).getPropertyValue("--u")) || 1;
+      return { ...toDoc(el.getBoundingClientRect()), el, u, clip: clipOf(el) };
+    })
+    .filter((g) => g.w > 0 && g.h > 0);
+
   const bullets = [...root.querySelectorAll("li")].map((li) => {
     const r = toDoc(li.getBoundingClientRect());
     const style = getComputedStyle(li);
@@ -190,7 +202,7 @@ export function measure(root, ctx) {
   }
 
   tintCache.clear();
-  return { words: words.concat(bullets), boxes, fills, paths, images, tabs };
+  return { words: words.concat(bullets), boxes, fills, paths, images, tabs, graphics };
 }
 
 // Tinted copies of data-draw images, keyed by source, size and color.
@@ -318,6 +330,11 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
   for (const im of layout.images) {
     if (!visible(im.y, im.h) || !im.el.complete || !im.el.naturalWidth) continue;
     clipped(ctx, im, () => ctx.drawImage(tinted(im.el, im.w, im.h, colors[im.ink]), im.x, im.y, im.w, im.h));
+  }
+
+  for (const g of layout.graphics) {
+    if (!visible(g.y, g.h)) continue;
+    clipped(ctx, g, () => drawGraphic(ctx, { ...g, x: snap(g.x), y: snap(g.y) }, ps, g.u, colors));
   }
 
   for (const p of layout.paths) {

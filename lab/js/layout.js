@@ -14,6 +14,7 @@ const QUIET_MS = 150;        // no wheel input this long = gesture over, snap
 const SNAP_MS = 250;
 const GOTO_MS = 500;
 import { viewer } from "./viewer.js";
+import { stepGraphics, setMotion } from "./graphic.js";
 
 // Motion off (viewer controls; it starts off when the OS asks for reduced motion)
 // makes the accordion and the controls panel jump instead of animating.
@@ -148,6 +149,16 @@ document.addEventListener("keydown", (e) => {
   e.preventDefault();
   const dir = e.key === " " && e.shiftKey ? -1 : KEYS[e.key];
   animateTo((anim ? anim.target : settled) + dir, GOTO_MS);
+});
+
+// ---- Graphic steps: ← and → move the graphics on screen between states --------
+setMotion(viewer.get().motion);
+viewer.subscribe((state) => setMotion(state.motion));
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+  if (e.altKey || e.ctrlKey || e.metaKey) return;
+  if (!site.contains(e.target) && e.target !== document.body) return; // leave the dial panel alone
+  if (stepGraphics(e.key === "ArrowRight" ? 1 : -1)) e.preventDefault();
 });
 
 // ---- Column-grid toggle (bottom bar) ------------------------------------------
