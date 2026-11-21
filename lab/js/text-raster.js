@@ -8,13 +8,42 @@ const inkOf = (el, style = getComputedStyle(el)) =>
   style.getPropertyValue("--ink").trim() || el.closest?.("[data-ink]")?.dataset.ink || "phosphor";
 const ascentCache = new Map();
 
+// Canvas only takes font-stretch as a keyword, so a computed percentage maps to
+// the nearest one. It rides in the font string (after the size-less part) and is
+// applied with ctx.fontStretch by setFont, since ctx.font alone ignores it in Chrome.
+const STRETCHES = [
+  [50, "ultra-condensed"], [62.5, "extra-condensed"], [75, "condensed"], [87.5, "semi-condensed"],
+  [100, "normal"], [112.5, "semi-expanded"], [125, "expanded"], [150, "extra-expanded"], [200, "ultra-expanded"],
+];
+function stretchOf(style) {
+  const pct = parseFloat(style.fontStretch);
+  if (Number.isNaN(pct)) return style.fontStretch || "normal";
+  return STRETCHES.reduce((a, b) => (Math.abs(b[0] - pct) < Math.abs(a[0] - pct) ? b : a))[1];
+}
+
 function fontOf(style) {
-  return `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+  return `${style.fontStyle} ${style.fontWeight} ${stretchOf(style)} ${style.fontSize} ${style.fontFamily}`;
+}
+
+// CSS text-transform, applied to the drawn string (the DOM text is untransformed).
+function transformOf(style) {
+  switch (style.textTransform) {
+    case "uppercase": return (t) => t.toUpperCase();
+    case "lowercase": return (t) => t.toLowerCase();
+    case "capitalize": return (t, first) => (first ? t.charAt(0).toUpperCase() + t.slice(1) : t);
+    default: return (t) => t;
+  }
+}
+
+// Sets ctx.font and ctx.fontStretch from a fontOf() string.
+function setFont(ctx, font) {
+  ctx.font = font;
+  if ("fontStretch" in ctx) ctx.fontStretch = font.match(/\b(?:(?:ultra|extra|semi)-)?(?:condensed|expanded)\b/)?.[0] ?? "normal";
 }
 
 function ascentOf(ctx, font) {
   if (!ascentCache.has(font)) {
-    ctx.font = font;
+    setFont(ctx, font);
     ascentCache.set(font, ctx.measureText("Hg").fontBoundingBoxAscent);
   }
   return ascentCache.get(font);
@@ -49,6 +78,8 @@ export function measure(root, ctx) {
     const ascent = ascentOf(ctx, font);
     const ink = inkOf(parent, style);
     const clip = clipOf(parent);
+    const tx = transformOf(style);
+    const spacing = style.letterSpacing === "normal" ? "0px" : style.letterSpacing;
     for (const m of node.data.matchAll(/\S+/g)) {
       range.setStart(node, m.index);
       range.setEnd(node, m.index + m[0].length);
@@ -56,7 +87,7 @@ export function measure(root, ctx) {
       if (!rects.length) continue;
       if (rects.length === 1) {
         const r = toDoc(rects[0]);
-        words.push({ text: m[0], x: r.x, baseline: r.y + ascent, font, ink, clip });
+        words.push({ text: tx(m[0], true), x: r.x, baseline: r.y + ascent, font, spacing, ink, clip });
         continue;
       }
       // Word wraps (e.g. at a hyphen): split it into one segment per line.
@@ -68,9 +99,9 @@ export function measure(root, ctx) {
         if (!rect) continue;
         const r = toDoc(rect);
         if (segment && Math.abs(segment.top - r.y) < 1) {
-          segment.text += m[0][i];
+          segment.text += tx(m[0][i], false);
         } else {
-          segment = { text: m[0][i], x: r.x, top: r.y, baseline: r.y + ascent, font, ink, clip };
+          segment = { text: tx(m[0][i], i === 0), x: r.x, top: r.y, baseline: r.y + ascent, font, spacing, ink, clip };
           words.push(segment);
         }
       }
@@ -301,7 +332,8 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
   ctx.textBaseline = "alphabetic";
   for (const w of layout.words) {
     if (!visible(w.baseline - 200, 400)) continue;
-    ctx.font = w.font;
+    setFont(ctx, w.font);
+    if ("letterSpacing" in ctx) ctx.letterSpacing = w.spacing ?? "0px";
     ctx.fillStyle = colors[w.ink];
     clipped(ctx, w, () => ctx.fillText(w.text, w.x, w.baseline));
   }

@@ -21,7 +21,12 @@
 
    Lines (--line, --line-dashed) are set by js/main.js in emulated pixels.
    Type is fixed here, so the panel's Type dials don't apply.
-   Eurostile is a local system font on this Mac; elsewhere falls back. */
+   Type is Chakra Petch (docs/design-system/typography.md), from the site's
+   self-hosted files in assets/fonts/. */
+@font-face { font-family: "Chakra Petch"; src: url("../../assets/fonts/chakra-petch/ChakraPetch-Regular.ttf") format("truetype"); font-weight: 400; }
+@font-face { font-family: "Chakra Petch"; src: url("../../assets/fonts/chakra-petch/ChakraPetch-Medium.ttf") format("truetype"); font-weight: 500; }
+@font-face { font-family: "Chakra Petch"; src: url("../../assets/fonts/chakra-petch/ChakraPetch-Bold.ttf") format("truetype"); font-weight: 700; }
+@font-face { font-family: "JetBrains Mono"; src: url("../../assets/fonts/jetbrains-mono/JetBrainsMono-wght.ttf") format("truetype"); font-weight: 100 800; }
 
 /* Registered so they resolve to px: the raster and main.js read them. */
 @property --u { syntax: "<length>"; inherits: true; initial-value: 1px; }
@@ -70,7 +75,7 @@
   /* Height an open panel gets: canvas minus top/bottom margin, bars, tab headers and the 4 gaps between 5 rows (840 units). */
   --avail: calc(var(--canvas-h) - 2 * var(--frame-margin) - 2 * var(--bar-height) - 2 * var(--tab-height) - 4 * var(--row-gap));
 
-  --site-font: "Eurostile", sans-serif;
+  --site-font: "Chakra Petch", sans-serif;
 }
 
 #content.site {
@@ -128,9 +133,9 @@
   display: flex;
   align-items: center;
   padding: 0 var(--box-inset);
-  font-size: var(--space-24);
+  font-size: var(--space-24);   /* label role */
   line-height: 1;
-  font-weight: 700;
+  font-weight: 500;
 }
 .site-tab-label:focus-visible { outline: none; }
 .site-tab-body {
@@ -168,8 +173,9 @@
   min-height: 0;
   display: grid;
   place-items: center;
-  font-size: var(--space-32);
-  font-weight: 700;
+  font-size: var(--space-24);   /* label role */
+  line-height: var(--space-32);
+  font-weight: 500;
 }
 
 .site-hero-text,
@@ -182,17 +188,20 @@
   justify-content: center;
 }
 
-/* Type: fixed sizes for now (the type session decides them); line-heights on the 8 grid. */
+/* Type: the roles from docs/design-system/typography.md (display, headline,
+   statement, body); line-heights on the 8 grid. */
 .site h1 {
   margin: 0;
   font-size: var(--space-128);
   line-height: var(--space-128);
   font-weight: 700;
 }
-.site .site-hero-sub {
+.site .site-hero-sub {             /* statement role */
   margin: var(--gap-related) 0 0;
-  font-size: var(--space-64);
-  line-height: calc(72 * var(--u));
+  max-width: var(--span-6);
+  font-size: var(--space-48);
+  line-height: calc(56 * var(--u));
+  font-weight: 500;
 }
 
 .site-section-text { gap: var(--gap-related); }
@@ -207,10 +216,12 @@
   flex-direction: column;
   gap: var(--gap-group);
 }
-.site .site-subheadline {
+.site .site-subheadline {          /* statement role */
   margin: 0;
-  font-size: var(--space-64);
-  line-height: var(--space-64);
+  max-width: var(--span-6);
+  font-size: var(--space-48);
+  line-height: calc(56 * var(--u));
+  font-weight: 500;
 }
 .site .site-body {
   margin: 0;

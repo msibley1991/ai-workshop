@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Type hierarchy — how (did you [make] this?)</title>
+  <link rel="stylesheet" href="vendor/dialkit/styles.css">
+  <link rel="stylesheet" href="css/text-layer.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/type.css">
+  <link rel="stylesheet" href="css/hierarchy.css">
+  <script type="importmap">
+    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js" } }
+  </script>
+  <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/hierarchy.js"></script>
+</head>
+<!-- Type hierarchy test: the six roles (display, headline, statement, body,
+     label, code) in Chakra Petch on the layout page's canvas. The "Type scale"
+     dial panel (js/hierarchy.js) sets each role's size, line-height and weight;
+     sizes are limited to the spacing scale. Two views: intro and open section. -->
+<body data-preset="light" data-panel-id="effects-lab-hierarchy" data-canvas data-type="chakra" data-view="section">
+  <canvas id="screen" aria-hidden="true"></canvas>
+
+  <main id="content" class="site">
+    <header class="site-bar site-bar-top type-bar-top" data-box>
+      <span class="h-title">how (did you [make] this?)</span>
+    </header>
+
+    <section class="site-intro site-panel" data-clip>
+      <div class="site-split site-grid">
+        <div class="site-graphic" data-box><span class="r-label">Graphic</span></div>
+        <div class="h-hero">
+          <h1 class="r-display">how (did you [make] this?)</h1>
+          <p class="r-statement">LLM-assisted coding in design</p>
+        </div>
+      </div>
+    </section>
+
+    <article class="site-tab site-panel h-open" data-tab>
+      <a class="site-tab-label r-label" href="#section"><span>Foundations</span></a>
+      <div class="site-tab-body" data-clip>
+        <div class="site-split site-grid">
+          <div class="h-graphic" data-box>
+            <div class="h-node" data-box><span class="r-label">generic prompt</span></div>
+            <div class="h-node" data-box><span class="r-label">detailed prompt</span></div>
+            <div class="h-node h-node-accent" data-box data-ink="accent"><span class="r-label">creative decisions</span></div>
+            <p class="r-label h-caption"><span class="h-fig">Fig 1.</span> Specific instructions are creative decisions</p>
+          </div>
+          <div class="h-text">
+            <h2 class="r-headline">Recap and creative decisions</h2>
+            <p class="r-statement">Specific instructions = <em>creative decisions</em>.</p>
+            <p class="r-body">Design school teaches you how to <em>communicate</em> and <em>apply</em> creative decisions. Because of this, we are better equipped than most to make what we want with or without AI.</p>
+            <p class="r-body">AI defaults to the average. Only you can determine what feels correct.</p>
+<pre class="r-code"># CLAUDE.md
+Purpose: workshop site
+- css/style.css: all styles
+- docs/: context docs</pre>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="site-tab site-panel" data-tab>
+      <a class="site-tab-label r-label" href="#section"><span>Advanced Topics</span></a>
+      <div class="site-tab-body" data-clip></div>
+    </article>
+
+    <footer class="site-bar site-bar-bottom type-bar-bottom" data-box>
+      <button class="type-pick" type="button" data-view-pick="intro" data-fill><span>Intro</span></button>
+      <button class="type-pick" type="button" data-view-pick="section" data-fill><span>Section</span></button>
+      <span class="h-spec"></span>
+      <button class="type-pick type-grid-toggle" type="button" aria-pressed="false" data-fill><span>Grid: off</span></button>
+    </footer>
+
+    <div class="site-grid-overlay site-grid" aria-hidden="true" hidden>
+      <div data-fill></div><div data-fill></div><div data-fill></div><div data-fill></div>
+      <div data-fill></div><div data-fill></div><div data-fill></div><div data-fill></div>
+      <div data-fill></div><div data-fill></div><div data-fill></div><div data-fill></div>
+    </div>
+  </main>
+</body>
+</html>

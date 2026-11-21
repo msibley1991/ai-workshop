@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Type specimen — how (did you [make] this?)</title>
+  <link rel="stylesheet" href="vendor/dialkit/styles.css">
+  <link rel="stylesheet" href="css/text-layer.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/type.css">
+  <script type="importmap">
+    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js" } }
+  </script>
+  <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/type.js"></script>
+</head>
+<!-- Typeface specimen for the typography grilling session. Same canvas, units,
+     grid and preset as layout.html. data-type picks the candidate (css/type.css);
+     js/type.js switches it with keys 1-5, the bottom-bar buttons and the URL hash.
+     Sizes are the layout page's placeholders, not a decided scale. -->
+<body data-preset="light" data-panel-id="effects-lab-type" data-canvas data-type="saira-wide">
+  <canvas id="screen" aria-hidden="true"></canvas>
+
+  <main id="content" class="site">
+    <header class="site-bar site-bar-top type-bar-top" data-box>
+      <span>Type specimen</span>
+      <span class="type-current">Saira, extended display</span>
+    </header>
+
+    <section class="type-panel" data-box>
+      <div class="type-specimen site-grid">
+        <div class="type-hero">
+          <h1 class="type-h1">how (did you [make] this?)</h1>
+          <p class="type-sub">LLM-assisted coding in design</p>
+        </div>
+
+        <div class="type-section">
+          <h2 class="type-headline">Foundations</h2>
+          <p class="type-subheadline">Sub-Headline</p>
+          <p class="type-body">A prompt is a request. Code is a specification. The model is non-deterministic, but what it writes can be read, edited and run the same way every time. Projected output loses contrast and fine detail, so type has to survive the low-res raster and the wash-out.</p>
+        </div>
+
+        <div class="type-weights">
+          <p class="type-label">Weights (text face)</p>
+          <p style="--wt: 300">300 Light Hamburgefonstiv</p>
+          <p style="--wt: 400">400 Regular Hamburgefonstiv</p>
+          <p style="--wt: 500">500 Medium Hamburgefonstiv</p>
+          <p style="--wt: 600">600 SemiBold Hamburgefonstiv</p>
+          <p style="--wt: 700">700 Bold Hamburgefonstiv</p>
+          <p style="--wt: 800">800 ExtraBold Hamburgefonstiv</p>
+        </div>
+
+        <div class="type-widths">
+          <p class="type-label">Widths (display face)</p>
+          <p style="--st: 100%">100 Display</p>
+          <p style="--st: 112.5%">112.5 Display</p>
+          <p style="--st: 125%">125 Display</p>
+          <p class="type-figures">0123456789 [ ] ( ) ? → %</p>
+        </div>
+
+        <div class="type-code">
+          <p class="type-label">Code (JetBrains Mono)</p>
+<pre>// lab/js/text-raster.js
+const s = stretchOf(style);
+ctx.fontStretch = s;
+await document.fonts.ready;
+if (il1 === O0) return {};</pre>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-bar site-bar-bottom type-bar-bottom" data-box>
+      <button class="type-pick" type="button" data-pick="saira-wide" data-fill><span>1 Saira wide</span></button>
+      <button class="type-pick" type="button" data-pick="saira" data-fill><span>2 Saira</span></button>
+      <button class="type-pick" type="button" data-pick="michroma-oxanium" data-fill><span>3 Michroma + Oxanium</span></button>
+      <button class="type-pick" type="button" data-pick="chakra" data-fill><span>4 Chakra Petch</span></button>
+      <button class="type-pick" type="button" data-pick="michroma-chakra" data-fill><span>5 Michroma + Chakra</span></button>
+      <button class="type-pick type-grid-toggle" type="button" aria-pressed="false" data-fill><span>Grid: off</span></button>
+    </footer>
+
+    <!-- Column-grid overlay, as on layout.html. -->
+    <div class="site-grid-overlay site-grid" aria-hidden="true" hidden>
+      <div data-fill></div><div data-fill></div><div data-fill></div><div data-fill></div>
+      <div data-fill></div><div data-fill></div><div data-fill></div><div data-fill></div>
+      <div data-fill></div><div data-fill></div><div data-fill></div><div data-fill></div>
+    </div>
+  </main>
+</body>
+</html>

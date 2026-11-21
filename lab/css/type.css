@@ -1,0 +1,155 @@
+/* Type specimen (type.html). Builds on layout.css: same canvas, units and grid.
+   Rejected candidate faces are local OFL files in ../fonts/; Chakra Petch (chosen)
+   and JetBrains Mono come from ../../assets/fonts/ via layout.css. Only Chakra
+   Petch 400/500/700 ship, so the weight ladder's 300/600/800 rows fall back.
+   body[data-type] picks a candidate by setting the face variables below. */
+
+@font-face {
+  font-family: "Saira";
+  src: url("../fonts/saira/Saira-wdth-wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-stretch: 50% 125%;
+}
+@font-face {
+  font-family: "Michroma";
+  src: url("../fonts/michroma/Michroma-Regular.ttf") format("truetype");
+  font-weight: 400;
+}
+@font-face {
+  font-family: "Oxanium";
+  src: url("../fonts/oxanium/Oxanium-wght.ttf") format("truetype");
+  font-weight: 200 800;
+}
+
+/* Candidates. Display = h1, headline, widths ladder; text = everything else. */
+:root {
+  --display-font: "Saira", sans-serif;
+  --display-stretch: 125%;
+  --display-weight: 700;
+  --text-font: "Saira", sans-serif;
+  --code-font: "JetBrains Mono", monospace;
+}
+body[data-type="saira"] { --display-stretch: 100%; }
+body[data-type="michroma-oxanium"] {
+  --display-font: "Michroma", sans-serif;
+  --display-stretch: 100%;
+  --display-weight: 400; /* Michroma has one weight; 700 would be faux bold */
+  --text-font: "Oxanium", sans-serif;
+}
+body[data-type="michroma-chakra"] {
+  --display-font: "Michroma", sans-serif;
+  --display-stretch: 100%;
+  --display-weight: 400;
+  --text-font: "Chakra Petch", sans-serif;
+}
+body[data-type="chakra"] {
+  --display-font: "Chakra Petch", sans-serif;
+  --display-stretch: 100%;
+  --text-font: "Chakra Petch", sans-serif;
+}
+
+#content.site { font-family: var(--text-font); }
+.site-bar { font-weight: 500; }
+
+.type-bar-top { justify-content: space-between; }
+.type-bar-bottom {
+  gap: var(--space-8);
+  padding: 0 calc(var(--box-inset) - var(--space-8));
+}
+.type-grid-toggle { margin-left: auto; }
+
+/* Buttons: same treatment as the layout page's grid toggle; the picked one stays inverted. */
+.type-pick {
+  --fill-alpha: 0;
+  align-self: stretch;
+  margin: 0;
+  padding: 0 var(--space-8);
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.type-pick:focus-visible { outline: none; }
+.type-pick:is(:hover, :focus-visible, [aria-pressed="true"]) { --fill-alpha: 1; }
+.type-pick:is(:hover, :focus-visible, [aria-pressed="true"]) span { --ink: ground; }
+
+/* The one panel between the bars. */
+.type-panel {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  border: var(--line) solid;
+  border-radius: var(--radius);
+}
+.type-specimen {
+  height: 100%;
+  padding-block: var(--box-inset);
+  grid-template-rows: minmax(0, 1fr) auto;
+  row-gap: var(--gap-section);
+}
+.type-specimen > * { min-width: 0; min-height: 0; overflow: hidden; }
+.type-specimen p, .type-specimen h1, .type-specimen h2, .type-specimen pre { margin: 0; }
+
+.type-hero { grid-column: 1 / 8; }
+.type-section { grid-column: 8 / -1; display: flex; flex-direction: column; }
+.type-weights { grid-column: 1 / 5; }
+.type-widths { grid-column: 5 / 9; }
+.type-code { grid-column: 9 / -1; }
+
+/* Placeholder sizes from layout.css (units, line-heights on the 8 grid). */
+.site .type-h1 {
+  font-family: var(--display-font);
+  font-stretch: var(--display-stretch);
+  font-weight: var(--display-weight);
+  font-size: var(--space-128);
+  line-height: var(--space-128);
+}
+.site .type-sub {
+  margin-top: var(--gap-related);
+  font-size: var(--space-64);
+  line-height: calc(72 * var(--u));
+}
+.site .type-headline {
+  font-family: var(--display-font);
+  font-stretch: var(--display-stretch);
+  font-weight: var(--display-weight);
+  font-size: var(--space-64);
+  line-height: var(--space-64);
+}
+.site .type-subheadline {
+  margin-top: var(--gap-related);
+  font-size: var(--space-64);
+  line-height: var(--space-64);
+}
+.site .type-body {
+  margin-top: var(--gap-group);
+  font-size: var(--space-32);
+  line-height: calc(40 * var(--u));
+}
+
+.site .type-label {
+  margin-bottom: var(--gap-tight);
+  font-size: var(--space-16);
+  line-height: var(--space-24);
+  font-weight: 500;
+}
+.type-weights p:not(.type-label) {
+  font-weight: var(--wt);
+  font-size: var(--space-24);
+  line-height: var(--space-32);
+}
+.type-widths p:not(.type-label) {
+  font-family: var(--display-font);
+  font-weight: var(--display-weight);
+  font-stretch: var(--st, var(--display-stretch));
+  font-size: var(--space-32);
+  line-height: calc(40 * var(--u));
+  white-space: nowrap;
+}
+.site .type-code pre {
+  font-family: var(--code-font);
+  font-size: var(--space-24);
+  line-height: var(--space-32);
+  font-weight: 400;
+}

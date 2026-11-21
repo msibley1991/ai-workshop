@@ -1,7 +1,49 @@
+/* Fonts: self-hosted OFL files (from github.com/google/fonts). See docs/design-system/typography.md. */
+@font-face { font-family: "Chakra Petch"; src: url("../assets/fonts/chakra-petch/ChakraPetch-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Chakra Petch"; src: url("../assets/fonts/chakra-petch/ChakraPetch-Medium.ttf") format("truetype"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Chakra Petch"; src: url("../assets/fonts/chakra-petch/ChakraPetch-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "JetBrains Mono"; src: url("../assets/fonts/jetbrains-mono/JetBrainsMono-wght.ttf") format("truetype"); font-weight: 100 800; font-display: swap; }
+
 /* Design tokens: all colors, fonts, spacing values live here. */
 :root {
+  /* Canvas unit: screen px per unit on the 1080-tall canvas (docs/design-system/layout-grid.md). */
+  --u: min(100dvh / 1080, 100vw / 1440);
+
+  /* Spacing scale (units). */
+  --space-4: calc(4 * var(--u));
+  --space-8: calc(8 * var(--u));
+  --space-16: calc(16 * var(--u));
+  --space-24: calc(24 * var(--u));
+  --space-32: calc(32 * var(--u));
+  --space-48: calc(48 * var(--u));
+  --space-64: calc(64 * var(--u));
+  --space-96: calc(96 * var(--u));
+  --space-128: calc(128 * var(--u));
+
+  /* Content gaps by relationship. */
+  --gap-tight: var(--space-8);     /* label and value, lines in a list */
+  --gap-related: var(--space-16);  /* headline -> statement, body -> body, figure -> caption */
+  --gap-group: var(--space-32);    /* statement -> body, text -> code or figure */
+  --gap-section: var(--space-64);  /* between beats or major blocks */
+
+  /* Type (docs/design-system/typography.md). Sentence case everywhere; emphasis is weight 700. */
+  --font-sans: "Chakra Petch", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-bold: 700;
+  --measure: 6; /* Statement and Body run at most 6 columns */
+
+  --type-display-size: var(--space-128);  --type-display-lh: var(--space-128);  --type-display-weight: var(--weight-bold);
+  --type-headline-size: var(--space-64);  --type-headline-lh: var(--space-64);  --type-headline-weight: var(--weight-bold);
+  --type-statement-size: var(--space-48); --type-statement-lh: calc(56 * var(--u)); --type-statement-weight: var(--weight-medium);
+  --type-body-size: var(--space-32);      --type-body-lh: calc(40 * var(--u));   --type-body-weight: var(--weight-regular);
+  --type-label-size: var(--space-24);     --type-label-lh: var(--space-32);     --type-label-weight: var(--weight-medium);
+  --type-bar-size: var(--space-16);       --type-bar-lh: var(--space-24);       --type-bar-weight: var(--weight-medium);
+  --type-code-size: var(--space-24);      --type-code-lh: var(--space-32);      --type-code-weight: var(--weight-regular);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-body { margin: 0; }
+body { margin: 0; font-family: var(--font-sans); }
 img, video, canvas, svg { display: block; max-width: 100%; }
+em { font-style: normal; font-weight: var(--weight-bold); }

@@ -33,7 +33,7 @@ Status: **exploration**. Decided in the first design-system grilling session (20
 - The bottom bar's **Grid** toggle overlays the columns at 25% of the primary ink.
 
 ## Type and lines
-- **Line-heights:** multiples of 8 (4 allowed for small text). No strict baseline grid. Type sizes wait for the type session.
+- **Line-heights:** multiples of 8 (4 allowed for small text). No strict baseline grid. Type sizes are in [typography.md](typography.md).
 - **Emulated pixel:** measured in units and limited to 1, 2, 4 or 8, then rounded to whole device pixels so scanlines and pixel rows stay even. Spacing can be off by one emulated pixel on screens where a unit isn't a whole number of device pixels.
 - **Lines:** counted in emulated pixels, outline 2 and dashed 1.
 - **Radius:** 8 units.
