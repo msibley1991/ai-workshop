@@ -28,9 +28,16 @@ Status: **exploration**. Decided in the first design-system grilling session (20
 - **Rows:** bars 32, tab headers 64, gaps 8. The open intro gets 1080 − 16 − 64 − 128 − 32 = 840. When a tab is open, the closed intro's gap collapses, so the first tab sits 8 under the top bar and an open tab body gets 848.
 
 ## Columns
-- The grid lives **inside each box**: box edge → 24 inset → 12 columns with 24 gutters.
-- The tab flap ends at column 4 (inset + 4 columns).
-- The bottom bar's **Grid** toggle overlays the columns at 25% of the primary ink.
+- **One grid for the whole canvas:** frame margin 8 → box inset 24 → 12 columns with 24 gutters. It's computed from the canvas width and never recalculated. About 112 units per column on the MacBook, 133 on the projector.
+- Content boxes put their content on this grid. The tab flap ends at column 4 (inset + 4 columns).
+- The bottom bar's **Grid** toggle overlays the columns at 25% of the primary ink, across the whole canvas and over the panels.
+
+## Panels on the grid
+- **Panels cover whole columns, at most 2 each.** The viewer controls cover columns 11–12. The planned left nav will cover columns 1–2.
+- **Box lines:** a panel's box runs from the start of its first column out to the frame margin. The content box's outline stops 8 before it, so content in the last open column sits 16 from the content box's line instead of 24. A panel's own contents sit 24 inside its line, so they're off the column lines.
+- **Reflow, not recalculation:** the content keeps its columns and moves off the covered ones. Text reflows first, down to a minimum of 4 columns. Only then do graphics give up columns (see [graphics.md](graphics.md)).
+  - With one panel open, 10 columns are left. With both open, 8 are left, which still fits a 4-column graphic and 4 columns of text.
+- **Order in motion:** opening reflows the content first, then the panel slides in. Closing slides the panel out, then the content reflows back.
 
 ## Type and lines
 - **Line-heights:** multiples of 8 (4 allowed for small text). No strict baseline grid. Type sizes are in [typography.md](typography.md).

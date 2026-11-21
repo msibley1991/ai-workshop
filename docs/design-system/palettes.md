@@ -21,11 +21,9 @@ A palette changes **colours only**: the ground, the ink (the "phosphor" dial), t
 
 ## Viewer controls
 - **Opening:** the bottom bar's right end reads "Press [c] for controls". Pressing [c] or clicking it opens the panel. [c] or Esc closes it.
-- **Panel:** 384 units wide and a fixed width on every screen. It sits between the top and bottom bars at the right frame margin.
-- **It pushes the page.** The panels narrow by 384 + 8, and their 12-column grid is recalculated inside the remaining width. The bars stay full width.
-  - On a 1920-wide projector the panels go from 1904 to 1512.
-  - On the MacBook they go from about 1655 to 1263.
-  - It slides over 250 ms, or snaps when motion is off.
+- **Panel:** covers grid columns 11–12, between the top and bottom bars. Its box runs from the start of column 11 to the right frame margin, so its width follows the columns: about 272 units on the MacBook and 314 on the projector. The rules are in [layout-grid.md](layout-grid.md) under "Panels on the grid".
+- **The content reflows around it.** The content box's outline stops 8 before the panel, and the text moves off columns 11–12. The grid isn't recalculated. The bars stay full width.
+  - It slides over 250 ms, or snaps when motion is off. The content reflows before it slides in and after it slides out.
 - **Controls:**
   1. **Palette:** Ink · Blueprint · Plasma · Vector.
   2. **Motion: on/off.** Off removes ghost trails, jitter, warp and flicker, and the tab accordion and the panel jump instead of animating. It starts off when the device asks for reduced motion (`prefers-reduced-motion`).

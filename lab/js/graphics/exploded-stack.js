@@ -4,7 +4,8 @@
 // offset at explode = 1.
 export default {
   kind: "iso",
-  size: [520, 640],   // units
+  size: [520, 640],   // design units; fitted to the span
+  span: [3, 4],       // columns (graphic + captions)
   origin: [260, 360], // world origin in the scene box
   scale: 96,          // units per world unit
   parts: [

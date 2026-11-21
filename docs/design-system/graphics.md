@@ -65,6 +65,12 @@ All in emulated pixels:
 ## Size, placement and shapes
 - **No frame.** A graphic has no box around it. The dashed graphic box in the layout test was only a wireframe element, and it's gone.
 - **Size and placement:** each graphic is sized and placed per slide to suit the content, always on the column grid.
+- **The sizing unit is the graphic plus its captions.** Together they span whole columns, from a column's start edge to a column's end edge. Graphics are drawn with code so that the captions reach that edge:
+  - On each side, the longest caption's outer edge lands on the span's edge. Left captions all start on the span's left edge, and the drawing is fitted to the longest one.
+  - The drawing fills the rest of the span, scaled to fit between the caption lines. Line weights and the hatch spacing stay fixed (see Lines), so only the geometry scales.
+  - **A graphic with no captions** spans whole columns itself: its drawing runs edge to edge.
+- **Variable span:** each graphic declares a range in columns (for example, 3–4). It can be as wide as all 12 columns, with the text above or below it.
+- **Panels open:** when a panel (controls, nav) covers columns, the text reflows first. The graphic keeps its widest span until the text would go under 4 columns. Only then does the graphic drop to fewer columns, down to its minimum. The grid and panel rules are in [layout-grid.md](layout-grid.md).
 - **Square corners** on flat graphic shapes. The 8 radius belongs to the interface chrome, which keeps UI and content distinct. Rounding can still carry a meaning, such as a process, when a graphic calls for it.
 
 ## Connectors and leader lines
@@ -78,7 +84,7 @@ All in emulated pixels:
   - Near-ties go to the face on the label's side.
   - The dot sits well inside the visible area, toward the label.
   - It's chosen again as the object turns.
-- **Captions align per side.** All captions on one side of a graphic share one vertical line: left captions right-aligned to it, right captions left-aligned.
+- **Captions align per side,** on their left edges. Left captions all start on the span's left edge, and each leader ends 8 short of its own caption. Right captions all start just past one shared caption line, where their leaders end.
 - **Leader lines always bend,** in flat graphics too. They run 45° out of the anchor, then horizontally into the label. So a label always sits above or below its anchor, never on its row.
 - **Casing:** a leader line that enters a graphic gets a ground-coloured outline (proposed: 2 px each side, to test), so it separates from the object and its hatching.
 - **Dashed means hypothetical:** a removed part, an assembly path, where a part travels. Never decoration.

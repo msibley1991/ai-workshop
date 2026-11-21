@@ -10,9 +10,13 @@
 //     ease-in-out); rapid presses skip to the end; motion off cuts
 //   - iso objects drag to rotate and spring back; not during a transition
 //
-// Scene coordinates are layout units. A scene's `size` [w, h] is centred in its
-// element and never scaled (weights are fixed). Iso scenes put the world origin
-// at `origin` (units, in the scene box) and draw `scale` units per world unit.
+// Scene coordinates are design units in a `size` [w, h] box. The element is the
+// graphic's column span (graphic + captions), set by the page. The geometry is
+// scaled so the longest caption on each side ends on the element's edge, and a
+// side without captions puts the drawing's edge there (`fit`). Line weights and
+// hatching never scale. `span: [min, max]` is the scene's range in columns
+// (`graphicSpan`). Iso scenes put the world origin at `origin` (design units)
+// and draw `scale` design units per world unit.
 import {
   ISO_STYLE, ISO_YAW, ISO_PITCH, Raster, Spin, hatchInk, stepTone, rotator, boxFaces, lightVector, fillFace, rgb,
 } from "./shade.js";
@@ -28,12 +32,16 @@ const DASH = [6, 4];              // on, off (pixel steps)
 const PACKET = [12, 4];           // flow packet length, width
 const PACKET_SPEED = 48;          // emulated px per second
 const BLINK_MS = 500;             // focus blink half-period
+const CAPTION_GAP = 8;            // leader end -> caption text (units)
 
 let motion = !matchMedia("(prefers-reduced-motion: reduce)").matches;
 export function setMotion(on) { motion = on; }
 
 const ease = (p) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
 const mounts = new Map(); // el -> mount
+
+// A scene's span range in columns, for the page's reflow; null if none mounts here.
+export function graphicSpan(el) { return SCENES[el?.dataset.graphic]?.span ?? null; }
 
 // ---------- mounting ----------
 
@@ -172,10 +180,10 @@ function syncLabels(m) {
   if (changed) window.dispatchEvent(new Event("lab:layout"));
 }
 
-// Captions on the same side share one vertical alignment line: the outermost
+// Caption lines in design units, one per side: the outermost
 // `at` x of all that side's labels (shown or not, so nothing jumps between
-// states), unless scene.labelColumns sets it. Returns a label's leader end.
-function labelPoint(scene, l) {
+// states), unless scene.labelColumns sets it.
+function captionLines(scene) {
   if (!scene._columns) {
     const xs = (side) => (scene.labels ?? []).filter((q) => (q.side ?? "right") === side).map((q) => q.at[0]);
     const left = xs("left"), right = xs("right");
@@ -184,18 +192,67 @@ function labelPoint(scene, l) {
       right: scene.labelColumns?.right ?? (right.length ? Math.max(...right) : 0),
     };
   }
-  return [scene._columns[l.side === "left" ? "left" : "right"], l.at[1]];
+  return scene._columns;
 }
+// Where a label's leader ends, in buffer px. Right captions: on the shared
+// caption line. Left captions are left-aligned on the span's edge, so each
+// leader ends one gap short of its own caption.
+function leaderEnd(m, l, P, f) {
+  const p = P(...labelPoint(m.scene, l));
+  if (l.side === "left") {
+    // The shown label's own DOM width (canvas measureText runs a few units short).
+    const span = m.labels.get(l.id), w = span.offsetWidth ? span.getBoundingClientRect().width / m.geom.u : m.caps.width.get(l.id);
+    p[0] = (w + CAPTION_GAP) * f + LINE / 2; // the line stamp reaches LINE / 2 px left of its point
+  }
+  return p;
+}
+const labelPoint = (scene, l) => [captionLines(scene)[l.side === "left" ? "left" : "right"], l.at[1]];
 
 // Label boxes follow the element box; called from draw with the current offset.
-function placeLabels(m, ox, oy) {
+function placeLabels(m, ox, oy, s) {
   for (const l of m.scene.labels ?? []) {
     const span = m.labels.get(l.id), [lx, ly] = labelPoint(m.scene, l);
-    const x = ox + lx + (l.side === "left" ? -8 : 8), y = oy + ly - 16;
+    // Left captions start on the span's edge (x 0), so all their left edges align;
+    // right captions start just past the caption line.
+    const x = l.side === "left" ? 0 : ox + lx * s + CAPTION_GAP, y = oy + ly * s - 16;
     span.style.left = `calc(${x} * var(--u))`;
     span.style.top = `calc(${y} * var(--u))`;
-    span.style.transform = l.side === "left" ? "translateX(-100%)" : "";
   }
+}
+
+// ---------- fitting to the span ----------
+
+// Caption widths in units: the longest label per side, shown or not (so the
+// fit doesn't change between states). Measured with the labels' own font and
+// re-measured when fonts finish loading.
+const measure = document.createElement("canvas").getContext("2d");
+let fontEpoch = 0;
+document.fonts?.addEventListener("loadingdone", () => fontEpoch++);
+function captionWidths(m, u) {
+  if (m.caps && m.caps.epoch === fontEpoch && m.caps.u === u) return m.caps;
+  const caps = { epoch: fontEpoch, u, left: null, right: null, width: new Map() };
+  for (const l of m.scene.labels ?? []) {
+    const cs = getComputedStyle(m.labels.get(l.id));
+    measure.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    const side = l.side === "left" ? "left" : "right";
+    const w = measure.measureText(l.text).width / u;
+    caps.width.set(l.id, w);
+    caps[side] = Math.max(caps[side] ?? 0, w);
+  }
+  return (m.caps = caps);
+}
+
+// Scale s and offset (units, in the element) that map the design box onto the
+// element: caption lines sit a caption (plus gap) in from each edge; a side
+// without captions maps the design box's edge onto the element's edge.
+function fit(m, W, H, u) {
+  const scene = m.scene, caps = captionWidths(m, u);
+  const cols = captionLines(scene);
+  const dL = caps.left != null ? cols.left : 0, dR = caps.right != null ? cols.right : scene.size[0];
+  const aL = caps.left != null ? caps.left + CAPTION_GAP : 0;
+  const aR = W - (caps.right != null ? caps.right + CAPTION_GAP : 0);
+  const s = Math.max(0.05, (aR - aL) / (dR - dL));
+  return { s, ox: aL - dL * s, oy: (H - scene.size[1] * s) / 2 };
 }
 
 // ---------- drawing ----------
@@ -215,32 +272,31 @@ export function drawGraphic(ctx, item, ps, u, colors) {
     m.key = null;
   }
   const vals = currentValues(m, now), st = stateAt(m, m.index);
-  const [sw, sh] = m.scene.size;
-  const ox = (item.w / u - sw) / 2, oy = (item.h / u - sh) / 2; // scene box offset, units
+  const { s, ox, oy } = fit(m, item.w / u, item.h / u, u); // design units -> element units
   const f = u / ps; // buffer px per unit
-  m.geom = { ps, bw, bh, ox, oy, f };
-  placeLabels(m, ox, oy);
+  m.geom = { ps, bw, bh, ox, oy, f, s, u };
+  placeLabels(m, ox, oy, s);
 
   const blinkOn = !motion || st.loop !== "blink" || Math.floor(now / BLINK_MS) % 2 === 0;
   const flowing = motion && (st.flow?.length ?? 0) > 0;
-  const key = [bw, bh, ox, oy, f, m.index, vals.explode, m.spin.yaw, m.spin.pitch, m.hover, blinkOn,
+  const key = [bw, bh, ox, oy, f, s, m.index, vals.explode, m.spin.yaw, m.spin.pitch, m.hover, blinkOn,
     flowing ? Math.floor(now / 16) : 0, colors.phosphor, colors.accent, colors.ground].join("|");
   if (key !== m.key) {
     m.key = key;
-    paint(m, vals, st, { f, ox, oy, now, blinkOn, flowing });
+    paint(m, vals, st, { f, s, ox, oy, now, blinkOn, flowing });
     compose(m, rgb(colors.phosphor), rgb(colors.accent), rgb(colors.ground));
   }
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(m.canvas, item.x, item.y, bw * ps, bh * ps);
 }
 
-function paint(m, vals, st, { f, ox, oy, now, blinkOn, flowing }) {
+function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn, flowing }) {
   const r = m.raster, scene = m.scene;
   r.clear();
   m.owners = []; m.accent = [];
   const focus = blinkOn ? st.focus ?? null : null;
   const own = (id, part) => { m.owners[id] = { part }; m.accent[id] = focus != null && part === focus; return id; };
-  const P = (x, y) => [(ox + x) * f, (oy + y) * f]; // scene units -> buffer px
+  const P = (x, y) => [(ox + x * scale) * f, (oy + y * scale) * f]; // design units -> buffer px
   const show = st.show ? new Set(st.show) : null;
   const visible = (id) => !show || show.has(id);
 
@@ -250,7 +306,7 @@ function paint(m, vals, st, { f, ox, oy, now, blinkOn, flowing }) {
   const anchors = new Map(); // label id -> buffer point, for automatic iso anchors
 
   if (scene.kind === "iso") {
-    const k = scene.scale * f;
+    const k = scene.scale * scale * f;
     const R = rotator(ISO_YAW + m.spin.yaw, ISO_PITCH + m.spin.pitch), L = lightVector(ISO_STYLE);
     const [cx, cy] = P(...scene.origin);
     const offsetOf = (part) => (part.explode ?? [0, 0, 0]).map((v) => v * vals.explode);
@@ -333,7 +389,7 @@ function paint(m, vals, st, { f, ox, oy, now, blinkOn, flowing }) {
   const on = shownLabels(m);
   for (const l of scene.labels ?? []) {
     if (!on.has(l.id) || !l.anchor) continue;
-    const a = anchors.get(l.id) ?? resolve(l.anchor), b = P(...labelPoint(scene, l)), pts = route(a, b, l.id);
+    const a = anchors.get(l.id) ?? resolve(l.anchor), b = leaderEnd(m, l, P, f), pts = route(a, b, l.id);
     for (let i = 0; i + 1 < pts.length; i++) r.line(pts[i], pts[i + 1], 0, LINE + 2 * CASING, { clear: true });
     // Squares of exactly n pixels (the fill includes pixels on both edges).
     const square = (half) => { const lo = -half, hi = half - 1e-3; return [[a[0] + lo, a[1] + lo], [a[0] + hi, a[1] + lo], [a[0] + hi, a[1] + hi], [a[0] + lo, a[1] + hi]]; };

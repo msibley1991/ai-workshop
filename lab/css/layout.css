@@ -14,10 +14,12 @@
    next opens. Panel content is laid out at the full open height (--avail) and
    clipped, so it never reflows mid-animation.
 
-   Grid: lives inside each box. Box edge -> --box-inset -> 12 columns with
-   --grid-gutter. --col is one column; span N with
-   calc(N * var(--col) + (N - 1) * var(--grid-gutter)), or lay children on
-   .site-grid and use grid-column. The tab flap ends at 4 columns.
+   Grid: one 12-column grid for the whole canvas, never recalculated: frame
+   margin -> --box-inset -> 12 columns with --grid-gutter. --col is one column;
+   span N with calc(N * var(--col) + (N - 1) * var(--grid-gutter)), or lay
+   children on .site-grid and use grid-column. The tab flap ends at 4 columns.
+   Panels cover whole columns (controls: 11-12) and js/layout.js reflows the
+   content off them.
 
    Lines (--line, --line-dashed) are set by js/main.js in emulated pixels.
    Type is fixed here, so the panel's Type dials don't apply.
@@ -68,15 +70,18 @@
   /* 12-column grid inside a box. */
   --grid-columns: 12;
   --grid-gutter: var(--space-24);
-  /* Viewer controls panel: --controls-open (0..1, set by js/layout.js) pushes
-     the panels left by the panel plus one row gap. Bars stay full width. */
-  --controls-w: calc(384 * var(--u));
-  --controls-open: 0;
-  --controls-push: calc((var(--controls-w) + var(--row-gap)) * var(--controls-open));
-  --box-w: calc(var(--canvas-w) - 2 * var(--frame-margin) - var(--controls-push)); /* a panel's width */
-  --col: calc((var(--box-w) - 2 * var(--box-inset) - (var(--grid-columns) - 1) * var(--grid-gutter)) / var(--grid-columns));
+  --col: calc((var(--canvas-w) - 2 * var(--frame-margin) - 2 * var(--box-inset) - (var(--grid-columns) - 1) * var(--grid-gutter)) / var(--grid-columns));
+  --span-2: calc(2 * var(--col) + var(--grid-gutter));
   --span-4: calc(4 * var(--col) + 3 * var(--grid-gutter));
   --span-6: calc(6 * var(--col) + 5 * var(--grid-gutter));
+  /* Viewer controls panel: covers columns 11-12, its box running from column
+     11's start to the frame margin. --controls-open (0..1, set by js/layout.js)
+     stops the content boxes one row gap short of it. Bars stay full width.
+     A left nav would cover columns 1-2 the same way (--nav-cols: 2). */
+  --controls-w: calc(var(--span-2) + var(--box-inset));
+  --controls-open: 0;
+  --controls-push: calc((var(--controls-w) + var(--row-gap)) * var(--controls-open));
+  --nav-cols: 0;
 
   /* Height an open panel gets: canvas minus top/bottom margin, bars, tab headers and the 4 gaps between 5 rows (840 units). */
   --avail: calc(var(--canvas-h) - 2 * var(--frame-margin) - 2 * var(--bar-height) - 2 * var(--tab-height) - 4 * var(--row-gap));
@@ -162,12 +167,13 @@
    themselves with grid-column. */
 .site-grid {
   display: grid;
-  grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+  grid-template-columns: repeat(var(--grid-columns), var(--col)); /* fixed: a narrower box clips, it doesn't recalculate */
   column-gap: var(--grid-gutter);
   padding-inline: var(--box-inset);
 }
 
-/* Graphic (columns 1-4) | text (5-12), at full open height whatever the panel's current size. */
+/* Graphic (columns 1-4) | text (5-12) by default; js/layout.js sets the spans from the
+   scene and the covered columns. At full open height whatever the panel's current size. */
 .site-split {
   height: var(--avail);
   padding-block: var(--box-inset);
@@ -263,12 +269,11 @@
 .site-grid-toggle:is(:hover, :focus-visible) { --fill-alpha: 1; }
 .site-grid-toggle:is(:hover, :focus-visible) span { --ink: ground; }
 
-/* Column-grid overlay: the box grid's columns over the full canvas, at 25% of the primary ink. */
+/* Column-grid overlay: the canvas grid's columns, over the panels too, at 25% of the primary ink. */
 .site-grid-overlay {
   position: absolute;
   inset: var(--frame-margin) 0;
   padding-inline: calc(var(--frame-margin) + var(--box-inset));
-  padding-right: calc(var(--frame-margin) + var(--box-inset) + var(--controls-push));
   pointer-events: none;
 }
 .site-grid-overlay[hidden] { display: none; }
@@ -329,9 +334,10 @@
   margin: 0 calc(-1 * var(--space-8));
 }
 .site-controls-heading { margin-bottom: var(--gap-tight); }
-/* A setting row: "Motion on / off"; only the chosen option is highlighted. */
-.site-controls-setting { display: flex; align-items: stretch; gap: var(--space-8); }
+/* A setting: its name on one line, "on / off" under it (the 2-column panel is
+   too narrow for one row on a 1440 canvas); only the chosen option is highlighted. */
+.site-controls-setting { display: flex; flex-wrap: wrap; align-items: stretch; column-gap: var(--space-8); }
 .site-controls-setting > span { padding-block: 0; }
-.site-controls-setting > span:first-child { min-width: calc(128 * var(--u)); }
+.site-controls-setting > span:first-child { flex-basis: 100%; }
 .site-controls-group .site-controls-setting .site-bar-button { margin: 0; align-self: auto; }
 .site-controls-hint { margin-top: auto; font-size: var(--space-16); line-height: var(--space-24); }

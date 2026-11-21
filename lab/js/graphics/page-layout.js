@@ -13,7 +13,8 @@ const shift = (shapes) => shapes.map((sh) => ({ ...sh, x: sh.x + DX }));
 
 export default {
   kind: "flat",
-  size: [520, 560],
+  size: [520, 560],   // design units; fitted to the span
+  span: [3, 4],       // columns (graphic + captions)
   shapes: shift([
     { id: "frame", part: "page", type: "rect", x: 0, y: 24, w: 352, h: 512, fill: "none", outline: "outer" },
     { id: "header", part: "header", type: "rect", x: 16, y: 40, w: 320, h: 56, fill: 2 },

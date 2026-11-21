@@ -14,7 +14,7 @@ const QUIET_MS = 150;        // no wheel input this long = gesture over, snap
 const SNAP_MS = 250;
 const GOTO_MS = 500;
 import { viewer } from "./viewer.js";
-import { stepGraphics, setMotion } from "./graphic.js";
+import { stepGraphics, setMotion, graphicSpan } from "./graphic.js";
 
 // Motion off (viewer controls; it starts off when the OS asks for reduced motion)
 // makes the accordion and the controls panel jump instead of animating.
@@ -177,11 +177,36 @@ gridToggle.addEventListener("click", () => showGrid(gridOverlay.hidden));
 for (const type of ["pointerenter", "pointerleave", "focus", "blur"]) gridToggle.addEventListener(type, relayout);
 try { if (localStorage.getItem(GRID_KEY) === "1") showGrid(true); } catch {}
 
-// ---- Viewer controls panel ([c]) -------------------------------------------------
-// Opening tweens --controls-open 0 -> 1, which pushes the panels left by the
-// panel's width (layout.css) and slides the panel in.
-const CONTROLS_MS = 250;
+// ---- Reflow on the column grid ---------------------------------------------------
+// The 12 columns never change; panels cover whole columns (controls: 11-12; a
+// left nav would set --nav-cols on :root). Content moves off covered columns:
+// the text gives way first, down to TEXT_MIN columns, then the graphic drops
+// toward its scene's minimum span (docs/design-system/layout-grid.md).
+const COLUMNS = 12, TEXT_MIN = 4, CONTROLS_COLS = 2, DEFAULT_SPAN = [4, 4];
 const root = document.documentElement;
+const splits = [...site.querySelectorAll(".site-split")];
+let coverRight = 0;
+
+function reflow() {
+  const left = parseInt(getComputedStyle(root).getPropertyValue("--nav-cols"), 10) || 0;
+  const avail = COLUMNS - left - coverRight;
+  for (const split of splits) {
+    const graphic = split.querySelector(".site-graphic"), text = split.lastElementChild;
+    const [min, max] = graphicSpan(graphic) ?? DEFAULT_SPAN;
+    const span = Math.max(min, Math.min(max, avail - TEXT_MIN));
+    graphic.style.gridColumn = `${1 + left} / span ${span}`;
+    text.style.gridColumn = `${1 + left + span} / ${COLUMNS + 1 - coverRight}`;
+  }
+  relayout();
+}
+reflow();
+
+// ---- Viewer controls panel ([c]) -------------------------------------------------
+// The panel covers columns 11-12. Opening reflows the content off them, then
+// tweens --controls-open 0 -> 1, which stops the content box short of the
+// panel (layout.css) and slides the panel in. Closing slides it out, then
+// reflows the content back.
+const CONTROLS_MS = 250;
 const controlsPanel = site.querySelector(".site-controls");
 const controlsToggle = site.querySelector(".site-controls-toggle");
 const paletteButtons = [...controlsPanel.querySelectorAll("[data-palette]")];
@@ -201,13 +226,16 @@ function toggleControls(open = controlsTarget === 0) {
   controlsPanel.inert = !open;
   controlsToggle.setAttribute("aria-expanded", String(open));
   cancelAnimationFrame(controlsAnim);
-  if (reduceMotion()) return setControlsOpen(controlsTarget);
+  if (open) { coverRight = CONTROLS_COLS; reflow(); }
+  const closed = () => { if (controlsTarget === 0) { coverRight = 0; reflow(); } };
+  if (reduceMotion()) { setControlsOpen(controlsTarget); return closed(); }
   const from = controlsOpen;
   const start = performance.now();
   const step = (now) => {
     const t = Math.min(1, (now - start) / CONTROLS_MS);
     setControlsOpen(from + (controlsTarget - from) * ease(t));
     if (t < 1) controlsAnim = requestAnimationFrame(step);
+    else closed();
   };
   controlsAnim = requestAnimationFrame(step);
   if (open) controlsPanel.querySelector("[aria-pressed='true']")?.focus({ preventScroll: true });
