@@ -3,6 +3,7 @@
 // draw() runs every frame and only translates by the render scroll offset.
 
 import { mountGraphic, drawGraphic } from "./graphic.js";
+import { genieT, warpBlock, setLines, sinkOf, settings as genieSettings } from "./genie-warp.js";
 
 // Ink comes from the CSS custom property --ink (so states like :hover can set it),
 // else the nearest data-ink attribute, else phosphor.
@@ -71,6 +72,10 @@ export function measure(root, ctx) {
   const words = [];
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   const range = document.createRange();
+  // [data-genie]: a text block that can genie into its panel's bottom-right
+  // corner (js/genie-warp.js). Its words carry the block's index.
+  const genieEls = [...root.querySelectorAll("[data-genie]")];
+  const genieOf = (el) => genieEls.indexOf(el.closest("[data-genie]"));
 
   for (let node = walker.nextNode(); node; node = walker.nextNode()) {
     const parent = node.parentElement;
@@ -85,6 +90,7 @@ export function measure(root, ctx) {
     // Underlines (CSS text-decoration) are drawn by the raster, one emulated
     // pixel thick, just under the baseline.
     const underline = /underline/.test(style.textDecorationLine);
+    const genie = genieOf(parent);
     for (const m of node.data.matchAll(/\S+/g)) {
       range.setStart(node, m.index);
       range.setEnd(node, m.index + m[0].length);
@@ -92,7 +98,7 @@ export function measure(root, ctx) {
       if (!rects.length) continue;
       if (rects.length === 1) {
         const r = toDoc(rects[0]);
-        words.push({ text: tx(m[0], true), x: r.x, baseline: r.y + ascent, font, spacing, ink, clip, underline });
+        words.push({ text: tx(m[0], true), x: r.x, baseline: r.y + ascent, font, spacing, ink, clip, underline, genie });
         continue;
       }
       // Word wraps (e.g. at a hyphen): split it into one segment per line.
@@ -106,7 +112,7 @@ export function measure(root, ctx) {
         if (segment && Math.abs(segment.top - r.y) < 1) {
           segment.text += tx(m[0][i], false);
         } else {
-          segment = { text: tx(m[0][i], i === 0), x: r.x, top: r.y, baseline: r.y + ascent, font, spacing, ink, clip, underline };
+          segment = { text: tx(m[0][i], i === 0), x: r.x, top: r.y, baseline: r.y + ascent, font, spacing, ink, clip, underline, genie };
           words.push(segment);
         }
       }
@@ -201,8 +207,35 @@ export function measure(root, ctx) {
     paths.push({ points, ink: shape.dataset.ink ?? inkOf(shape.closest("svg")) });
   }
 
+  // Genie blocks: the box around their text (not the element, which may be a
+  // wide grid cell), its line bands (each text node's line fragments, merged
+  // by top), and its panel's box and line width (the sink is the panel's
+  // inner bottom-right corner).
+  const genies = genieEls.map((el) => {
+    range.selectNodeContents(el);
+    const box = toDoc(range.getBoundingClientRect());
+    const lines = [];
+    const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    for (let n = tw.nextNode(); n; n = tw.nextNode()) {
+      if (!n.data.trim()) continue;
+      range.selectNodeContents(n);
+      for (const r of range.getClientRects()) {
+        const d = toDoc(r), hit = lines.find((l) => Math.abs(l.y0 - d.y) < 2);
+        if (hit) hit.y1 = Math.max(hit.y1, d.y + d.h);
+        else lines.push({ y0: d.y, y1: d.y + d.h });
+      }
+    }
+    lines.sort((a, b) => a.y0 - b.y0);
+    setLines(el, lines.length);
+    const panelEl = el.closest(".site-panel") ?? el;
+    const panel = toDoc(panelEl.getBoundingClientRect());
+    const line = parseFloat(getComputedStyle(panelEl).getPropertyValue("--line")) || 1;
+    return { el, ...box, lines, panel, line };
+  });
+  const u = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--u")) || 1;
+
   tintCache.clear();
-  return { words: words.concat(bullets), boxes, fills, paths, images, tabs, graphics };
+  return { words: words.concat(bullets), boxes, fills, paths, images, tabs, graphics, genies, u };
 }
 
 // Tinted copies of data-draw images, keyed by source, size and color.
@@ -241,6 +274,17 @@ function tabPath(ctx, x, y, w, h, header, flap) {
     ctx.arcTo(px, py, nx, ny, r);
   }
   ctx.closePath();
+}
+
+// One offscreen canvas the size of the frame, for warped genie blocks.
+let offCtx = null;
+function offscreen(canvas) {
+  if (!offCtx) offCtx = document.createElement("canvas").getContext("2d");
+  if (offCtx.canvas.width !== canvas.width || offCtx.canvas.height !== canvas.height) {
+    offCtx.canvas.width = canvas.width;
+    offCtx.canvas.height = canvas.height;
+  }
+  return offCtx;
 }
 
 // Runs fn clipped to item.clip (document space), if it has one.
@@ -344,20 +388,41 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
     ctx.stroke();
   }
 
-  ctx.textBaseline = "alphabetic";
-  const drawWords = (colorOf) => {
+  // Genie blocks in motion (0 < t < 1) are drawn offscreen and warped; at
+  // t = 1 they're in the sink and draw nothing; at 0 they draw as normal words.
+  const now = performance.now();
+  const genieTs = (layout.genies ?? []).map((g) => genieT(g.el, now));
+  const plain = (w) => !(w.genie >= 0 && genieTs[w.genie] > 0);
+
+  const drawWords = (colorOf, keep = plain, c = ctx) => {
+    c.textBaseline = "alphabetic";
     for (const w of layout.words) {
-      if (!visible(w.baseline - 200, 400)) continue;
-      setFont(ctx, w.font);
-      if ("letterSpacing" in ctx) ctx.letterSpacing = w.spacing ?? "0px";
-      ctx.fillStyle = colorOf(w);
-      clipped(ctx, w, () => {
-        ctx.fillText(w.text, w.x, w.baseline);
-        if (w.underline) ctx.fillRect(w.x, snap(w.baseline + ps), ctx.measureText(w.text).width, ps);
+      if (!keep(w) || !visible(w.baseline - 200, 400)) continue;
+      setFont(c, w.font);
+      if ("letterSpacing" in c) c.letterSpacing = w.spacing ?? "0px";
+      c.fillStyle = colorOf(w);
+      clipped(c, w, () => {
+        c.fillText(w.text, w.x, w.baseline);
+        if (w.underline) c.fillRect(w.x, snap(w.baseline + ps), c.measureText(w.text).width, ps);
       });
     }
   };
   drawWords((w) => colors[w.ink]);
+
+  layout.genies?.forEach((g, i) => {
+    const t = genieTs[i];
+    if (t <= 0 || t >= 1) return;
+    const off = offscreen(ctx.canvas);
+    off.setTransform(1, 0, 0, 1, 0, 0);
+    off.clearRect(0, 0, width, height);
+    off.setTransform(1 / ps, 0, 0, 1 / ps, 0, -renderY / ps);
+    drawWords((w) => colors[w.ink], (w) => w.genie === i, off);
+    const toPx = (x) => x / ps, toPy = (y) => (y - renderY) / ps;
+    const S = sinkOf({ x: toPx(g.panel.x), y: toPy(g.panel.y), w: g.panel.w / ps, h: g.panel.h / ps }, g.line / ps, layout.u / ps);
+    warpBlock(ctx, off.canvas,
+      { x0: toPx(g.x), x1: toPx(g.x + g.w), y0: toPy(g.y), y1: toPy(g.y + g.h), lines: g.lines.map((l) => ({ y0: toPy(l.y0), y1: toPy(l.y1) })) },
+      { x0: S.x0, x1: S.x1, y: Math.round(S.y) }, t, (genieSettings.arc * layout.u) / ps);
+  });
 
   // Selection is the inverse: a block of the main ink with the selected text
   // knocked out in the ground colour (every ink inverts to ground).

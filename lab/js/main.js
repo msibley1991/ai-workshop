@@ -4,6 +4,7 @@ import { measure, selectionRects, draw } from "./text-raster.js";
 import { updateScroll } from "./scroll.js";
 import { viewer, enabled as viewerEnabled, applyViewer } from "./viewer.js";
 import { createPalettePanel } from "./palette-panel.js";
+import { ghostBoost } from "./genie-warp.js";
 
 const content = document.getElementById("content");
 const viewportEl = document.getElementById("viewport3d");
@@ -152,6 +153,10 @@ function frame(t) {
   if (clearGhostFrames > 0) {
     clearGhostFrames--;
     renderParams = { ...params, ghost: { ...params.ghost, decay: 0, scrollGain: 0 } };
+  } else {
+    // A running genie (js/genie-warp.js) lengthens the phosphor trail.
+    const boost = ghostBoost(t);
+    if (boost > 0) renderParams = { ...params, ghost: { ...params.ghost, decay: Math.min(0.98, params.ghost.decay + boost) } };
   }
   renderer.render({ params: renderParams, renderY, velocity, time: t / 1000, viewport });
 }

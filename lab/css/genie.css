@@ -1,0 +1,39 @@
+/* genie.html only: the curvature graph editor (js/genie-graphs.js). A normal,
+   visible panel outside the invisible #content, styled like the dark dial
+   panels, bottom left above the bottom bar so it's clear of the funnel. */
+.genie-graphs {
+  position: fixed;
+  left: 16px;
+  bottom: 64px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 14px;
+  background: rgba(24, 24, 27, 0.94);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  color: #e4e4e7;
+  font: 500 11px/1.2 system-ui, sans-serif;
+  user-select: none;
+}
+.genie-graphs[hidden] { display: none; }
+.genie-graph-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.genie-graph-head button {
+  border: 0;
+  border-radius: 6px;
+  padding: 2px 8px;
+  background: #3f3f46;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.genie-graph svg { display: block; background: #111113; border-radius: 8px; touch-action: none; }
+.genie-graph-guides line { stroke: #3f3f46; stroke-width: 1; }
+.genie-graph-guides rect { fill: none; stroke: #27272a; }
+.genie-graph-curve { fill: none; stroke: #f38020; stroke-width: 2; }
+.genie-graph-hit { fill: none; stroke: transparent; stroke-width: 12; cursor: copy; }
+.genie-graph-arm { stroke: #71717a; stroke-width: 1; }
+.genie-graph-handle { fill: #e4e4e7; cursor: grab; }
+.genie-graph-anchor { fill: #f38020; stroke: #111113; cursor: grab; }
+.genie-graph-playhead { stroke: #e4e4e7; stroke-width: 1; stroke-dasharray: 2 2; }

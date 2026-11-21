@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Genie test — how (did you [make] this?)</title>
+  <link rel="stylesheet" href="vendor/dialkit/styles.css">
+  <link rel="stylesheet" href="css/text-layer.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/genie.css">
+  <script type="importmap">
+    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js" } }
+  </script>
+  <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/layout.js"></script>
+  <script type="module" src="js/genie.js"></script>
+</head>
+<!-- Genie test (docs/design-system/motion.md): a copy of layout.html, with the
+     same display layer and controls. Text blocks marked data-genie funnel into
+     their panel's bottom-right corner on -> (or l) and pour back out on <-; the
+     "Genie" dial panel and the curvature graphs (g) tune the warp (js/genie.js).
+     Layout from Figma frames "ref1" (intro, node 313:125) and "ref2" (open
+     section, node 313:148), rendered through the effects pipeline. The tabs are
+     an accordion driven by scroll (js/layout.js). data-preset loads that preset
+     on every page load. data-canvas scales the emulated pixel and lines with the
+     canvas unit (js/main.js). data-viewer turns on the viewer controls panel
+     (palette, motion, blur; js/viewer.js), opened with [c]. -->
+<body data-preset="light" data-panel-id="effects-lab-genie" data-canvas data-viewer>
+  <canvas id="screen" aria-hidden="true"></canvas>
+
+  <main id="content" class="site">
+    <header class="site-bar site-bar-top" data-box>
+      <a class="site-title" href="#">how (did you [make] this?)</a>
+    </header>
+
+    <!-- Intro: collapses as the first tab opens. -->
+    <section class="site-intro site-panel" data-panel="" data-clip>
+      <div class="site-split site-grid">
+        <div class="site-graphic" data-graphic="exploded-stack"></div>
+        <div class="site-hero-text" data-genie>
+          <h1>how (did you [make] this?)</h1>
+          <p class="site-hero-sub">LLM-assisted coding in design</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tabs: each opens in place; its outline grows around its body. Placeholder copy. -->
+    <article class="site-tab site-panel" data-tab data-panel="foundations">
+      <a class="site-tab-label" href="#foundations"><span>Foundations</span></a>
+      <div class="site-tab-body" data-clip>
+        <div class="site-split site-grid">
+          <div class="site-graphic" data-graphic="page-layout"></div>
+          <div class="site-section-text" data-genie>
+            <h2 class="site-headline">Foundations</h2>
+            <div class="site-section-content">
+              <p class="site-subheadline">Sub-Headline</p>
+              <p class="site-body">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, <a href="https://www.virtualelena.co/p/toward-a-working-definition-of-paperclip">dictum est a</a>, mattis tellus. Sed dignissim, metus nec fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus elit sed risus. Maecenas eget condimentum velit, sit amet feugiat lectus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+
+    <article class="site-tab site-panel" data-tab data-panel="advanced-topics">
+      <a class="site-tab-label" href="#advanced-topics"><span>Advanced Topics</span></a>
+      <div class="site-tab-body" data-clip>
+        <div class="site-split site-grid">
+          <div class="site-graphic"></div>
+          <div class="site-section-text" data-genie>
+            <h2 class="site-headline">Advanced Topics</h2>
+            <div class="site-section-content">
+              <p class="site-subheadline">Sub-Headline</p>
+              <p class="site-body">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, <a href="https://www.virtualelena.co/p/toward-a-working-definition-of-paperclip">dictum est a</a>, mattis tellus. Sed dignissim, metus nec fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus elit sed risus. Maecenas eget condimentum velit, sit amet feugiat lectus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <footer class="site-bar site-bar-bottom" data-box>
+      <button class="site-grid-toggle" type="button" aria-pressed="false" data-fill><span>Grid: off</span></button>
+      <button class="site-bar-button site-controls-toggle" type="button" aria-expanded="false" aria-controls="site-controls" data-fill><span>Press [c] for controls</span></button>
+    </footer>
+
+    <!-- Viewer controls: pushes the panels left when open (js/layout.js). The
+         clip box is the panel's open position, so it's drawn only inside it. -->
+    <div class="site-controls-clip" data-clip>
+      <aside class="site-controls" id="site-controls" aria-label="Controls" data-box inert>
+        <p class="site-controls-title">Controls</p>
+        <div class="site-controls-group" role="group" aria-labelledby="ctl-palette">
+          <p class="site-controls-heading" id="ctl-palette">[Palette]</p>
+          <button class="site-bar-button" type="button" data-palette="ink" aria-pressed="false" data-fill><span>Ink</span></button>
+          <button class="site-bar-button" type="button" data-palette="blueprint" aria-pressed="false" data-fill><span>Blueprint</span></button>
+          <button class="site-bar-button" type="button" data-palette="plasma" aria-pressed="false" data-fill><span>Plasma</span></button>
+          <button class="site-bar-button" type="button" data-palette="vector" aria-pressed="false" data-fill><span>Vector</span></button>
+        </div>
+        <div class="site-controls-group">
+          <p class="site-controls-heading">[Display]</p>
+          <div class="site-controls-setting" role="group" aria-label="Motion">
+            <span>Motion</span>
+            <button class="site-bar-button" type="button" data-setting="motion" data-value="on" aria-pressed="true" data-fill><span>on</span></button>
+            <span>/</span>
+            <button class="site-bar-button" type="button" data-setting="motion" data-value="off" aria-pressed="false" data-fill><span>off</span></button>
+          </div>
+          <div class="site-controls-setting" role="group" aria-label="Blur">
+            <span>Blur</span>
+            <button class="site-bar-button" type="button" data-setting="blur" data-value="on" aria-pressed="true" data-fill><span>on</span></button>
+            <span>/</span>
+            <button class="site-bar-button" type="button" data-setting="blur" data-value="off" aria-pressed="false" data-fill><span>off</span></button>
+          </div>
+        </div>
+        <p class="site-controls-hint">[c] or Esc to close</p>
+      </aside>
+    </div>
+
+    <!-- Column-grid overlay, shown by the bottom-bar toggle (js/layout.js). -->
+    <div class="site-grid-overlay site-grid" aria-hidden="true" hidden>
+      <div data-fill></div><div data-fill></div><div data-fill></div><div data-fill></div>
+      <div data-fill></div><div data-fill></div><div data-fill></div><div data-fill></div>
+      <div data-fill></div><div data-fill></div><div data-fill></div><div data-fill></div>
+    </div>
+  </main>
+</body>
+</html>

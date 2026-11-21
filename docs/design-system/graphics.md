@@ -103,6 +103,8 @@ All in emulated pixels:
 - Only one element per graphic is accented at a time, and the accent can move from step to step.
 
 ## Presentation steps
+The named curves, durations, loops and enter/exit motions are in [motion.md](motion.md).
+
 - The presentation is moving from scroll-driven animation to **forward and back steps**, like an animated slide presentation. That keeps graphic and motion timing, and looping, simple.
 - **States:** each step names a state for each graphic on screen, such as explode distance, the focused part, pose and visible elements.
 - **Tween:** forward moves to the next state through one standard tween, 400 ms ease-in-out. 800 is the only longer duration, and there are no free values.
