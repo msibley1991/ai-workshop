@@ -51,8 +51,9 @@ export const config = {
   },
   theme: {
     mode: { type: "select", options: ["light", "dark"], default: "light" },
-    light: { ground: "#F4F4F0", phosphor: "#0050FF", accent: "#F38020", _collapsed: true },
-    dark: { ground: "#0A0C10", phosphor: "#3D7BFF", accent: "#F38020", _collapsed: true },
+    // link: inline link text (viewer pages set it from the palette).
+    light: { ground: "#F4F4F0", phosphor: "#0050FF", accent: "#F38020", link: "#0050FF", _collapsed: true },
+    dark: { ground: "#0A0C10", phosphor: "#3D7BFF", accent: "#F38020", link: "#F3C020", _collapsed: true },
   },
   outline: {
     width: [4, 1, 16, 1],        // CSS px; sets --line (layout.html bars and tab outlines)

@@ -12,7 +12,7 @@
 // built-in Ink palette covers the moment before.
 export const PALETTE_IDS = ["ink", "blueprint", "plasma", "vector"];
 export const PALETTES = {
-  ink: { name: "Ink", ground: "#F2F6FF", ink: "#00010F", accent: "#F38020", ghost1: "#FF0088", ghost2: "#00C7F7", ghost3: "#8A1A00" },
+  ink: { name: "Ink", ground: "#F2F6FF", ink: "#00010F", accent: "#F38020", link: "#0050FF", ghost1: "#FF0088", ghost2: "#00C7F7", ghost3: "#8A1A00" },
 };
 export const palettesReady = fetch("presets/palettes.json", { cache: "no-store" })
   .then((res) => (res.ok ? res.json() : Promise.reject(new Error("presets/palettes.json not found"))))
@@ -61,7 +61,7 @@ export function paletteValues(id) {
   const p = PALETTES[id] ?? PALETTES.ink;
   const mode = modeOf(p.ground);
   return {
-    theme: { mode, [mode]: { ground: p.ground, phosphor: p.ink, accent: p.accent } },
+    theme: { mode, [mode]: { ground: p.ground, phosphor: p.ink, accent: p.accent, link: p.link ?? p.accent } },
     phosphor: { persistenceColor: p.ghost1, persistenceColor2: p.ghost2, persistenceColor3: p.ghost3 },
   };
 }

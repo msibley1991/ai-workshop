@@ -83,7 +83,7 @@ let clearGhostFrames = 0;
 const kit = createPanel((snapshot) => {
   const values = structuredClone(snapshot);
   for (const key of ["light", "dark"]) {
-    for (const role of ["ground", "phosphor", "accent"]) values.theme[key][role] = toHex(values.theme[key][role]);
+    for (const role of ["ground", "phosphor", "accent", "link"]) values.theme[key][role] = toHex(values.theme[key][role]);
   }
   for (const key of ["persistenceColor", "persistenceColor2", "persistenceColor3"]) values.phosphor[key] = toHex(values.phosphor[key]);
   const key = `${values.theme.mode} ${values.theme[values.theme.mode].ground}`;
@@ -142,6 +142,7 @@ function frame(t) {
   const colors = {
     phosphor: theme.phosphor,
     accent: theme.accent,
+    link: theme.link,
     dim: mix(theme.ground, theme.phosphor, 0.55),
     ground: theme.ground, // knock-out ink, e.g. text on a filled shape
   };

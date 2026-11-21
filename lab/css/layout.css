@@ -101,6 +101,8 @@
 }
 
 .site a { color: inherit; text-decoration: none; }
+/* Inline links in running text: the palette's link colour, underlined (drawn by the raster). */
+.site :is(p, li) a { --ink: link; text-decoration: underline; }
 .site section { margin: 0; }
 
 .site-bar {

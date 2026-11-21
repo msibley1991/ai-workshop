@@ -80,6 +80,9 @@ export function measure(root, ctx) {
     const clip = clipOf(parent);
     const tx = transformOf(style);
     const spacing = style.letterSpacing === "normal" ? "0px" : style.letterSpacing;
+    // Underlines (CSS text-decoration) are drawn by the raster, one emulated
+    // pixel thick, just under the baseline.
+    const underline = /underline/.test(style.textDecorationLine);
     for (const m of node.data.matchAll(/\S+/g)) {
       range.setStart(node, m.index);
       range.setEnd(node, m.index + m[0].length);
@@ -87,7 +90,7 @@ export function measure(root, ctx) {
       if (!rects.length) continue;
       if (rects.length === 1) {
         const r = toDoc(rects[0]);
-        words.push({ text: tx(m[0], true), x: r.x, baseline: r.y + ascent, font, spacing, ink, clip });
+        words.push({ text: tx(m[0], true), x: r.x, baseline: r.y + ascent, font, spacing, ink, clip, underline });
         continue;
       }
       // Word wraps (e.g. at a hyphen): split it into one segment per line.
@@ -101,7 +104,7 @@ export function measure(root, ctx) {
         if (segment && Math.abs(segment.top - r.y) < 1) {
           segment.text += tx(m[0][i], false);
         } else {
-          segment = { text: tx(m[0][i], i === 0), x: r.x, top: r.y, baseline: r.y + ascent, font, spacing, ink, clip };
+          segment = { text: tx(m[0][i], i === 0), x: r.x, top: r.y, baseline: r.y + ascent, font, spacing, ink, clip, underline };
           words.push(segment);
         }
       }
@@ -263,11 +266,6 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
   ctx.clearRect(0, 0, width, height);
   ctx.setTransform(1 / ps, 0, 0, 1 / ps, 0, -renderY / ps);
 
-  ctx.globalAlpha = 0.35;
-  ctx.fillStyle = colors.accent;
-  for (const r of selection) if (visible(r.y, r.h)) ctx.fillRect(r.x, r.y, r.w, r.h);
-  ctx.globalAlpha = 1;
-
   for (const f of layout.fills) {
     if (!visible(f.y, f.h)) continue;
     const rect = [snap(f.x), snap(f.y), snap(f.w), snap(f.h)];
@@ -330,11 +328,31 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
   }
 
   ctx.textBaseline = "alphabetic";
-  for (const w of layout.words) {
-    if (!visible(w.baseline - 200, 400)) continue;
-    setFont(ctx, w.font);
-    if ("letterSpacing" in ctx) ctx.letterSpacing = w.spacing ?? "0px";
-    ctx.fillStyle = colors[w.ink];
-    clipped(ctx, w, () => ctx.fillText(w.text, w.x, w.baseline));
+  const drawWords = (colorOf) => {
+    for (const w of layout.words) {
+      if (!visible(w.baseline - 200, 400)) continue;
+      setFont(ctx, w.font);
+      if ("letterSpacing" in ctx) ctx.letterSpacing = w.spacing ?? "0px";
+      ctx.fillStyle = colorOf(w);
+      clipped(ctx, w, () => {
+        ctx.fillText(w.text, w.x, w.baseline);
+        if (w.underline) ctx.fillRect(w.x, snap(w.baseline + ps), ctx.measureText(w.text).width, ps);
+      });
+    }
+  };
+  drawWords((w) => colors[w.ink]);
+
+  // Selection is the inverse: a block of the main ink with the selected text
+  // knocked out in the ground colour (every ink inverts to ground).
+  const sel = selection.filter((r) => visible(r.y, r.h));
+  if (sel.length) {
+    ctx.save();
+    ctx.beginPath();
+    for (const r of sel) ctx.rect(r.x, r.y, r.w, r.h);
+    ctx.clip();
+    ctx.fillStyle = colors.phosphor;
+    for (const r of sel) ctx.fillRect(r.x, r.y, r.w, r.h);
+    drawWords(() => colors.ground);
+    ctx.restore();
   }
 }

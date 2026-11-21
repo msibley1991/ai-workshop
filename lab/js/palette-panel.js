@@ -1,5 +1,5 @@
 // The "Palette" dial panel (pages with data-viewer): edits the active palette's
-// ground, ink, accent and ghost-trail colours live (light or dark mode follows
+// ground, ink, accent, link and ghost-trail colours live (light or dark mode follows
 // the ground, see modeOf in viewer.js), and "Save palettes"
 // writes every palette to presets/palettes.json (needs serve.py). Edits that
 // aren't saved last until reload.
@@ -11,7 +11,7 @@ import { viewer, PALETTES, palettesReady, paletteValues } from "./viewer.js";
 import { savePreset } from "./params.js";
 import { toast } from "./panel.js";
 
-const FIELDS = ["ground", "ink", "accent", "ghost1", "ghost2", "ghost3"];
+const FIELDS = ["ground", "ink", "accent", "link", "ghost1", "ghost2", "ghost3"];
 
 export function createPalettePanel(effectsKit) {
   const active = () => viewer.get().palette;

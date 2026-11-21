@@ -4,35 +4,39 @@
     "ground": "#F2F6FF",
     "ink": "#00010F",
     "accent": "#F38020",
-    "ghost1": "#FF0088",
-    "ghost2": "#00C7F7",
-    "ghost3": "#8A1A00"
+    "link": "#0050FF",
+    "ghost1": "#00010F",
+    "ghost2": "#00010F",
+    "ghost3": "#00010F"
   },
   "blueprint": {
     "name": "Blueprint",
     "ground": "#F4F4F0",
     "ink": "#0050FF",
     "accent": "#F38020",
-    "ghost1": "#F38020",
-    "ghost2": "#F3C020",
-    "ghost3": "#8A1A00"
+    "link": "#B8860B",
+    "ghost1": "#0050FF",
+    "ghost2": "#2f00eb",
+    "ghost3": "#5d00b6"
   },
   "plasma": {
     "name": "Plasma",
     "ground": "#120A04",
     "ink": "#FF8A1F",
     "accent": "#3D7BFF",
-    "ghost1": "#00fdcd",
-    "ghost2": "#518aff",
-    "ghost3": "#2b0090"
+    "link": "#1F94FF",
+    "ghost1": "#FF8A1F",
+    "ghost2": "#eb4400",
+    "ghost3": "#b7033c"
   },
   "vector": {
     "name": "Vector",
     "ground": "#050A06",
     "ink": "#3DFF7A",
     "accent": "#F38020",
-    "ghost1": "#B6FF3D",
-    "ghost2": "#1FBF5A",
-    "ghost3": "#0A3A1A"
+    "link": "#FF3DC2",
+    "ghost1": "#34ff83",
+    "ghost2": "#1fb5c0",
+    "ghost3": "#005ea0"
   }
 }

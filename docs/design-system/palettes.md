@@ -3,14 +3,19 @@
 Status: **exploration**. Started 2026-11-21 and built on the lab layout page ([`lab/layout.html`](../../lab/layout.html), [`lab/js/viewer.js`](../../lab/js/viewer.js)). Viewers choose a palette themselves, so there's no single site palette. The colours below are starting values to tune by eye.
 
 ## Palettes
-A palette changes **colours only**: the ground, the ink (the "phosphor" dial), the accent and the three ghost-trail colours. Light or dark mode follows the ground automatically: a ground brighter than mid-grey is light. It isn't a setting, because a light ground in dark mode breaks the ghost maths. The display effects (glow, scanlines, warp, ghosting) stay as tuned, so every palette shares one display layer.
+A palette changes **colours only**: the ground, the ink (the "phosphor" dial), the accent, the link colour and the three ghost-trail colours. Light or dark mode follows the ground automatically: a ground brighter than mid-grey is light. It isn't a setting, because a light ground in dark mode breaks the ghost maths. The display effects (glow, scanlines, warp, ghosting) stay as tuned, so every palette shares one display layer.
 
-| Palette | Mode | Ground | Ink | Accent | Ghost trails | Lineage |
-|---|---|---|---|---|---|---|
-| Ink (default) | light | `#F2F6FF` | `#00010F` | `#F38020` | `#FF0088` `#00C7F7` `#8A1A00` | the tuned light preset |
-| Blueprint | light | `#F4F4F0` | `#0050FF` | `#F38020` | `#F38020` `#F3C020` `#8A1A00` | paperclip-punk source |
-| Plasma | dark | `#120A04` | `#FF8A1F` | `#3D7BFF` | `#FFD27A` `#FF3D1F` `#5A1A00` | PLATO plasma panels |
-| Vector | dark | `#050A06` | `#3DFF7A` | `#F38020` | `#B6FF3D` `#1FBF5A` `#0A3A1A` | oscilloscope / radar phosphor |
+| Palette | Mode | Ground | Ink | Accent | Link | Ghost trails | Lineage |
+|---|---|---|---|---|---|---|---|
+| Ink (default) | light | `#F2F6FF` | `#00010F` | `#F38020` | `#0050FF` blue | `#FF0088` `#00C7F7` `#8A1A00` | the tuned light preset |
+| Blueprint | light | `#F4F4F0` | `#0050FF` | `#F38020` | `#B8860B` gold | `#F38020` `#F3C020` `#8A1A00` | paperclip-punk source |
+| Plasma | dark | `#120A04` | `#FF8A1F` | `#3D7BFF` | `#1F94FF` (complement of ink) | `#FFD27A` `#FF3D1F` `#5A1A00` | PLATO plasma panels |
+| Vector | dark | `#050A06` | `#3DFF7A` | `#F38020` | `#FF3DC2` (complement of ink) | `#B6FF3D` `#1FBF5A` `#0A3A1A` | oscilloscope / radar phosphor |
+
+- **Links:** inline links in running text use the palette's link colour and are underlined (the raster draws the underline, one emulated pixel thick).
+  - The rule is the complement of the ink: the hue turned 180°.
+  - Exceptions: Ink uses blue, because near-black ink has no meaningful complement, and Blueprint uses gold.
+- **Selected text is the inverse:** the selection fills with the ink colour, and the selected text is knocked out in the ground colour. This holds in every palette.
 
 "Dim" ink is still mixed from the ground and ink (55% toward the ink).
 
@@ -30,7 +35,7 @@ A palette changes **colours only**: the ground, the ink (the "phosphor" dial), t
 
 ## How it works in the lab
 - **Source of truth:** the palettes are in [`lab/presets/palettes.json`](../../lab/presets/palettes.json).
-- **Editing:** the **Palette** dial panel edits the active palette: ground, ink, accent and ghost 1–3.
+- **Editing:** the **Palette** dial panel edits the active palette: ground, ink, accent, link and ghost 1–3.
   - Edits show live, and they're kept when you switch palettes.
   - **Save palettes** writes all four to the file (needs `serve.py`). Unsaved edits are lost on reload.
 - **Ghost history:** a ground change (a palette switch or a ground edit) clears the trail history for two frames, so old trails don't smear over the new ground.
