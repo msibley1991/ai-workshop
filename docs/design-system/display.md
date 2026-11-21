@@ -48,6 +48,7 @@ These are overrides applied on top of the look at render time (`applyViewer()` i
 - **A low frame rate is not a reason to fall back.** A slow device keeps the display, and the viewer can turn effects off.
 
 ## On the real site
+- **Performance to carry over:** the raster's cost is in painting graphics, not in measuring the page (about 1 ms). Keep the lab's caching (two looks per graphic, flow packets drawn on top) and the span-based fills, and skip hidden content when measuring (see [graphics.md](graphics.md), "Rendering cost").
 - **Code:** the raster, the passes, the scene engine and the viewer controls move into the site's `js/`. The dial panels, the preset actions and the vendored dialkit stay in the lab. **The live site has no dial panel.**
 - **The look:** one frozen file (proposed `js/display/look.js`) holding only the display values above, plus the dark-glow exception if it's needed. Colours stay in the palettes file. Layout, type and spacing tokens stay in `:root` in `css/style.css`. The effect values aren't CSS tokens, because only the WebGL passes read them.
 - **Changing the look:** tune on the lab layout page, then update the look file and this doc together.

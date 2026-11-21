@@ -124,7 +124,13 @@ The named curves, durations, loops and enter/exit motions are in [motion.md](mot
 - **Mounting:** a graphic mounts on a DOM element, for example `<div data-graphic="exploded-stack">`, and `shade.js` draws it into the raster.
 - **Shared rules:** hatching, the 8/4/2 weights, focus and state tweens are implemented once, for flat and iso alike.
 - **Labels stay real DOM text** in the type roles, anchored to points in the scene, so they stay selectable and leader lines can find them.
-- **Built in the lab:** [`lab/js/graphic.js`](../../lab/js/graphic.js), with scenes in `lab/js/graphics/`. The scene format is described in [`lab/CLAUDE.md`](../../lab/CLAUDE.md). There are two demos on the layout test, `exploded-stack` (iso) and `page-layout` (flat); step them with ← and →.
+- **Built in the lab:** [`lab/js/graphic.js`](../../lab/js/graphic.js), with scenes in `lab/js/graphics/`. The scene format is described in [`lab/CLAUDE.md`](../../lab/CLAUDE.md). The two demo scenes, `exploded-stack` (iso) and `page-layout` (flat), appear on the layout test's hero, tab 1 and template slides; step them with ← and →.
+- **Rendering cost:** graphics are painted on the CPU at full emulated-pixel resolution, so painting is the expensive step and is kept rare:
+  - Each graphic keeps its last two painted looks, so a blink alternates between them without repainting.
+  - Flow packets are drawn over the look each frame instead of being painted into it.
+  - Moving a graphic by position is free. Changing its size, state or pose (a carried move, an explode tween, a drag) repaints it every frame.
+  - The raster fills shapes in row spans and grows outlines only inside the shapes' own area (`lab/js/shade.js`), about 5× faster than before with identical pixels.
+  - New scenes should avoid huge areas that change every frame.
 
 ## Open
 - **Motion session (separate):** easing curves for tweens and idle motion, the idle-motion vocabulary, and the 400/800 durations. Easing matters more than defining each motion's meaning.
