@@ -11,7 +11,7 @@
   "ghost": {
     "decay": 0.85,
     "scrollGain": 1,
-    "blur": 2.5
+    "blur": 0
   },
   "grid": {
     "mode": "scanlines",
@@ -20,9 +20,9 @@
     "snapScroll": true
   },
   "phosphor": {
-    "persistenceColor": "#F38020",
-    "persistenceColor2": "#F3C020",
-    "persistenceColor3": "#8A1A00",
+    "persistenceColor": "#0050FF",
+    "persistenceColor2": "#2f00eb",
+    "persistenceColor3": "#5d00b6",
     "layers": 2,
     "layerMode": "blend",
     "layerFrames": 13,
@@ -31,8 +31,8 @@
     "flicker": 0
   },
   "warp": {
-    "strength": 5,
-    "size": 0.02,
+    "strength": 4,
+    "size": 0.05,
     "frequency": 4,
     "speed": 5.5,
     "randomness": 0.67
@@ -42,12 +42,14 @@
     "light": {
       "ground": "#F4F4F0",
       "phosphor": "#0050FF",
-      "accent": "#F38020"
+      "accent": "#F38020",
+      "link": "#B8860B"
     },
     "dark": {
       "ground": "#120A04",
       "phosphor": "#FF8A1F",
-      "accent": "#3D7BFF"
+      "accent": "#3D7BFF",
+      "link": "#1F94FF"
     }
   },
   "outline": {
