@@ -450,15 +450,24 @@
   bottom: var(--box-inset);
   height: var(--space-32);
 }
-.site .slide-section-title {
+/* The slide number takes a two-digit slot at the right end; the section title
+   ends one gap left of it. Same style, figures tabular. */
+.site .slide-section-title,
+.site .slide-number {
   position: absolute;
-  right: 0;
+  right: calc(2ch + var(--space-16));
   top: 0;
   margin: 0;
   white-space: nowrap;
   font-size: var(--space-24);
   line-height: var(--space-32);
   font-weight: 700;
+}
+.site .slide-number {
+  right: 0;
+  width: 2ch;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Left nav (docs/design-system/components.md): the panel component mirrored,

@@ -80,66 +80,109 @@
     </article>
 
 
-    <!-- Tab 2: placeholder slides, one or two per template, in three made-up
-         sections (docs/design-system/slide-templates.md; js/slides.js). Each
-         statement sentence is a genie block revealed one per beat; a graphic's
-         data-states lists its scene state for each beat. -->
+    <!-- Tab 2: Max's part, from docs/max-pres-draft/max-pres-v3.md. One slide per
+         script bullet, statement from its Text line, all on the Text template and
+         one beat each until visuals and beats are worked out slide by slide.
+         [Placeholder] marks bullets with no Text line yet. -->
     <article class="site-tab site-panel" data-tab data-panel="advanced-topics">
       <a class="site-tab-label" href="#advanced-topics"><span>Max's Section</span></a>
       <div class="site-tab-body" data-clip>
         <div class="slides">
-          <div data-section="Placeholder section one">
+          <div data-section="On creative decisions">
             <section class="slide" data-slide data-template="text">
-              <div class="slide-statement">
-                <p data-genie>Text: the statement alone, set at 64 across eight columns.</p>
-                <p data-genie>Each beat pours the next sentence out of the sink.</p>
-              </div>
+              <div class="slide-statement"><p data-genie>Specific Instructions = specific results.</p></div>
             </section>
-            <section class="slide" data-slide data-template="split" data-split="6">
-              <div class="slide-statement">
-                <p data-genie>Split 6: the statement leads on six columns.</p>
-                <p data-genie>The visual takes the other six.</p>
-              </div>
-              <div class="slide-visual"><div data-graphic="page-layout" data-fit="box" data-align="top" data-states="0,1,2"></div></div>
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>Specific instructions = creative decisions.</p></div>
             </section>
-          </div>
-          <div data-section="Placeholder section two">
-            <section class="slide" data-slide data-template="split" data-split="4">
-              <div class="slide-statement">
-                <p data-genie>Split 4: a short statement.</p>
-              </div>
-              <div class="slide-visual"><div data-graphic="exploded-stack" data-fit="box" data-align="top" data-states="0,1"></div></div>
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>Design school teaches <em>syntax</em> and <em>application</em> of creative decisions. This knowledge enhances capabilities with AI; it does not become irrelevant.</p></div>
             </section>
-            <section class="slide" data-slide data-template="wide">
-              <div class="slide-statement">
-                <p data-genie>Wide: one visual across the grid.</p>
-                <p data-genie>The stack is carried over and moves to its new box.</p>
-              </div>
-              <div class="slide-visual"><div data-graphic="exploded-stack" data-fit="box" data-align="top" data-states="1,2"></div></div>
-            </section>
-            <section class="slide" data-slide data-template="row">
-              <div class="slide-statement">
-                <p data-genie>Row: three visuals side by side.</p>
-              </div>
-              <div class="slide-visual"><div data-graphic="page-layout" data-fit="box" data-align="top" data-states="0"></div></div>
-              <div class="slide-visual"><div data-graphic="exploded-stack" data-fit="box" data-align="top" data-states="2"></div></div>
-              <div class="slide-visual"><div data-graphic="page-layout" data-fit="box" data-align="top" data-states="4"></div></div>
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>Design school does <em>not</em> teach <em>correct</em> creative decisions. AI will not give you <em>correct</em> creative decisions. Only you can determine what feels <em>correct</em>.</p></div>
             </section>
           </div>
-          <div data-section="Placeholder section three">
-            <section class="slide" data-slide data-template="row">
-              <div class="slide-statement">
-                <p data-genie>Row: two visuals for a comparison.</p>
-                <p data-genie>A new section, so the title in the footer changes.</p>
-              </div>
-              <div class="slide-visual"><div data-graphic="page-layout" data-fit="box" data-align="top" data-states="0,1"></div></div>
-              <div class="slide-visual"><div data-graphic="page-layout" data-fit="box" data-align="top" data-states="4,3"></div></div>
+          <div data-section="State of digital media">
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>Digital design constrained by technical limitations &amp; knowledge.</p></div>
             </section>
-            <section class="slide" data-slide data-template="visual">
-              <div class="slide-visual"><div data-graphic="exploded-stack" data-fit="box" data-align="bottom" data-states="0,1,0"></div></div>
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>Current system = infinite-symbol programs that all do similar but slightly different things for different uses.</p></div>
+            </section>
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>Templates made using the web easy, but boring.</p></div>
+            </section>
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>Old way = tech: hard but visuals: interesting or tech: easy but visuals: boring.</p></div>
+            </section>
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>But what if it <em>stopped</em> being technically challenging to make what you want digitally?</p></div>
+            </section>
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>But old tools had a <em>purpose</em>. Old tools were a bridge between traditional design techniques and digital capabilities. How can I design by just chatting to a robot? (Spoiler: Chat becomes just 10% of the process)</p></div>
             </section>
           </div>
-          <footer class="slide-footer" data-clip><p class="slide-section-title">Placeholder section one</p></footer>
+          <div data-section="Coding agents">
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>A single chat is limited context. Using an LLM in a project folder allows context to exist in multiple documents.</p></div>
+            </section>
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>Overview (CLAUDE.md or AGENTS.md): Tells the coding agent what we&rsquo;re doing and where to look. Contains a table of contents and overview of the project. Uses Markdown: legible but organised.</p></div>
+            </section>
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>[Placeholder] Example link: CLAUDE.md page.</p></div>
+            </section>
+          </div>
+          <div data-section="Design systems">
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>What else goes in the folder?</p></div>
+            </section>
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>One poster is easy. What about 50 posters? What about collaborators?</p></div>
+            </section>
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>Brand systems defined what stays consistent. People follow them as best as they can.</p></div>
+            </section>
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>Design system = concrete elaboration of creative decisions, organised in discrete sections</p></div>
+            </section>
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>[Placeholder] Example link: design system page.</p></div>
+            </section>
+          </div>
+          <div data-section="Skills">
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>Skills: keywords for directions for an LLM to follow. Can be as broad or specific as you want. If written by others, can make decisions for you. Warning: sometimes skills can be malicious.</p></div>
+            </section>
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>[Placeholder] Text needed: skills vs design documents.</p></div>
+            </section>
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>[Placeholder] Example link: formatted /grill-me session.</p></div>
+            </section>
+          </div>
+          <div data-section="MCPs">
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>[Placeholder] Text needed: MCPs.</p></div>
+            </section>
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>[Placeholder] Graphic: Figma, agent and live code back and forth.</p></div>
+            </section>
+          </div>
+          <div data-section="Make your own tools">
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>[Placeholder] Text needed: make your own tools.</p></div>
+            </section>
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>[Placeholder] Example link: graphics playground.</p></div>
+            </section>
+          </div>
+          <div data-section="Conclusion">
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement"><p data-genie>[Placeholder] Text needed: conclusion and repo download.</p></div>
+            </section>
+          </div>
+          <footer class="slide-footer" data-clip><p class="slide-section-title">On creative decisions</p></footer>
           <span class="genie-sink" data-genie-sink data-fill aria-hidden="true"></span>
         </div>
       </div>

@@ -9,8 +9,8 @@ The chrome is everything that isn't slide content: the bars, the accordion tabs,
 - **The download button** for the repo zip (§8). It lives inside a slide, so it comes with the slides.
 - **Focus distinct from hover, Tab order and screen-reader labels** belong to the accessibility and interaction-and-keys gaps.
 
-## No position display
-- **No step value, slide count or section number appears anywhere.** The step control is shown, but not where it's up to.
+## Position display
+- **The slide number shows in the footer,** right of the section title (changed 2026-11-22). It counts the slides within the tab, from 1, and is worked out from the page, so it follows slides being added or moved. There's still no step value or slide total.
 - **Sections aren't numbered,** in the nav or the footer ([slide-templates.md](slide-templates.md)).
 - Where you are shows only as state: the open tab's flap and the current section in the nav stay inverted.
 

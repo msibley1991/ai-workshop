@@ -59,6 +59,10 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
       footer: panel.querySelector(".slide-footer"),
     };
   }
+  // Each slide's number within its tab, counted from the page, so it follows
+  // slides being added or moved.
+  stops.forEach((s) => { s.number = stops.filter((t) => t.panel === s.panel).indexOf(s) + 1; });
+  stops.filter((s) => s.number === 1).forEach(setNumber); // every tab's footer starts numbered
 
   const beatsOf = (stop) => Math.max(1, stop.implicit ? 1 : stop.sentences.length, ...[...stop.states.values()].map((s) => s.length));
   const stateFor = (stop, g, beat) => { const s = stop.states.get(g); return s[Math.min(beat, s.length - 1)]; };
@@ -138,7 +142,21 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
     layoutSlide(stop.root);
   }
 
+  // The slide number sits right of the section title and changes on every
+  // slide, as soon as the new slide comes on (it doesn't rise or fall).
+  function setNumber(stop) {
+    if (!stop.footer || stop.implicit) return;
+    let num = stop.footer.querySelector(".slide-number");
+    if (!num) {
+      num = document.createElement("p");
+      num.className = "slide-number";
+      stop.footer.append(num);
+    }
+    num.textContent = String(stop.number);
+  }
+
   function setTitle(stop) {
+    setNumber(stop);
     if (!stop.footer) return;
     const spans = [...stop.footer.querySelectorAll(".slide-section-title")];
     spans.slice(1).forEach((s) => s.remove());
@@ -291,6 +309,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
 
     // The new slide comes on with its text in the sink.
     to.sentences.forEach((el) => setGenie(el, 1, false));
+    if (from.panel === to.panel) setNumber(to);
     if (from.panel === to.panel) {
       // Shown and set up in one go, so no frame ever draws the new slide's
       // visuals in place before their entrance.

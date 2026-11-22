@@ -25,7 +25,7 @@ Status: **exploration**, from the slide-templates grilling session (2026-11-21).
 ## Footer strip
 - **One line along the bottom of the content area,** 32 tall, with a 16 gap above row 6. Its bottom is the content's bottom line, one box inset (24) above the panel's edge.
 - **The genie's sink** sits on the left, at the text axis (column 1), on the content's bottom line. Text always hangs from the left, so it funnels down its own side of the slide instead of over the visuals. The spine's swing is mirrored to match, swinging right, away from the sink's side.
-- **The section title** sits on the right, ending on the last column's edge. It's set in the **Section title** style, 24/32 at weight 700, in sentence case, with no number (decided 2026-11-22, [components.md](components.md)). The names come from the script's `##` titles:
+- **The section title** sits on the right, ending just left of the slide number. It's set in the **Section title** style, 24/32 at weight 700, in sentence case, with no section number (decided 2026-11-22, [components.md](components.md)). The names come from the script's `##` titles:
   - On creative decisions
   - State of digital media
   - Coding agents
@@ -35,6 +35,7 @@ Status: **exploration**, from the slide-templates grilling session (2026-11-21).
   - Make your own tools
   - Conclusion
 - So the sink square bottom left balances a small bold name bottom right, a Swiss running head.
+- **The slide number** ends on the last column's edge, in the same style with tabular figures, in a two-digit slot. The section title ends 16 to its left. The number counts slides within the tab, from the page, and changes as soon as a new slide comes on: it doesn't rise or fall with the title (added 2026-11-22).
 - **The strip belongs to the tab's open layout:** the title is clipped to its tab, so it never shows over a closed one.
 - **The title belongs to the section, not the slide.** It stays still through all the section's slides, with no genie. When the section changes within a tab, the old title falls out of the strip and the new one rises in, during the visuals phase (400 on ease, clipped to the strip). Between tabs it's set before the accordion moves.
 - The hero has no section title.
@@ -113,7 +114,7 @@ As built on the lab layout page:
 - A carried visual is the same scene on consecutive slides in one tab, matched in order.
 
 ## In the lab
-- **`lab/layout.html`, tab 2:** seven placeholder slides in three made-up sections: Text, Split 6, Split 4, Wide, Row 3, Row 2 and Visual. The exploded stack is carried from Split 4 into Wide and Row, and the page layouts from Row 3 into Row 2.
+- **`lab/layout.html`, tab 2:** Max's Section from the script, 26 slides in its eight sections, one per bullet. Each statement is the bullet's Text line. For now they're all on the Text template, one beat each, and bullets with no Text line show a `[Placeholder]` statement. Templates, visuals and beats get worked out slide by slide.
 - **Hero and tab 1** are on templates too: the hero is Split 6 (see Templates), and tab 1 (the placeholder for Nora's part) has one Split 4 slide with the page layout, in a placeholder section.
 - **Tab names** are temporarily "Nora's Section" and "Max's Section", for a layout recording. The hashes are still `#foundations` and `#advanced-topics`.
 - **Keys:** ← and →, and PageUp and PageDown from clickers, step beats and flow on across slides, sections and tabs. Clicking a tab, the URL hash or a scroll snap lands on that tab's first slide. The old l toggle is off on this page; the genie page still has it.
@@ -121,7 +122,7 @@ As built on the lab layout page:
 - **Code:** `lab/js/slides.js` (stops, beats, the phases, template placement); box fitting, `setGraphicState()` and `copyGraphicState()` in `lab/js/graphic.js`; the slide grid and footer strip in `lab/css/layout.css`.
 
 ## Not built yet
-- Real slides from the script.
+- Real slides from the script: tab 2 is laid out as text only (see "In the lab"); templates, visuals and beats are next.
 - The left nav, and the axis moving to column 3 with it (the code reads `--nav-cols`).
 - Reader mode.
 
