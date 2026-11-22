@@ -423,16 +423,79 @@
   line-height: calc(56 * var(--u));
   font-weight: 500;
 }
-.site .slide-statement > p { margin: 0; }
-.site .slide[data-template="text"] .slide-statement {
+.site .slide-statement > p { margin: 0; font-weight: inherit; } /* over text-layer.css's p 400 */
+.site .slide[data-template="text"] .slide-statement,
+.site .slide[data-statement="large"] .slide-statement {
   font-size: var(--space-64);
   line-height: calc(72 * var(--u));
 }
+/* data-statement="large" on a Wide or Row slide: a short statement at the
+   Text size, in bold, across every open column (js/slides.js), still on the
+   base line. */
+.site .slide[data-statement="large"] .slide-statement { font-weight: 700; }
 
 /* A visual region: a box of columns x row fields. The graphic fills it and is
    fitted inside (data-fit="box"; js/graphic.js). */
 .slide-visual { position: relative; min-width: 0; min-height: 0; }
 .slide-visual > [data-graphic] { width: 100%; height: 100%; }
+
+/* Text artefacts (docs/design-system/text-artefacts.md). A chat hangs from the
+   top of its box; your turn is boxed on the right at about two thirds of the
+   width, with its bold speaker label just above it on the same side. --s scales the whole chat
+   (js/slides.js sets it): 1 is the resting 24/32; 4/3 is 32/40, for a chat
+   shown alone. Width and padding scale with the type, so its line breaks hold;
+   line heights step 32 -> 40 with it. */
+.artefact { width: 100%; }
+.artefact[hidden] { display: none; } /* before its beat (data-enter) */
+.artefact-chat {
+  --s: 1;
+  --chat-lh: calc(var(--space-32) + 24 * var(--u) * (var(--s) - 1));
+  box-sizing: border-box;
+  padding-right: calc(var(--col) + var(--grid-gutter)); /* ends one column in from its box */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: calc(var(--gap-tight) * var(--s));
+}
+.site .chat-speaker {
+  margin: 0;
+  font-size: calc(var(--space-24) * var(--s));
+  line-height: var(--chat-lh);
+  font-weight: 700;
+}
+.chat-turn {
+  box-sizing: border-box;
+  flex: none;
+  width: calc(var(--span-4) * var(--s));
+  padding: calc(var(--space-16) * var(--s)) calc(var(--space-24) * var(--s));
+  overflow: hidden; /* a cropped turn (data-crop) is a window on its sheet */
+}
+/* The sheet holds the turn's text; a crop moves it up behind the window. Marks
+   are ink bars placed in it by js/slides.js. */
+.chat-sheet { position: relative; }
+.chat-line { display: block; }
+.chat-mark { position: absolute; }
+/* Connector lines from marked lines to a statement phrase (js/slides.js). */
+.slide-links { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.site .chat-turn p {
+  margin: 0;
+  font-size: calc(var(--space-24) * var(--s));
+  line-height: var(--chat-lh);
+  font-weight: 400;
+  white-space: pre-line; /* a new line per design area */
+  min-height: var(--chat-lh); /* one line while it's empty, before typing */
+}
+/* Typing (js/artefact.js): the rest of the word being typed keeps its room but
+   isn't drawn; the cursor is a block one em tall that takes no width. */
+.type-rest { visibility: hidden; }
+.type-cursor { position: relative; }
+.type-cursor > [data-fill] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0.5em;
+  height: 1em;
+}
 
 /* Footer strip, inside .slides so it keeps the open layout while the tab
    opens and closes: the genie's sink on the left, under the text axis (so text

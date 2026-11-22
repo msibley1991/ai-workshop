@@ -94,6 +94,9 @@ export function measure(root, ctx) {
     const parent = node.parentElement;
     if (!parent || parent.closest("svg")) continue;
     const style = getComputedStyle(parent);
+    // visibility: hidden text keeps its layout but isn't drawn (typing's
+    // untyped part, js/artefact.js; genied-out blocks draw nothing anyway).
+    if (style.visibility === "hidden") continue;
     const font = fontOf(style);
     const ascent = ascentOf(ctx, font);
     const ink = inkOf(parent, style);
@@ -218,7 +221,9 @@ export function measure(root, ctx) {
       const [cx, cy, rad] = ["cx", "cy", "r"].map(n);
       points = Array.from({ length: 17 }, (_, i) => pt(cx + rad * Math.cos((i / 16) * Math.PI * 2), cy + rad * Math.sin((i / 16) * Math.PI * 2)));
     }
-    paths.push({ points, ink: shape.dataset.ink ?? inkOf(shape.closest("svg")) });
+    // data-weight on the svg: the stroke in units (default one emulated pixel).
+    const weight = parseFloat(shape.closest("svg").dataset.weight) || 0;
+    paths.push({ points, weight, ink: shape.dataset.ink ?? inkOf(shape.closest("svg")) });
   }
 
   // Genie blocks: the box around their text (not the element, which may be a
@@ -401,11 +406,13 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
   }
 
   for (const p of layout.paths) {
+    ctx.lineWidth = p.weight ? Math.max(ps, snap(p.weight * layout.u)) : ps;
     ctx.strokeStyle = colors[p.ink];
     ctx.beginPath();
     p.points.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
     ctx.stroke();
   }
+  ctx.lineWidth = ps;
 
   // Genie blocks in motion (0 < t < 1) are drawn offscreen and warped; at
   // t = 1 they're in the sink and draw nothing; at 0 they draw as normal words.

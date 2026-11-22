@@ -5,14 +5,14 @@ Status: **exploration**, from the slide-templates grilling session (2026-11-21).
 ## Sections, slides and beats
 - **Tab:** one presenter's part. Tab 1 is Nora's and tab 2 is Max's.
 - **Section:** a group of slides within a tab, from the script's `##` titles. Its name shows small in the footer strip (see "Footer strip"), not as a Headline at the top of the slide.
-- **Slide:** each bullet in the script is a full slide. It uses **one template** for all its beats.
+- **Slide:** each bullet in the script is a full slide. It normally uses **one template** for all its beats. A slide may change template at a beat (added 2026-11-22; built, but no slide uses it now). The statement then moves and resizes to its new place over 400 on ease, keeping its line breaks, before that beat's visuals come in.
 - **Beat:** one press of →. A beat changes only what's inside the slide's regions: the statement gains its next sentence, or a visual steps to its next state (see [graphics.md](graphics.md), "Presentation steps").
 - **A slide may hold more than one visual.** The visuals aren't settled, so templates describe regions on the grid, not kinds of visual. Any visual can go in any visual region.
 
 ## Swiss principles applied
 - **Scale, not width:** a text-only slide gets bigger type, not longer lines. Lines stay around 30 characters.
 - **One text axis:** the statement always starts on the first open column, normally column 1. In Text and Split it hangs from the top of row 1. In Wide and Row it stands on the base line under the visuals, so the genie funnels straight down into the sink (bottom left) instead of over them.
-- **Asymmetry:** nothing is centred. Empty columns are part of the composition. Text is flush left with a ragged right, and hierarchy comes from size and weight, never colour.
+- **Asymmetry:** nothing is centred, except a solo artefact shown alone before its comparison (`data-solo`, slide 1 of Max's Section, 2026-11-22). Empty columns are part of the composition. Text is flush left with a ragged right, and hierarchy comes from size and weight, never colour.
 - **A modular grid:** columns and rows. Visuals fill boxes of fields. Text flows freely from the top using the typography gaps.
 
 ## Row fields
@@ -112,6 +112,15 @@ As built on the lab layout page:
 - `data-states` lists the graphic's scene state for each beat. Without it, the graphic steps through every state in order. A slide has as many beats as its longest list.
 - `data-fit="box"` fits the graphic to its region; `data-align` is `top` for Split, Wide and Row, and `bottom` for Visual.
 - A carried visual is the same scene on consecutive slides in one tab, matched in order.
+- `data-templates="text,row,row"` gives the slide's template at each beat (the last one holds for later beats), with `data-template` set to the first. On a change, the statement morphs first, then visuals enter. Stepping back reverses it: visuals leave first, then the statement morphs back.
+- `data-enter` on a graphic or text artefact is the beat it enters on (default 0). Before that beat it's hidden. On its beat it rises in, and stepping back past it sends it out the way it came. A slide has at least enter + 1 beats.
+- `data-enter` on a statement sentence holds it in the sink until that beat, so a statement can come after the visuals (slide 1: the two chats, then the statement on beat 3).
+- `data-statement="large"` on a Wide or Row slide: the statement at 64/72 across all open columns, on the base line.
+- `data-solo="0"` on a text artefact shows it alone at those beats: centred on both axes over the slide's visual area, with its type at 32/40. On the next beat it moves to its own box and shrinks to 24/32 together (400, ease), before that beat's visuals enter.
+- `data-exit` on a statement sentence or a visual is the beat it leaves on. A statement can change within a slide: on that beat the leaving sentences genie out first, then the entering ones pour in (slide 1, beat 4).
+- `data-leave="shrink"` on a text artefact: on leaving it erases its text, then its box shrinks to nothing onto its top-right corner instead of falling.
+- `.slide-statement[data-place="stack"]` is a second statement on 6 columns, hung from row 1 and moved so its `[data-link-target]` line is centred in the frame (slide 1: "Specific instructions / =" then "creative decisions").
+- **Within a beat** the phases run in order: leaving and cropping artefacts (together), then the statement change, then marks, then links.
 
 ## In the lab
 - **`lab/layout.html`, tab 2:** Max's Section from the script, 26 slides in its eight sections, one per bullet. Each statement is the bullet's Text line. For now they're all on the Text template, one beat each, and bullets with no Text line show a `[Placeholder]` statement. Templates, visuals and beats get worked out slide by slide.
@@ -130,4 +139,4 @@ As built on the lab layout page:
 - ~~The accordion's tab headers also show section names, so they appear twice~~: closed. The tabs are named for the presenters' parts, so a header shows the tab and the footer shows the section ([components.md](components.md)).
 - ~~Whether the section title carries its number~~: no. Sections are unnumbered everywhere.
 - Reader mode: what someone scrolling the page gets instead of beats.
-- Whether Wide and Row ever need the statement wider than 6 columns.
+- ~~Whether Wide and Row ever need the statement wider than 6 columns~~: sometimes. `data-statement="large"` (2026-11-22, slide 1) sets a short statement at the Text size, 64/72, across every open column, still on the base line. It's for statements that fit on one line there, so they keep to one row field.

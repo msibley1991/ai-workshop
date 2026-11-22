@@ -1,6 +1,6 @@
 # Text artefacts
 
-Status: **exploration**. Decided in the prompt-blocks grilling session (2026-11-22). Nothing is built yet. The script's opening sections need these first ([`docs/max-pres-draft/max-pres-v3.md`](../max-pres-draft/max-pres-v3.md) §1, §3–6).
+Status: **exploration**. Decided in the prompt-blocks grilling session (2026-11-22). **Partly built** in the lab: the chat kind with your turn only, plain spans, and typing in, for slide 1 of Max's Section (`lab/layout.html`, `lab/js/artefact.js`). Nothing else is built yet. The script's opening sections need these first ([`docs/max-pres-draft/max-pres-v3.md`](../max-pres-draft/max-pres-v3.md) §1, §3–6).
 
 ## What they are
 - A text artefact is a **graphic made of legible text**: prompts, chats, files and folders shown on a slide.
@@ -79,7 +79,7 @@ A span is any run of words in an artefact. Each slide sets every span's state at
 - **Retype is the motion for text changing in place.** The old text is erased and the new text typed character by character at one steady rate, with a block cursor in ink.
 - A new chat turn or prompt can also appear empty and be typed in this way, the human's and the agent's alike. Whether it's typed or already there is the slide's choice.
 - The genie stays for statements entering and leaving ([motion.md](motion.md)). It isn't used inside artefacts.
-- **The rate** is tuned in the lab, then named in motion.md.
+- **The rate:** for now a whole turn types in over **400 ms in all**, whatever its length, so a long prompt arrives as fast as a short one (slide 1, 2026-11-22). Erasing takes the same. A per-character rate may still be tuned in the lab and named in motion.md.
 
 ## Pixelated blur
 - Blur is for **out of focus**. It's the only place the emulated pixel grows past 1 unit, so coarse pixels always mean "not looking here".
@@ -98,9 +98,27 @@ A span is any run of words in an artefact. Each slide sets every span's state at
 ## Links
 - **Artefacts carry no links.** Links to the real files are ordinary clickable text links in the presentation.
 
-## Authoring (to build)
-- An artefact is HTML markup: a container that declares its kind (prompt, chat, document, tree), with spans that carry ids. The exact attributes are settled when it's built in the lab.
-- Its text is real DOM text in the type roles, drawn by the text raster.
+## Authoring
+- An artefact is HTML markup: a container that declares its kind (prompt, chat, document, tree), with spans that carry ids. Its text is real DOM text in the type roles, drawn by the text raster.
+- **Built so far** (the chat, one turn):
+
+```html
+<div class="slide-visual">
+  <div class="artefact artefact-chat" data-artefact="chat" data-enter="0" data-solo="0">
+    <p class="chat-speaker">You</p>
+    <div class="chat-turn" data-box><p data-type>Your request…</p></div>
+  </div>
+</div>
+```
+
+- `data-artefact` makes it a visual for the slides: it rises and falls like a graphic, but has no states and isn't carried yet.
+- `data-enter` is the beat it enters on, and `data-solo` the beats it's shown alone, centred and at 32/40 ([slide-templates.md](slide-templates.md)).
+- **Line breaks in a turn** are kept, so a long prompt can put each area (colours, type, layout…) on its own line, as people do in real prompts.
+- **Scale:** the whole chat scales together (type, padding, width, gaps), so its line breaks hold when it grows or shrinks. Line heights step with the type (24/32 to 32/40).
+- A `[data-type]` block types in after its artefact has risen, with a block cursor in ink. Stepping back erases it, then it falls. The box starts one line tall and grows a line at a time as the text reaches it, like a real input. The word being typed takes its full room from its first letter, so words never jump to the next line partway through.
+- **Crop and split (built, slide 1):** `data-crop="3"` on a chat, with `[data-crop-area]` on the focus lines (one `.chat-line` per line of the prompt). On that beat it first erases every other line (400), keeping their room so nothing moves, then splits (400): the emptied lines close and the turn's outline becomes one box per area, spaced so the middle one is centred in the frame and the outer ones sit half a link run above and below, for clean 45° bends. The box doesn't grow.
+- **Marked and cross-links (built, slide 1):** `data-mark="4"` wipes an ink bar in behind each line of each area, left to right (400), knocking the text out. Then a line draws from each box's left edge, at its centre, to 8 past the end of the `[data-link-target]` phrase, bending 45° at the midpoint, all converging on one point (`svg.slide-links`, weight 2).
+- Spans with ids, the agent's turn, and the other kinds are still to build.
 
 ## Open
 - **Marked vs selected:** the marked state (ink bar, text knocked out) looks the same as selected text ([palettes.md](palettes.md)). Test whether that confuses, and if it does, change one of them.
