@@ -7,6 +7,10 @@
   <link rel="stylesheet" href="vendor/dialkit/styles.css">
   <link rel="stylesheet" href="css/text-layer.css">
   <link rel="stylesheet" href="css/layout.css">
+  <!-- TEMPORARY (slide-building sessions): hides the dialkit Render menu so it
+       doesn't need closing after every refresh. Render settings still load
+       from presets/render.json. Delete this block to bring the menu back. -->
+  <style>.dialkit-root { display: none !important; }</style>
   <script type="importmap">
     { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js" } }
   </script>
@@ -107,7 +111,7 @@
               <div class="slide-statement"><p data-genie>Digital design constrained by technical limitations &amp; knowledge.</p></div>
             </section>
             <section class="slide" data-slide data-template="text">
-              <div class="slide-statement"><p data-genie>Current system = infinite-symbol programs that all do similar but slightly different things for different uses.</p></div>
+              <div class="slide-statement"><p data-genie>Current system = ∞ programs that all do similar but slightly different things for different uses.</p></div>
             </section>
             <section class="slide" data-slide data-template="text">
               <div class="slide-statement"><p data-genie>Templates made using the web easy, but boring.</p></div>
