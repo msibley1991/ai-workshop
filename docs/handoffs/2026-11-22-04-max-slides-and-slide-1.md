@@ -34,7 +34,7 @@ This session laid out every slide of Max's Section, then built the first visual:
 - **Containers in flat graphics:** within a tab, the outermost layer is a 4 outline with 8 corners, and containers nested inside are 2. Chrome (tabs, bars, buttons) keeps its own weights.
 - **Corners:** every flat element takes 8 corners, replacing square corners.
 - **Connectors:** 4 thick with 8-radius bends, ending in the open chevron (32 tall, tip 32 short of the end). Leader lines (captions) keep their own rules: 2, with a square dot.
-- **Scene engine (`lab/js/graphic.js`) follows them:** `rounded()` rounds rects, polygons and connector bends. A shape whose bounds sit inside another's is drawn at 2. `chevron()` and `pullBack()` draw the arrows. Both scenes paint without errors. You haven't checked them in Chrome yet (Foundations' `page-layout`, the intro's dashed pin arrow).
+- **Scene engine (`lab/js/graphic.js`) follows them:** `rounded()` rounds rects, polygons and connector bends. A shape whose bounds sit inside another's is drawn at 2. `chevron()` and `pullBack()` draw the arrows. Both scenes paint without errors, and you checked them in Chrome (`page-layout` on tab 1, Nora's Section; the intro's dashed pin arrow).
 
 ### 4. Code
 - **`lab/js/artefact.js` (new):** typing, with `typeTo` / `setTyped` and a block cursor. A turn types in over 400 ms in all. Its box grows a line at a time.
