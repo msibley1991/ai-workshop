@@ -2,7 +2,7 @@
 //
 // A tab body can hold `.slides` with `[data-slide]` slides, grouped in
 // `[data-section]` elements whose name shows in the footer strip. A panel
-// without slides (the hero, tab 1) counts as one slide: the panel itself.
+// without slides counts as one slide: the panel itself (none on layout.html now).
 // Every slide, in order, is a stop; ← and → move through each stop's beats and
 // then on to the next stop, across sections and tabs.
 //

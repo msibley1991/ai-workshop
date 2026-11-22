@@ -368,6 +368,8 @@
   position: relative;
   height: calc(var(--avail) + var(--row-gap));
 }
+/* The intro has no tab header to share the gap with: it opens 8 shorter. */
+.site-intro .slides { height: var(--avail); }
 .slide {
   position: absolute;
   inset: 0;

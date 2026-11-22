@@ -53,7 +53,7 @@ Status: **exploration**, from the slide-templates grilling session (2026-11-21).
 - **How visuals sit in their box:** in Split, Wide and Row, a visual hangs from the top of its box (row 1). In Visual it stands on the base line.
 - **Rows for the statement (Wide and Row):** the statement's height is measured at its full length, every sentence included, from the slide's first beat. It takes as many bottom row fields as that needs, set on the base line, and the visuals take the rows above it.
 - **Why text goes below in Wide and Row** (changed 2026-11-22): with the sink bottom left, a statement above full-width visuals funnels down across them. Below them, it drops straight into the sink.
-- **Hero:** the intro screen keeps its own arrangement, a graphic beside the Display title. It's slide zero.
+- **Hero:** slide zero, on the Split 6 template (changed 2026-11-22). The statement is one block: the Display title and the sub. The visual is to the right. It has no section, so there's no footer title, but its sink is bottom left like every slide's. At 128 on 6 columns, the title takes about four lines on a 1440 canvas.
 - **New templates** are added only when a slide doesn't fit these five, the same "named, not free" rule as motion's values. Left out for now: a mirrored Split (it breaks the text axis) and an unequal Row.
 
 ## Panels
@@ -114,7 +114,8 @@ As built on the lab layout page:
 
 ## In the lab
 - **`lab/layout.html`, tab 2:** seven placeholder slides in three made-up sections: Text, Split 6, Split 4, Wide, Row 3, Row 2 and Visual. The exploded stack is carried from Split 4 into Wide and Row, and the page layouts from Row 3 into Row 2.
-- **Hero and tab 1** (the placeholder for Nora's part) keep their old layout. Each counts as one slide, and its graphic's states are its beats.
+- **Hero and tab 1** are on templates too: the hero is Split 6 (see Templates), and tab 1 (the placeholder for Nora's part) has one Split 4 slide with the page layout, in a placeholder section.
+- **Tab names** are temporarily "Nora's Section" and "Max's Section", for a layout recording. The hashes are still `#foundations` and `#advanced-topics`.
 - **Keys:** ← and → step beats and flow on across slides, sections and tabs. Clicking a tab, the URL hash or a scroll snap lands on that tab's first slide. The old l toggle is off on this page; the genie page still has it.
 - **Rendering cost:** painting a graphic is the expensive step, so the lab keeps its last two painted looks and draws flow packets on top instead of repainting. A carried move or an explode tween still repaints its graphic every frame.
 - **Code:** `lab/js/slides.js` (stops, beats, the phases, template placement); box fitting, `setGraphicState()` and `copyGraphicState()` in `lab/js/graphic.js`; the slide grid and footer strip in `lab/css/layout.css`.

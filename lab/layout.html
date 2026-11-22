@@ -31,33 +31,42 @@
       <a class="site-title" href="#">how (did you [make] this?)</a>
     </header>
 
-    <!-- Intro: collapses as the first tab opens. -->
+    <!-- Intro: the hero, slide zero, on the Split 6 template (the Display title
+         and the sub as one statement block). No section, so no footer title.
+         It collapses as the first tab opens. -->
     <section class="site-intro site-panel" data-panel="" data-clip>
-      <div class="site-split site-grid">
-        <div class="site-graphic" data-graphic="exploded-stack"></div>
-        <div class="site-hero-text" data-genie>
-          <h1>how (did you [make] this?)</h1>
-          <p class="site-hero-sub">LLM-assisted coding in design</p>
-        </div>
+      <div class="slides">
+        <section class="slide" data-slide data-template="split" data-split="6">
+          <div class="slide-statement">
+            <div data-genie>
+              <h1>how (did you [make] this?)</h1>
+              <p class="site-hero-sub">LLM-assisted coding in design</p>
+            </div>
+          </div>
+          <div class="slide-visual"><div data-graphic="exploded-stack" data-fit="box" data-align="top"></div></div>
+        </section>
+        <span class="genie-sink" data-genie-sink data-fill aria-hidden="true"></span>
       </div>
-      <span class="genie-sink" data-genie-sink data-fill aria-hidden="true"></span>
     </section>
 
     <!-- Tabs: each opens in place; its outline grows around its body. Placeholder copy. -->
     <article class="site-tab site-panel" data-tab data-panel="foundations">
-      <a class="site-tab-label" href="#foundations"><span>Foundations</span></a>
+      <a class="site-tab-label" href="#foundations"><span>Nora's Section</span></a>
       <div class="site-tab-body" data-clip>
-        <div class="site-split site-grid">
-          <div class="site-graphic" data-graphic="page-layout"></div>
-          <div class="site-section-text" data-genie>
-            <h2 class="site-headline">Foundations</h2>
-            <div class="site-section-content">
-              <p class="site-subheadline">Sub-Headline</p>
-              <p class="site-body">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, <a href="https://www.virtualelena.co/p/toward-a-working-definition-of-paperclip">dictum est a</a>, mattis tellus. Sed dignissim, metus nec fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus elit sed risus. Maecenas eget condimentum velit, sit amet feugiat lectus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.</p>
-            </div>
+        <!-- Tab 1 (Nora's part): one placeholder slide on the Split 4 template. -->
+        <div class="slides">
+          <div data-section="Placeholder section">
+            <section class="slide" data-slide data-template="split" data-split="4">
+              <div class="slide-statement">
+                <p data-genie>Placeholder: the first slide of this part.</p>
+                <p data-genie>The page layout steps through its states.</p>
+              </div>
+              <div class="slide-visual"><div data-graphic="page-layout" data-fit="box" data-align="top"></div></div>
+            </section>
           </div>
+          <footer class="slide-footer" data-clip><p class="slide-section-title">Placeholder section</p></footer>
+          <span class="genie-sink" data-genie-sink data-fill aria-hidden="true"></span>
         </div>
-        <span class="genie-sink" data-genie-sink data-fill aria-hidden="true"></span>
       </div>
     </article>
 
@@ -67,7 +76,7 @@
          statement sentence is a genie block revealed one per beat; a graphic's
          data-states lists its scene state for each beat. -->
     <article class="site-tab site-panel" data-tab data-panel="advanced-topics">
-      <a class="site-tab-label" href="#advanced-topics"><span>Advanced Topics</span></a>
+      <a class="site-tab-label" href="#advanced-topics"><span>Max's Section</span></a>
       <div class="site-tab-body" data-clip>
         <div class="slides">
           <div data-section="Placeholder section one">
