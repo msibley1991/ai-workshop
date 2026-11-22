@@ -16,7 +16,7 @@ Status: **exploration**, from the graphics grilling session (2026-11-21). Built 
   - boxes for regions
   - lines for text
   - hatching or solid for images
-  - 4/2 weights and square corners
+  - the container weights and corners (see Lines)
 - **Screenshots are evidence, used sparingly.** A screenshot is shown when the artefact itself is the point.
   - At most one per point, and always captioned.
   - Converted to two-colour ink on ground with a simple threshold, not dither.
@@ -54,8 +54,10 @@ All in emulated pixels:
 
 | Weight | Use |
 |---|---|
-| 4 | Every shape edge: outer outlines, internal outlines and edges between faces |
-| 2 | Connectors and leader lines |
+| 4 | Outermost containers in flat graphics, connectors, and every edge of an iso object (outlines and edges between faces) |
+| 2 | Interior containers (a box inside another box) and leader lines |
+
+- **Containers in flat graphics** (2026-11-22, from slide 1's chat boxes, which looked better this way): within a tab, the outermost layer of containers has a **4 outline with 8 corners**. Containers nested inside it drop to a **2 outline**. A graphic with a single layer of boxes (side-by-side chats, split boxes) is all 4/8. This replaces square corners (see Corners below). Interface chrome (tab outlines, bars, buttons) keeps its own weights ([layout-grid.md](layout-grid.md)).
 
 - **Fixed at every size.** The weights and the hatch spacing never scale with a graphic's size. A graphic too small for them is simplified (fewer parts, less detail) rather than thinned. The minimum size will be found by testing.
 - **How edges are drawn:** 4-pixel lines centred on each face's or shape's true edge (2 of their pixels inside). Exploded parts each keep their own edges.
@@ -71,14 +73,14 @@ All in emulated pixels:
 - **Boxes ([slide-templates.md](slide-templates.md), built in the lab):** a visual fits a box of columns × row fields, scaled to whichever side runs out first and hung from the box's top-left. Captions still end on column edges.
 - **Variable span:** each graphic declares a range in columns (for example, 3–4). It can be as wide as all 12 columns, with the text above or below it.
 - **Panels open:** when a panel (controls, nav) covers columns, the text reflows first. The graphic keeps its widest span until the text would go under 4 columns. Only then does the graphic drop to fewer columns, down to its minimum. The grid and panel rules are in [layout-grid.md](layout-grid.md).
-- **Square corners** on flat graphic shapes. The 8 radius belongs to the interface chrome, which keeps UI and content distinct. Rounding can still carry a meaning, such as a process, when a graphic calls for it.
+- **Corners:** every flat element takes 8 corners (2026-11-22): containers, nested containers, shapes and connector bends.
 
 ## Connectors and leader lines
-2-pixel lines.
+- **Connectors are 4 thick with 8-radius bends** (2026-11-22, from slide 1's links, to match the containers). Leader lines (captions) stay 2 and follow their own rules below.
 - **Angles:** horizontal, vertical and 45° only. These are the angles that draw pixel-clean.
   - Exception: leader lines may run along iso angles (30°, 150°) where they point into an iso object.
 - **Ends:**
-  - **Arrows:** a solid triangular arrowhead.
+  - **Arrows:** an open chevron (2026-11-22, from slide 1's links): legs at 45° in the connector's weight, 32 tall, its tip 32 short of what it points at (on slide 1, the phrase). It replaces the solid triangular arrowhead.
   - **Leader lines:** a small solid square dot where they touch the object, and nothing at the label end.
 - **On iso parts, the dot sits on the part's most visible plane:** the face with the most visible area after occlusion. On the demo, that's the top face of the cap and the base.
   - Near-ties go to the face on the label's side.
@@ -144,6 +146,6 @@ The named curves, durations, loops and enter/exit motions are in [motion.md](mot
   - flat connectors with automatic routing: authors give the points
 - The minimum graphic or part size for the fixed weights.
 - **Since dropping the silhouette:**
-  - Outer and inner edges share one weight, so in flat diagrams an enclosing box (the page frame in `page-layout`) no longer stands out from the boxes inside it. If that hierarchy is missed, a wider edge on `outline: "outer"` shapes is cheap.
+  - ~~Outer and inner edges share one weight~~: settled by the container rule (2026-11-22). The outermost container is 4 and the boxes inside it 2, so `page-layout`'s page frame stands out again. The scene engine follows this: a flat shape whose bounds sit inside another shape's is drawn at 2.
   - During an explode tween, parts separate from the first frame, where the merged outline used to close gaps under 12 px.
   - Scenes still leave room for the old outward growth (`page-layout`'s 8-unit shift), so drawings stop about 6 px short of their span edge. Tighten per scene.

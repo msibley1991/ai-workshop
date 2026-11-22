@@ -2,9 +2,12 @@
 // mounted on an element with data-graphic="<name>" and drawn into the raster by
 // text-raster.js. The rules are in docs/design-system/graphics.md:
 //   - every pixel is ground, ink, or accent (focus); shading is hatching
-//   - lines: 4 for every shape edge (outer and inner alike), 2 connectors
-//   - connectors: arrowheads, dashed = hypothetical, flow packets; leader lines
-//     end in a square dot on the object and are cased in ground
+//   - lines: 4 for iso edges, outermost flat shapes and connectors; 2 for flat
+//     shapes nested inside another shape, and leader lines
+//   - flat shapes and connector bends have 8 corners
+//   - connectors: open chevron arrows (32 tall, tip 32 short of the end),
+//     dashed = hypothetical, flow packets; leader lines end in a square dot on
+//     the object and are cased in ground
 //   - labels are real DOM text (label role), placed off the hatching
 //   - steps (← →) move between named states with one tween (400 or 800 ms,
 //     ease-in-out); rapid presses skip to the end; motion off cuts
@@ -22,11 +25,15 @@ import {
 } from "./shade.js";
 import SCENES from "./graphics/index.js";
 
-const INNER = ISO_STYLE.inner;    // 4, every shape edge
-const LINE = 2;                   // connectors and leader lines
+const INNER = ISO_STYLE.inner;    // 4, iso edges and outermost flat shapes
+const NESTED = 2;                 // flat shapes inside another shape
+const LINE = 2;                   // leader lines
+const CONNECTOR = 4;              // connectors
+const RADIUS = 8;                 // flat corners and connector bends (emulated px)
+const ARROW_H = 32;               // open chevron height, legs at 45° (emulated px)
+const ARROW_GAP = 32;             // chevron tip short of the connector's end
 const CASING = 2;                 // ground each side of a leader line
 const DOT = 6;                    // leader-line dot, square
-const ARROW = [12, 6];            // arrowhead length, half-width (emulated px)
 const DASH = [6, 4];              // on, off (pixel steps)
 const PACKET = [12, 4];           // flow packet length, width
 const PACKET_SPEED = 48;          // emulated px per second
@@ -401,20 +408,28 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
     }
   } else {
     // Flat shapes, in order. fill: "none" (ground), "solid", or a hatch step 1..3.
-    // outline: "none", or anything else (the 4 edge; "outer" and "inner" are the same).
-    for (const s of (scene.shapes ?? []).filter((s) => visible(s.id))) {
+    // outline: "none", or anything else: 4 for a shape on the outermost layer,
+    // 2 for one inside another shape. Rects and polygons get 8 corners.
+    const shapes = (scene.shapes ?? []).filter((s) => visible(s.id)), boxes = shapes.map(shapeBox);
+    const inside = (a, b) => a !== b && b[0] <= a[0] && b[1] <= a[1] && b[2] >= a[2] && b[3] >= a[3];
+    shapes.forEach((s, i) => {
       const t = s.fill === "solid" ? 1 : typeof s.fill === "number" ? stepTone(ISO_STYLE.hatch, s.fill) : 0;
-      own(r.fill(shapePoints(s, P), t, { edges: s.outline !== "none", edgeWidth: INNER }), s.part ?? s.id);
-    }
+      const nested = boxes.some((b, j) => j !== i && inside(boxes[i], b));
+      const pts = s.type === "circle" ? shapePoints(s, P) : rounded(shapePoints(s, P), RADIUS, true);
+      own(r.fill(pts, t, { edges: s.outline !== "none", edgeWidth: nested ? NESTED : INNER }), s.part ?? s.id);
+    });
   }
 
-  // Connectors: 2-pixel lines, orthogonal or 45°; arrow ends; dashed; flow packets.
+  // Connectors: 4-pixel lines, orthogonal or 45°, bends rounded; open chevron
+  // arrow ends; dashed; flow packets.
   for (const c of scene.connectors ?? []) {
     if (!visible(c.id)) continue;
-    const pts = c.pts.map(resolve);
+    let pts = c.pts.map(resolve);
+    if (c.end === "arrow") pts = pullBack(pts, ARROW_GAP);
+    pts = rounded(pts, RADIUS, false);
     const id = own(r.count++, c.part ?? c.id);
-    for (let i = 0; i + 1 < pts.length; i++) r.line(pts[i], pts[i + 1], id, LINE, { dash: c.dashed ? DASH : null });
-    if (c.end === "arrow") own(arrowhead(r, pts[pts.length - 2], pts[pts.length - 1]), c.part ?? c.id);
+    for (let i = 0; i + 1 < pts.length; i++) r.line(pts[i], pts[i + 1], id, CONNECTOR, { dash: c.dashed ? DASH : null });
+    if (c.end === "arrow") chevron(r, pts[pts.length - 2], pts[pts.length - 1], id);
     if (st.flow?.includes(c.id)) m.flows.push({ pts, id }); // packets: drawn over the look (drawGraphic)
   }
 
@@ -533,11 +548,55 @@ function route(a, b, id) {
   return [a, [a[0], b[1] - Math.sign(dy) * Math.abs(dx)], b];
 }
 
-function arrowhead(r, from, to) {
-  const dx = to[0] - from[0], dy = to[1] - from[1], len = Math.hypot(dx, dy) || 1;
-  const ux = dx / len, uy = dy / len, [L, W] = ARROW;
-  const back = [to[0] - ux * L, to[1] - uy * L];
-  return r.fill([[to[0] + ux, to[1] + uy], [back[0] - uy * W, back[1] + ux * W], [back[0] + uy * W, back[1] - ux * W]], 1);
+// An open chevron at `to`, pointing along from -> to: two legs at 45° in the
+// connector's weight, ARROW_H tall.
+function chevron(r, from, to, id) {
+  const dx = to[0] - from[0], dy = to[1] - from[1], len = Math.hypot(dx, dy);
+  if (!len) return;
+  const ux = dx / len, uy = dy / len, back = ARROW_H / 2; // legs at 45°: as far back as they are out
+  for (const sx of [1, -1]) r.line(to, [to[0] - ux * back - sx * uy * back, to[1] - uy * back + sx * ux * back], id, CONNECTOR);
+}
+
+// The polyline with its end moved back by up to `gap` along its last segment
+// (never past the chevron's room, so a short connector keeps its arrow).
+function pullBack(pts, gap) {
+  const a = pts[pts.length - 2], b = pts[pts.length - 1], len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+  const d = Math.min(gap, Math.max(0, len - ARROW_H / 2 - CONNECTOR));
+  if (!len || !d) return pts;
+  return [...pts.slice(0, -1), [b[0] - ((b[0] - a[0]) / len) * d, b[1] - ((b[1] - a[1]) / len) * d]];
+}
+
+// A polyline (or a closed polygon) with each corner rounded to radius `rad`,
+// as short straight segments (the raster draws only those). Each corner's cut
+// is held to half of its shorter side, so small shapes round fully.
+function rounded(pts, rad, closed) {
+  const n = pts.length;
+  if (n < 3) return pts;
+  const out = closed ? [] : [pts[0]];
+  for (let i = closed ? 0 : 1; i < (closed ? n : n - 1); i++) {
+    const a = pts[(i - 1 + n) % n], b = pts[i], c = pts[(i + 1) % n];
+    const l1 = Math.hypot(b[0] - a[0], b[1] - a[1]), l2 = Math.hypot(c[0] - b[0], c[1] - b[1]);
+    if (!l1 || !l2) { out.push(b); continue; }
+    const d1 = [(b[0] - a[0]) / l1, (b[1] - a[1]) / l1], d2 = [(c[0] - b[0]) / l2, (c[1] - b[1]) / l2];
+    const turn = Math.acos(Math.max(-1, Math.min(1, d1[0] * d2[0] + d1[1] * d2[1])));
+    const t = Math.min(rad * Math.tan(turn / 2), l1 / 2, l2 / 2);
+    if (t < 0.5) { out.push(b); continue; }
+    const p0 = [b[0] - d1[0] * t, b[1] - d1[1] * t], p2 = [b[0] + d2[0] * t, b[1] + d2[1] * t];
+    for (let j = 0; j <= 6; j++) { // a quadratic through the corner, close to the arc
+      const f = j / 6, g = 1 - f;
+      out.push([g * g * p0[0] + 2 * g * f * b[0] + f * f * p2[0], g * g * p0[1] + 2 * g * f * b[1] + f * f * p2[1]]);
+    }
+  }
+  if (!closed) out.push(pts[n - 1]);
+  return out;
+}
+
+// A flat shape's bounds in scene units: [x0, y0, x1, y1].
+function shapeBox(s) {
+  if (s.type === "rect") return [s.x, s.y, s.x + s.w, s.y + s.h];
+  if (s.type === "circle") return [s.cx - s.r, s.cy - s.r, s.cx + s.r, s.cy + s.r];
+  const xs = s.pts.map((p) => p[0]), ys = s.pts.map((p) => p[1]);
+  return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
 }
 
 // The flow packet on a connector at time `now`: a short solid segment, pw

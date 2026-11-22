@@ -120,7 +120,7 @@ As built on the lab layout page:
 - `data-exit` on a statement sentence or a visual is the beat it leaves on. A statement can change within a slide: on that beat the leaving sentences genie out first, then the entering ones pour in (slide 1, beat 4).
 - `data-leave="shrink"` on a text artefact: on leaving it erases its text, then its box shrinks to nothing onto its top-right corner instead of falling.
 - `.slide-statement[data-place="stack"]` is a second statement on 6 columns, hung from row 1 and moved so its `[data-link-target]` line is centred in the frame (slide 1: "Specific instructions / =" then "creative decisions").
-- **Within a beat** the phases run in order: leaving and cropping artefacts (together), then the statement change, then marks, then links.
+- **Within a beat** the phases run in order: leaving and erasing artefacts (together), then a split, then the statement change, then marks, then links. A split on the same beat as a statement change runs with the old sentences' genie out, before the new ones pour in (slide 1, beat 5).
 
 ## In the lab
 - **`lab/layout.html`, tab 2:** Max's Section from the script, 26 slides in its eight sections, one per bullet. Each statement is the bullet's Text line. For now they're all on the Text template, one beat each, and bullets with no Text line show a `[Placeholder]` statement. Templates, visuals and beats get worked out slide by slide.

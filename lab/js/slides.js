@@ -39,13 +39,17 @@ const enterOf = (g) => Number(g.dataset.enter) || 0;
 const exitOf = (g) => (g.dataset.exit != null ? Number(g.dataset.exit) : Infinity);
 const fromBeat = (g, key) => (g.dataset[key] != null ? Number(g.dataset[key]) : null);
 // data-crop="3": from that beat the artefact erases all but its
-// [data-crop-area] lines, then splits into one box per area.
+// [data-crop-area] lines; data-split="4": from that beat it splits into one
+// box per area (default: the crop beat, right after the erase).
 // data-mark="5": from that beat those lines are marked (ink bars, text in
 // ground) and linked to the statement's [data-link-target] phrase.
 const cropAt = (g, beat) => fromBeat(g, "crop") != null && beat >= fromBeat(g, "crop");
+const splitAt = (g, beat) => cropAt(g, beat) && beat >= (fromBeat(g, "split") ?? fromBeat(g, "crop"));
 const markAt = (g, beat) => fromBeat(g, "mark") != null && beat >= fromBeat(g, "mark");
 const MARK_PAD = 8;      // units at each end of a mark bar
-const LINK_GAP = 8;      // units between a connector's end and its phrase
+const LINK_GAP = 32;     // units between a connector's arrow tip and its phrase
+const ARROW_H = 32;      // units, the height of a connector's open chevron (legs at 45°)
+const LINK_RADIUS = 8;   // units, the radius of a connector's bends
 // data-solo="0": the beats an artefact is shown alone, centred on both axes over
 // the slide's visual area at SOLO_SCALE (its type 32/40 instead of 24/32).
 const soloAt = (g, beat) => (g.dataset.solo ?? "").split(",").filter((b) => b.trim() !== "").map(Number).includes(beat);
@@ -91,7 +95,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
   const beatsOf = (stop) => Math.max(1, stop.implicit ? 1 : stop.sentences.length,
     ...[...stop.states.values()].map((s) => s.length), ...stop.visuals.map((g) => enterOf(g) + 1),
     ...stop.sentences.map((el) => (el.dataset.enter != null ? Number(el.dataset.enter) + 1 : 0)),
-    ...[...stop.visuals, ...stop.sentences].flatMap((g) => [exitOf(g), fromBeat(g, "crop"), fromBeat(g, "mark"), fromBeat(g, "enter")])
+    ...[...stop.visuals, ...stop.sentences].flatMap((g) => [exitOf(g), fromBeat(g, "crop"), fromBeat(g, "split"), fromBeat(g, "mark"), fromBeat(g, "enter")])
       .filter((b) => b != null && Number.isFinite(b)).map((b) => b + 1),
     stop.templates?.length ?? 1);
   const stateFor = (stop, g, beat) => { const s = stop.states.get(g); return s[Math.min(beat, s.length - 1)]; };
@@ -150,7 +154,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
     for (const g of stop.visuals) {
       if (fromBeat(g, "crop") == null) continue;
       const on = !g.hidden && cropAt(g, beat);
-      setCropZoom(stop, g, on ? 1 : 0, on ? 1 : 0);
+      setCropZoom(stop, g, on ? 1 : 0, on && splitAt(g, beat) ? 1 : 0);
     }
     placeStack(stop);
     for (const g of stop.visuals) if (fromBeat(g, "mark") != null) setMarks(stop, g, !g.hidden && markAt(g, beat) ? 1 : 0);
@@ -159,7 +163,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
 
   // ---- Crop and zoom, marks, links, stacked statements --------------------------
   const cz = new Map();        // artefact -> { c, p }: erase, split, 0..1 each
-  const lineText = new Map();  // a non-focus line -> { text, h }: its full text and height
+  const lineText = new Map();  // a non-focus line -> its full text
   const cropAreas = (g) => [...g.querySelectorAll("[data-crop-area]")];
   const textOf = (a) => a.firstElementChild ?? a; // the area's text (marks ink it)
   const FRAME_H = ROWS * FIELD + (ROWS - 1) * FIELD_GAP; // all 6 row fields, units
@@ -185,20 +189,11 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
     const u = unit(), areas = cropAreas(g);
     if (label) label.style.visibility = c > 0 ? "hidden" : "";
     for (const line of g.querySelectorAll(".chat-line:not([data-crop-area])")) {
-      // Erasing keeps the line's room (the erased text stays as hidden rest,
-      // which the raster skips), so nothing moves until the split, which then
-      // closes the emptied lines.
-      if (!lineText.has(line)) lineText.set(line, { text: line.textContent, h: 0 });
-      const lt = lineText.get(line);
-      if (p <= 0) { line.style.height = ""; const h = line.getBoundingClientRect().height; if (h > 0) lt.h = h; }
-      const { text: full, h } = lt, n = Math.round(full.length * (1 - c));
-      const rest = document.createElement("span");
-      rest.className = "type-rest";
-      rest.textContent = full.slice(n);
-      line.replaceChildren(full.slice(0, n), rest);
-      line.style.height = p > 0 ? `${h * (1 - p)}px` : "";
-      line.style.overflow = p > 0 ? "hidden" : "";
-      line.hidden = p >= 1;
+      // Erasing shortens the line, so the box closes up as the text goes.
+      if (!lineText.has(line)) lineText.set(line, line.textContent);
+      const full = lineText.get(line);
+      line.textContent = full.slice(0, Math.round(full.length * (1 - c)));
+      line.hidden = c >= 1;
     }
     if (p <= 0) {
       turn.setAttribute("data-box", "");
@@ -271,7 +266,10 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
     if (!svg) return;
     svg.replaceChildren();
     if (k <= 0 || !pt) return;
-    const sv = svg.getBoundingClientRect(), tx = pt.x - sv.left, ty = pt.y - sv.top;
+    // The chevron's mitred point sticks out past its vertex by half the stroke
+    // times root 2, so the vertex sits back by that and the drawn tip lands on pt.
+    const u = unit(), miter = ((parseFloat(svg.dataset.weight) || 0) / 2) * Math.SQRT2 * u;
+    const sv = svg.getBoundingClientRect(), tx = pt.x - sv.left - miter, ty = pt.y - sv.top;
     const areas = stop.visuals.filter((g) => !g.hidden && g.querySelector(".chat-mark")).flatMap(cropAreas);
     for (const a of areas) {
       const r = a.getBoundingClientRect();
@@ -279,12 +277,44 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
       // A 45-degree diagonal centred between the ends (steeper only if the drop
       // is more than the run).
       const xm = (x0 + tx) / 2, w = Math.min(dy, Math.max(0, x0 - tx));
-      const pts = [[x0, y0], [xm + w / 2, y0], [xm - w / 2, ty], [tx, ty]];
+      const pts = rounded([[x0, y0], [xm + w / 2, y0], [xm - w / 2, ty], [tx, ty]], LINK_RADIUS * u);
+      const drawn = partial(pts, k);
       const line = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
-      line.setAttribute("points", partial(pts, k).map((p) => p.join(",")).join(" "));
+      line.setAttribute("points", drawn.map((p) => p.join(",")).join(" "));
       line.setAttribute("fill", "none");
       svg.append(line);
+      // An open chevron riding the tip, pointing along the last drawn stretch.
+      const [px, py] = drawn[drawn.length - 2], [hx, hy] = drawn[drawn.length - 1], len = Math.hypot(hx - px, hy - py);
+      if (len > 0) {
+        const L = (ARROW_H / 2) * Math.SQRT2 * unit(), ux = (hx - px) / len, uy = (hy - py) / len, c = Math.SQRT1_2;
+        const arm = (sx) => [hx - L * c * (ux - sx * uy), hy - L * c * (uy + sx * ux)];
+        const head = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+        head.setAttribute("points", [arm(1), [hx, hy], arm(-1)].map((p) => p.join(",")).join(" "));
+        head.setAttribute("fill", "none");
+        svg.append(head);
+      }
     }
+  }
+  // A polyline with each bend rounded to radius `rad` (the raster draws only
+  // straight segments, so each arc is a few short ones).
+  function rounded(pts, rad) {
+    const out = [pts[0]];
+    for (let i = 1; i < pts.length - 1; i++) {
+      const [a, b, c] = [pts[i - 1], pts[i], pts[i + 1]];
+      const l1 = Math.hypot(b[0] - a[0], b[1] - a[1]), l2 = Math.hypot(c[0] - b[0], c[1] - b[1]);
+      if (!l1 || !l2) { out.push(b); continue; }
+      const d1 = [(b[0] - a[0]) / l1, (b[1] - a[1]) / l1], d2 = [(c[0] - b[0]) / l2, (c[1] - b[1]) / l2];
+      const turn = Math.acos(Math.max(-1, Math.min(1, d1[0] * d2[0] + d1[1] * d2[1])));
+      const t = Math.min(rad * Math.tan(turn / 2), l1 / 2, l2 / 2);
+      if (t < 0.01) { out.push(b); continue; }
+      const p0 = [b[0] - d1[0] * t, b[1] - d1[1] * t], p2 = [b[0] + d2[0] * t, b[1] + d2[1] * t];
+      for (let j = 0; j <= 8; j++) { // quadratic through the corner, close to the arc at these turns
+        const f = j / 8, g = 1 - f;
+        out.push([g * g * p0[0] + 2 * g * f * b[0] + f * f * p2[0], g * g * p0[1] + 2 * g * f * b[1] + f * f * p2[1]]);
+      }
+    }
+    out.push(pts[pts.length - 1]);
+    return out;
   }
   // The first fraction k of a polyline, by length.
   function partial(pts, k) {
@@ -318,13 +348,15 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
   }
   // Statement changes within a slide: the leaving sentences funnel into the
   // sink, then the entering ones pour out.
-  async function textRun(stop, from, to, my) {
+  // `withOut` / `withIn` run alongside the leaving / entering sentences (a
+  // split that goes with the statement change).
+  async function textRun(stop, from, to, my, { withOut, withIn } = {}) {
     const at = (beat) => (el) => shownAt(stop, stop.sentences.indexOf(el), beat);
     const outs = stop.sentences.filter((el) => at(from)(el) && !at(to)(el));
     const ins = stop.sentences.filter((el) => !at(from)(el) && at(to)(el));
-    if (outs.length) {
+    if (outs.length || withOut) {
       outs.forEach((el) => setGenie(el, 1, true));
-      await wait(Math.max(0, ...outs.map((el) => totalFor(el))));
+      await Promise.all([wait(Math.max(0, ...outs.map((el) => totalFor(el)))), withOut?.(my)]);
       if (my !== epoch) return;
     }
     if (ins.length) {
@@ -333,8 +365,8 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
       await frames(2);
       if (my !== epoch) return;
       ins.forEach((el) => setGenie(el, 0, true));
-      await wait(Math.max(0, ...ins.map((el) => totalFor(el))));
-    }
+      await Promise.all([wait(Math.max(0, ...ins.map((el) => totalFor(el)))), withIn?.(my)]);
+    } else if (withIn) await withIn(my);
   }
 
   // ---- Solo placement ---------------------------------------------------------
@@ -756,21 +788,29 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
     const enter = stop.visuals.filter((g) => !shownVisual(g, a) && shownVisual(g, b));
     const solo = stop.visuals.filter((g) => isArtefact(g) && both(g) && soloAt(g, a) !== soloAt(g, b));
     const crop = stop.visuals.filter((g) => both(g) && cropAt(g, a) !== cropAt(g, b));
+    const split = stop.visuals.filter((g) => both(g) && splitAt(g, a) !== splitAt(g, b));
     const mark = stop.visuals.filter((g) => shownVisual(g, b) && markAt(g, a) !== markAt(g, b));
     const text = stop.sentences.some((el, i) => shownAt(stop, i, a) !== shownAt(stop, i, b));
-    const run = (keys, to) => async (my) => { for (const k of keys) { await cropRun(stop, crop, k, to, my); if (my !== epoch) return; } };
-    const cropIn = run(["c", "p"], 1), cropOut = run(["p", "c"], 0);
+    const cropIn = (my) => cropRun(stop, crop, "c", 1, my), cropOut = (my) => cropRun(stop, crop, "c", 0, my);
     const ph = [];
-    // Visuals leaving and a crop on the same beat run together.
+    // Visuals leaving and an erase on the same beat run together.
     if (leave.length && crop.length) {
       ph.push({ fwd: (my) => Promise.all([takeOut(stop, leave, my), cropIn(my)]), back: (my) => Promise.all([bringIn(stop, leave, a, my), cropOut(my)]) });
     } else {
       if (leave.length) ph.push({ fwd: (my) => takeOut(stop, leave, my), back: (my) => bringIn(stop, leave, a, my) });
       if (crop.length) ph.push({ fwd: cropIn, back: cropOut });
     }
+    const splitIn = (my) => cropRun(stop, split, "p", 1, my), splitOut = (my) => cropRun(stop, split, "p", 0, my);
+    // A split on a beat with a statement change goes with the old statement's
+    // genie out (and back, with its pour in).
+    const splitWithText = split.length > 0 && text;
+    if (split.length && !splitWithText) ph.push({ fwd: splitIn, back: splitOut });
     if (templateAt(stop, a) !== templateAt(stop, b)) ph.push({ fwd: (my) => morph(stop, b, my), back: (my) => morph(stop, a, my) });
     if (solo.length) ph.push({ fwd: (my) => soloRun(stop, solo, b, my), back: (my) => soloRun(stop, solo, a, my) });
-    if (text) ph.push({ fwd: (my) => textRun(stop, a, b, my), back: (my) => textRun(stop, b, a, my) });
+    if (text) ph.push({
+      fwd: (my) => textRun(stop, a, b, my, splitWithText ? { withOut: splitIn } : {}),
+      back: (my) => textRun(stop, b, a, my, splitWithText ? { withIn: splitOut } : {}),
+    });
     if (mark.length) {
       ph.push({ fwd: (my) => markRun(stop, mark, 1, my), back: (my) => markRun(stop, mark, 0, my) });
       ph.push({ fwd: (my) => linkRun(stop, 1, my), back: (my) => linkRun(stop, 0, my) });
