@@ -20,7 +20,7 @@ A palette changes **colours only**: the ground, the ink (the "phosphor" dial), t
 "Dim" ink is still mixed from the ground and ink (55% toward the ink).
 
 ## Viewer controls
-- **Opening:** the bottom bar's right end reads "Press [c] for controls". Pressing [c] or clicking it opens the panel. [c] or Esc closes it.
+- **Opening:** the bottom bar's right end reads `[c] Controls`, and the top bar's right end shows the palette indicator (`Palette - Ink ■ ■ ■`) ([components.md](components.md)). Pressing [c] or clicking either opens the panel. [c] or Esc closes it, and its hint reads `[c] [Esc] Close`. (The lab still reads "Press [c] for controls".)
 - **Panel:** covers grid columns 11–12, between the top and bottom bars. Its box runs from the start of column 11 to the right frame margin, so its width follows the columns: about 272 units on the MacBook and 314 on the projector. The rules are in [layout-grid.md](layout-grid.md) under "Panels on the grid".
 - **The content reflows around it.** The content box's outline stops 8 before the panel, and the text moves off columns 11–12. The grid isn't recalculated. The bars stay full width.
   - It slides over 250 ms, or snaps when motion is off. The content reflows before it slides in and after it slides out.

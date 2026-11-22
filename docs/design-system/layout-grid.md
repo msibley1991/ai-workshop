@@ -37,7 +37,7 @@ Status: **exploration**. Decided in the first design-system grilling session (20
 - **6 row fields of 112, with 16 gutters,** fill the remaining 752. Visuals snap to them, and text flows freely. The bottom of row 6 is the visuals' base line. The templates that use them are in [slide-templates.md](slide-templates.md).
 
 ## Panels on the grid
-- **Panels cover whole columns, at most 2 each.** The viewer controls cover columns 11–12. The planned left nav will cover columns 1–2.
+- **Panels cover whole columns, at most 2 each.** The viewer controls cover columns 11–12. The planned left nav will cover columns 1–2. Its contents (a subtree of tabs and sections) are in [components.md](components.md).
 - **Box lines:** a panel's box runs from the start of its first column out to the frame margin. The content box's outline stops 8 before it, so content in the last open column sits 16 from the content box's line instead of 24. A panel's own contents sit 24 inside its line, so they're off the column lines.
 - **Reflow, not recalculation:** the content keeps its columns and moves off the covered ones. Text reflows first, down to a minimum of 4 columns. Only then do graphics give up columns (see [graphics.md](graphics.md)).
   - With one panel open, 10 columns are left. With both open, 8 are left, which still fits a 4-column graphic and 4 columns of text.

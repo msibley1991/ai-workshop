@@ -27,4 +27,6 @@ Purpose: _TBD_
 - [docs/design-system/slide-templates.md](docs/design-system/slide-templates.md): sections, slides and beats; row fields; the five templates; slide and section changes (exploration)
 - [docs/design-system/motion.md](docs/design-system/motion.md): motion rules: curves, named durations and sizes, loops, enter/exit, the text genie (exploration; genie built in the lab genie page)
 - [docs/design-system/display.md](docs/design-system/display.md): the display layer: one tuned look, ambient effects, viewer overrides, the DOM fallback, the projector test (exploration; tuned on the lab layout page)
+- [docs/design-system/text-artefacts.md](docs/design-system/text-artefacts.md): prompts, chats, documents and file trees as graphics of legible text: the face rule, span states, cross-links, carried spans, retype, the camera, detail levels, pixelated blur (exploration; not built)
+- [docs/design-system/components.md](docs/design-system/components.md): interface chrome: bars, palette indicator, key hints, buttons, panels, the subtree nav, tab headers, links (exploration; partly built in the lab layout page)
 - [docs/handoffs/](docs/handoffs/): session handoff notes, newest last

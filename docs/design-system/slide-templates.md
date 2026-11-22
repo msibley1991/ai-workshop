@@ -25,7 +25,7 @@ Status: **exploration**, from the slide-templates grilling session (2026-11-21).
 ## Footer strip
 - **One line along the bottom of the content area,** 32 tall, with a 16 gap above row 6. Its bottom is the content's bottom line, one box inset (24) above the panel's edge.
 - **The genie's sink** sits on the left, at the text axis (column 1), on the content's bottom line. Text always hangs from the left, so it funnels down its own side of the slide instead of over the visuals. The spine's swing is mirrored to match, swinging right, away from the sink's side.
-- **The section title** sits on the right, ending on the last column's edge. It's set in the **Section title** style, 24/32 at weight 700, in sentence case. The names come from the script's `##` titles:
+- **The section title** sits on the right, ending on the last column's edge. It's set in the **Section title** style, 24/32 at weight 700, in sentence case, with no number (decided 2026-11-22, [components.md](components.md)). The names come from the script's `##` titles:
   - On creative decisions
   - State of digital media
   - Coding agents
@@ -83,7 +83,7 @@ Each step starts only when the one before has finished, so nothing new appears u
 - **Within a tab,** a new section is an ordinary slide change. The footer title changes during the visuals phase.
 - **→ on a tab's last beat** runs text out, then the old visuals fall out, then the accordion jumps to the next tab (400 on ease), and its first slide comes in: visuals, then text. Nothing is carried between tabs.
 - **← on a tab's first beat** reverses this, back to the previous tab's last slide in its final state.
-- **Jumping to a tab directly** (a click, the URL hash, a scroll snap, or the left nav later) lands on that tab's first slide.
+- **Jumping to a tab directly** (a click, the URL hash or a scroll snap) lands on that tab's first slide. **Jumping to a section** from the left nav lands on that section's first slide ([components.md](components.md)).
 - **The hero is slide zero:** → from it opens tab 1.
 
 ## Authoring
@@ -116,7 +116,7 @@ As built on the lab layout page:
 - **`lab/layout.html`, tab 2:** seven placeholder slides in three made-up sections: Text, Split 6, Split 4, Wide, Row 3, Row 2 and Visual. The exploded stack is carried from Split 4 into Wide and Row, and the page layouts from Row 3 into Row 2.
 - **Hero and tab 1** are on templates too: the hero is Split 6 (see Templates), and tab 1 (the placeholder for Nora's part) has one Split 4 slide with the page layout, in a placeholder section.
 - **Tab names** are temporarily "Nora's Section" and "Max's Section", for a layout recording. The hashes are still `#foundations` and `#advanced-topics`.
-- **Keys:** ← and → step beats and flow on across slides, sections and tabs. Clicking a tab, the URL hash or a scroll snap lands on that tab's first slide. The old l toggle is off on this page; the genie page still has it.
+- **Keys:** ← and →, and PageUp and PageDown from clickers, step beats and flow on across slides, sections and tabs. Clicking a tab, the URL hash or a scroll snap lands on that tab's first slide. The old l toggle is off on this page; the genie page still has it.
 - **Rendering cost:** painting a graphic is the expensive step, so the lab keeps its last two painted looks and draws flow packets on top instead of repainting. A carried move or an explode tween still repaints its graphic every frame.
 - **Code:** `lab/js/slides.js` (stops, beats, the phases, template placement); box fitting, `setGraphicState()` and `copyGraphicState()` in `lab/js/graphic.js`; the slide grid and footer strip in `lab/css/layout.css`.
 
@@ -126,7 +126,7 @@ As built on the lab layout page:
 - Reader mode.
 
 ## Open
-- The accordion's tab headers also show section names, so they appear twice. That belongs with the left nav and chrome.
-- Whether the section title carries its number ("3. Coding agents").
+- ~~The accordion's tab headers also show section names, so they appear twice~~: closed. The tabs are named for the presenters' parts, so a header shows the tab and the footer shows the section ([components.md](components.md)).
+- ~~Whether the section title carries its number~~: no. Sections are unnumbered everywhere.
 - Reader mode: what someone scrolling the page gets instead of beats.
 - Whether Wide and Row ever need the statement wider than 6 columns.

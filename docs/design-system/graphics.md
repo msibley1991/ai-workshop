@@ -96,6 +96,8 @@ All in emulated pixels:
 - **Hover labels:** pointing at a part may reveal its label (with a leader line), following the label rules.
   - Hover never takes the accent; focus stays with the step.
   - Apart from dragging iso objects, this is the only cursor interaction inside a graphic.
+- **Glossary links:** a caption label may link to its term's entry in a glossary, where one is relevant. Labels are already real DOM text, so this needs no new mechanism. They use the palette's link style ([palettes.md](palettes.md)). The glossary is built later.
+- **Text artefacts** (prompts, chats, documents, file trees) are graphics of legible text, with their own rules for spans, cross-links and pixelated blur: [text-artefacts.md](text-artefacts.md).
 
 ## Accent: focus
 - The accent marks the **one element the graphic is about right now**, such as the part being explained or the active step.

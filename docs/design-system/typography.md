@@ -13,7 +13,7 @@ Status: **settled** (2026-11-21), from the second design-system grilling session
 
 ## Working choices
 - **One main sans** carries nearly everything.
-- **Mono only for literal code:** JetBrains Mono (variable, 100–800).
+- **Mono only for literal code:** JetBrains Mono (variable, 100–800). In text artefacts this widens to what a machine writes or a file holds (agent replies, Markdown source, file trees), while what a person types stays in the sans ([text-artefacts.md](text-artefacts.md)).
 - **Sans character:** squared and Eurostile-like, matching the technical, pre-window feel. Eurostile itself was a local placeholder and isn't licensed for web use.
 - **Width:** big display type uses an extended cut, and body stays at normal width.
 - ~~Front-runner: Saira~~ (variable weight and width, the only Google family that does extended display and normal body alone).

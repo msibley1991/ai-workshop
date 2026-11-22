@@ -103,6 +103,7 @@ From the genie test page ([`lab/genie.html`](../../lab/genie.html)). They're the
 
 - **The whole run** is 200 × (1 + (lines − 1) × 0.5) ms. An 11-line block takes 1200 ms.
 - **The 200 ms per line is genie-specific.** It isn't one of the named durations.
+- **The genie is for statements only.** Text changing in place inside a text artefact uses **retype** instead: the old text is erased and the new text typed in at a steady rate with a block cursor ([text-artefacts.md](text-artefacts.md)). Its rate is still to be tuned and named.
 
 ## Built so far
 - **Built:** step tweens (ease, 400/800), blink, flow, the drag spring, and the genie (tuned on its test page, and **settled**: on the layout page too, with its sink squares, toggled by l while there are no text steps yet).
