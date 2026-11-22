@@ -12,10 +12,9 @@ export const ISO_STYLE = {
   technique: "hatch",
   hatch: { mode: "density", angle: 45, spacing: 8, width: 4, steps: 5, lightest: 0, darkest: 1, solidTop: true },
   anchor: "object",   // pattern sticks to each face
-  edges: true,        // draw the silhouette and inner edges
-  silhouette: 6,      // outer outline, emulated pixels, grown outward from the true edge
-  inner: 4,           // every face edge, emulated pixels, centred on the edge (2 inside),
-                      // so the outline reads as 6 + 2 = 8
+  edges: true,        // draw the face edges
+  inner: 4,           // every face edge, outer and inner, emulated pixels, centred on the edge
+                      // (the 8 silhouette grown outward was dropped: it cost 5–28% of a repaint)
   inkMeans: "shadow", // ink marks shadow, on light and dark grounds alike
   lightAz: -60,       // degrees, view space; negative = from the left
   lightEl: 48,
@@ -241,7 +240,7 @@ export class Raster {
         for (let x = xs, i = row + xs; x <= xe; x++, i++) { U[i] = x + 0.5; V[i] = py; }
       }
     }
-    this.boxes[id] = [bx0, by0, bx1, by1];
+    this.boxes[id] = [bx0, by0, bx1, by1]; // every pixel this shape filled is inside
     if (edges) for (let i = 0; i < pts.length; i++) this.line(pts[i], pts[(i + 1) % pts.length], id, edgeWidth);
     return id;
   }
@@ -272,66 +271,6 @@ export class Raster {
       if (e2 >= dy) { err += dy; x += sx; }
       if (e2 <= dx) { err += dx; y += sy; }
     }
-  }
-
-  // Filled interiors of shapes `ids` (true edges, not the edge strokes).
-  // Only the union of the shapes' boxes is scanned; mask.box is that union.
-  interior(ids) {
-    const { tone, fid, w } = this, mask = new Uint8Array(tone.length);
-    const on = new Uint8Array(this.count + 1);
-    let x0 = Infinity, y0 = Infinity, x1 = -1, y1 = -1;
-    for (const id of ids) {
-      on[id] = 1;
-      const b = this.boxes[id];
-      if (b) { x0 = Math.min(x0, b[0]); y0 = Math.min(y0, b[1]); x1 = Math.max(x1, b[2]); y1 = Math.max(y1, b[3]); }
-    }
-    for (let y = y0; y <= y1; y++) for (let x = x0, i = y * w + x0; x <= x1; x++, i++) {
-      if (tone[i] >= 0 && on[fid[i]]) mask[i] = 1;
-    }
-    mask.box = x1 < 0 ? null : [x0, y0, x1, y1];
-    return mask;
-  }
-
-  // mask dilated by a (2·d+1) square, separably (rows, then columns), in linear
-  // time: distance to the nearest mask pixel along each line, both directions.
-  // Works only inside the mask's box (from interior()) grown by d; out.box is that area.
-  grow(mask, d) {
-    const { w, h } = this, b = mask.box ?? [0, 0, w - 1, h - 1];
-    const x0 = Math.max(0, b[0] - d), y0 = Math.max(0, b[1] - d), x1 = Math.min(w - 1, b[2] + d), y1 = Math.min(h - 1, b[3] + d);
-    const rows = new Uint8Array(mask.length), out = new Uint8Array(mask.length);
-    const left = new Float32Array(Math.max(w, h));
-    for (let y = y0; y <= y1; y++) {
-      const base = y * w;
-      let run = Infinity;
-      for (let x = x0; x <= x1; x++) { run = mask[base + x] ? 0 : run + 1; left[x] = run; }
-      run = Infinity;
-      for (let x = x1; x >= x0; x--) {
-        run = mask[base + x] ? 0 : run + 1;
-        if ((left[x] < run ? left[x] : run) <= d) rows[base + x] = 1;
-      }
-    }
-    for (let x = x0; x <= x1; x++) {
-      let run = Infinity;
-      for (let y = y0; y <= y1; y++) { run = rows[y * w + x] ? 0 : run + 1; left[y] = run; }
-      run = Infinity;
-      for (let y = y1; y >= y0; y--) {
-        const i = y * w + x;
-        run = rows[i] ? 0 : run + 1;
-        if ((left[y] < run ? left[y] : run) <= d) out[i] = 1;
-      }
-    }
-    out.box = [x0, y0, x1, y1];
-    return out;
-  }
-
-  // Outline of the union of shapes `ids`, lw pixels wide, grown outward from
-  // their filled interiors: every pixel within lw (Chebyshev) becomes edge.
-  silhouette(ids, lw, ownerId = ids[0]) {
-    if (lw < 1 || !ids.length) return;
-    const mask = this.interior(ids);
-    if (!mask.box) return;
-    const grown = this.grow(mask, lw), owner = ownerId + 1, [x0, y0, x1, y1] = grown.box, w = this.w;
-    for (let y = y0; y <= y1; y++) for (let x = x0, i = y * w + x0; x <= x1; x++, i++) if (grown[i] && !mask[i]) this.edge[i] = owner;
   }
 }
 
@@ -410,7 +349,6 @@ export function fillIso(r, { spin, cx, cy, k, spec, style }) {
   }
   vis.sort((a, b) => a.depth - b.depth);
   const ids = vis.map(({ f, n, pts }) => fillFace(r, f, n, pts, { k, spec, style, L }));
-  if (style.edges) r.silhouette(ids, style.silhouette ?? 1);
   return ids;
 }
 

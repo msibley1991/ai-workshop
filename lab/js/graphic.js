@@ -2,7 +2,7 @@
 // mounted on an element with data-graphic="<name>" and drawn into the raster by
 // text-raster.js. The rules are in docs/design-system/graphics.md:
 //   - every pixel is ground, ink, or accent (focus); shading is hatching
-//   - lines: 8 silhouette (6 grown outward + half of the 4 edge), 4 inner, 2 connectors
+//   - lines: 4 for every shape edge (outer and inner alike), 2 connectors
 //   - connectors: arrowheads, dashed = hypothetical, flow packets; leader lines
 //     end in a square dot on the object and are cased in ground
 //   - labels are real DOM text (label role), placed off the hatching
@@ -22,8 +22,7 @@ import {
 } from "./shade.js";
 import SCENES from "./graphics/index.js";
 
-const SIL = ISO_STYLE.silhouette; // 6 grown outward; with half the 4 edge it reads as 8
-const INNER = ISO_STYLE.inner;    // 4
+const INNER = ISO_STYLE.inner;    // 4, every shape edge
 const LINE = 2;                   // connectors and leader lines
 const CASING = 2;                 // ground each side of a leader line
 const DOT = 6;                    // leader-line dot, square
@@ -386,13 +385,11 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
       }
     }
     vis.sort((a, b) => a.depth - b.depth);
-    const all = [], focusIds = [], facesOf = new Map();
+    const facesOf = new Map();
     for (const { part, face, n, pts } of vis) {
       const id = own(fillFace(r, face, n, pts, { k, spec: ISO_STYLE.hatch, style: ISO_STYLE, L }), part.id);
-      all.push(id);
       if (!facesOf.has(part.id)) facesOf.set(part.id, []);
       facesOf.get(part.id).push(id);
-      if (part.id === focus) focusIds.push(id);
     }
     // Automatic leader anchors ({ part } with no point): on the part's most
     // visible plane, found before connectors and leaders draw over the faces.
@@ -402,35 +399,13 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
       const pt = autoAnchor(r, facesOf.get(l.anchor.part) ?? [], l.side ?? "right");
       if (pt) anchors.set(l.id, pt);
     }
-    const silId = own(r.count++, null);
-    r.silhouette(all, SIL, silId); // the merged outline, in ink
-    if (focusIds.length) {
-      // The stretch of that outline next to the focused part turns accent.
-      // (Growing the focused part's own outline would paint over nearer parts.)
-      const near = r.grow(r.interior(focusIds), SIL), owner = focusIds[0] + 1;
-      for (let i = 0; i < near.length; i++) if (near[i] && r.edge[i] === silId + 1) r.edge[i] = owner;
-    }
   } else {
     // Flat shapes, in order. fill: "none" (ground), "solid", or a hatch step 1..3.
-    // outline: "outer" (8: silhouette + edge), "inner" (4, the default), "none".
-    // A group's silhouette is drawn as soon as its last shape is filled, before
-    // shapes inside it overwrite its interior (which would grow the silhouette
-    // around them too).
-    const shapes = (scene.shapes ?? []).filter((s) => visible(s.id));
-    const groupOf = (s) => s.group ?? s.id;
-    const last = new Map();
-    shapes.forEach((s, i) => { if (s.outline === "outer") last.set(groupOf(s), i); });
-    const groups = new Map();
-    shapes.forEach((s, i) => {
+    // outline: "none", or anything else (the 4 edge; "outer" and "inner" are the same).
+    for (const s of (scene.shapes ?? []).filter((s) => visible(s.id))) {
       const t = s.fill === "solid" ? 1 : typeof s.fill === "number" ? stepTone(ISO_STYLE.hatch, s.fill) : 0;
-      const outline = s.outline ?? "inner";
-      const id = own(r.fill(shapePoints(s, P), t, { edges: outline !== "none", edgeWidth: INNER }), s.part ?? s.id);
-      if (outline !== "outer") return;
-      const g = groupOf(s);
-      if (!groups.has(g)) groups.set(g, []);
-      groups.get(g).push(id);
-      if (last.get(g) === i) r.silhouette(groups.get(g), SIL);
-    });
+      own(r.fill(shapePoints(s, P), t, { edges: s.outline !== "none", edgeWidth: INNER }), s.part ?? s.id);
+    }
   }
 
   // Connectors: 2-pixel lines, orthogonal or 45°; arrow ends; dashed; flow packets.
@@ -465,42 +440,74 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
 // those the one nearest the label's side.
 function autoAnchor(r, faceIds, side) {
   if (!faceIds.length) return null;
-  const { w, h, fid, edge } = r, set = new Set(faceIds), count = new Map(), sumX = new Map();
-  for (let i = 0; i < fid.length; i++) {
-    if (edge[i] || !set.has(fid[i])) continue;
-    count.set(fid[i], (count.get(fid[i]) ?? 0) + 1);
-    sumX.set(fid[i], (sumX.get(fid[i]) ?? 0) + (i % w));
+  const { w, h, fid, edge, boxes } = r;
+  // Each pass runs only inside the faces' boxes, grown by 1 and clipped to the
+  // buffer. Pixels outside a face's box are never that face, so the result is
+  // the same as scanning the whole buffer.
+  const area = (ids) => {
+    let x0 = w, y0 = h, x1 = -1, y1 = -1;
+    for (const id of ids) {
+      const b = boxes[id];
+      if (!b) continue;
+      x0 = Math.min(x0, b[0]); y0 = Math.min(y0, b[1]); x1 = Math.max(x1, b[2]); y1 = Math.max(y1, b[3]);
+    }
+    return x1 < 0 ? null : [Math.max(0, x0 - 1), Math.max(0, y0 - 1), Math.min(w - 1, x1 + 1), Math.min(h - 1, y1 + 1)];
+  };
+  const all = area(faceIds);
+  if (!all) return null;
+  const slot = new Int32Array(r.count).fill(-1);
+  faceIds.forEach((id, k) => { slot[id] = k; });
+  const count = new Int32Array(faceIds.length), sumX = new Float64Array(faceIds.length);
+  for (let y = all[1]; y <= all[3]; y++) for (let x = all[0], i = y * w + x; x <= all[2]; x++, i++) {
+    const f = fid[i];
+    if (f < 0 || edge[i]) continue;
+    const k = slot[f];
+    if (k < 0) continue;
+    count[k]++; sumX[k] += x;
   }
   let most = 0;
-  for (const n of count.values()) most = Math.max(most, n);
+  for (const n of count) most = Math.max(most, n);
   if (!most) return null;
   // Faces within 10% of the most visible are a tie: take the one on the label's side.
-  let best = -1, bestX = 0;
-  for (const [id, n] of count) {
-    if (n < most * 0.9) continue;
-    const cx = sumX.get(id) / n;
-    if (best < 0 || (side === "left" ? cx < bestX : cx > bestX)) { best = id; bestX = cx; }
+  // (Faces in first-seen pixel order, as the old Map scan visited them.)
+  const order = faceIds.map((id, k) => k).filter((k) => count[k]);
+  const firstAt = new Map();
+  for (let y = all[1]; y <= all[3] && firstAt.size < order.length; y++) for (let x = all[0], i = y * w + x; x <= all[2]; x++, i++) {
+    const f = fid[i];
+    if (f < 0 || edge[i] || slot[f] < 0 || firstAt.has(slot[f])) continue;
+    firstAt.set(slot[f], i);
   }
-  // Chebyshev distance to the edge of the visible area, two passes.
-  const CAP = 10, d = new Uint8Array(w * h);
-  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+  order.sort((p, q) => firstAt.get(p) - firstAt.get(q));
+  let best = -1, bestX = 0;
+  for (const k of order) {
+    const n = count[k];
+    if (n < most * 0.9) continue;
+    const cx = sumX[k] / n;
+    if (best < 0 || (side === "left" ? cx < bestX : cx > bestX)) { best = faceIds[k]; bestX = cx; }
+  }
+  // Chebyshev distance to the edge of the visible area, two passes, in the best
+  // face's box (local index j). The buffer's own edge counts as outside.
+  const [bx0, by0, bx1, by1] = area([best]), bw = bx1 - bx0 + 1, bh = by1 - by0 + 1;
+  const CAP = 10, d = new Uint8Array(bw * bh);
+  for (let y = by0; y <= by1; y++) for (let x = bx0; x <= bx1; x++) {
     const i = y * w + x;
     if (edge[i] || fid[i] !== best) continue;
+    const j = (y - by0) * bw + (x - bx0);
     let v = CAP;
-    if (x > 0) v = Math.min(v, d[i - 1] + 1); else v = 1;
-    if (y > 0) { v = Math.min(v, d[i - w] + 1, x > 0 ? d[i - w - 1] + 1 : 1, x < w - 1 ? d[i - w + 1] + 1 : 1); } else v = 1;
-    d[i] = v;
+    if (x > 0) v = Math.min(v, d[j - 1] + 1); else v = 1;
+    if (y > 0) { v = Math.min(v, d[j - bw] + 1, x > 0 ? d[j - bw - 1] + 1 : 1, x < w - 1 ? d[j - bw + 1] + 1 : 1); } else v = 1;
+    d[j] = v;
   }
   let pick = -1, score = -Infinity;
-  for (let y = h - 1; y >= 0; y--) for (let x = w - 1; x >= 0; x--) {
-    const i = y * w + x;
-    if (!d[i]) continue;
-    let v = d[i];
-    v = Math.min(v, x < w - 1 ? d[i + 1] + 1 : 1, y < h - 1 ? d[i + w] + 1 : 1);
-    if (y < h - 1) v = Math.min(v, x < w - 1 ? d[i + w + 1] + 1 : 1, x > 0 ? d[i + w - 1] + 1 : 1);
-    d[i] = v;
+  for (let y = by1; y >= by0; y--) for (let x = bx1; x >= bx0; x--) {
+    const j = (y - by0) * bw + (x - bx0);
+    if (!d[j]) continue;
+    let v = d[j];
+    v = Math.min(v, x < w - 1 ? d[j + 1] + 1 : 1, y < h - 1 ? d[j + bw] + 1 : 1);
+    if (y < h - 1) v = Math.min(v, x < w - 1 ? d[j + bw + 1] + 1 : 1, x > 0 ? d[j + bw - 1] + 1 : 1);
+    d[j] = v;
     const sc = v * 100000 + (side === "left" ? -x : x);
-    if (sc > score) { score = sc; pick = i; }
+    if (sc > score) { score = sc; pick = y * w + x; }
   }
   return pick < 0 ? null : [(pick % w) + 0.5, Math.floor(pick / w) + 0.5];
 }

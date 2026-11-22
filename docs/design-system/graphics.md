@@ -16,7 +16,7 @@ Status: **exploration**, from the graphics grilling session (2026-11-21). Built 
   - boxes for regions
   - lines for text
   - hatching or solid for images
-  - 8/4/2 weights and square corners
+  - 4/2 weights and square corners
 - **Screenshots are evidence, used sparingly.** A screenshot is shown when the artefact itself is the point.
   - At most one per point, and always captioned.
   - Converted to two-colour ink on ground with a simple threshold, not dither.
@@ -54,13 +54,12 @@ All in emulated pixels:
 
 | Weight | Use |
 |---|---|
-| 8 | Silhouette: an object's or shape's outer outline |
-| 4 | Internal outlines and edges between faces |
+| 4 | Every shape edge: outer outlines, internal outlines and edges between faces |
 | 2 | Connectors and leader lines |
 
 - **Fixed at every size.** The weights and the hatch spacing never scale with a graphic's size. A graphic too small for them is simplified (fewer parts, less detail) rather than thinned. The minimum size will be found by testing.
-- **How the iso outline is drawn:** a 6-pixel silhouette grown outward from the true edge, plus 4-pixel face edges centred on the edge (2 of their pixels inside), so it reads as 8.
-- **Exploded parts:** they share one merged outline. Gaps narrower than 12 px fill in. A ground "keep-out" ring between parts was tried and rejected.
+- **How edges are drawn:** 4-pixel lines centred on each face's or shape's true edge (2 of their pixels inside). Exploded parts each keep their own edges.
+- **The 8-pixel silhouette was dropped** (2026-11-22). It was a 6-pixel outline grown outward around the whole object, so exploded parts shared one merged outline. It cost 5–28% of every repaint (measured on the two demo scenes) and added little to the look.
 
 ## Size, placement and shapes
 - **No frame.** A graphic has no box around it. The dashed graphic box in the layout test was only a wireframe element, and it's gone.
@@ -122,14 +121,16 @@ The named curves, durations, loops and enter/exit motions are in [motion.md](mot
 ## Authoring
 - **One engine for both styles.** Every graphic is a small JS scene description: shapes or 3D parts, their weights and fills, and named states.
 - **Mounting:** a graphic mounts on a DOM element, for example `<div data-graphic="exploded-stack">`, and `shade.js` draws it into the raster.
-- **Shared rules:** hatching, the 8/4/2 weights, focus and state tweens are implemented once, for flat and iso alike.
+- **Shared rules:** hatching, the 4/2 weights, focus and state tweens are implemented once, for flat and iso alike.
 - **Labels stay real DOM text** in the type roles, anchored to points in the scene, so they stay selectable and leader lines can find them.
 - **Built in the lab:** [`lab/js/graphic.js`](../../lab/js/graphic.js), with scenes in `lab/js/graphics/`. The scene format is described in [`lab/CLAUDE.md`](../../lab/CLAUDE.md). The two demo scenes, `exploded-stack` (iso) and `page-layout` (flat), appear on the layout test's hero, tab 1 and template slides; step them with ← and →.
 - **Rendering cost:** graphics are painted on the CPU at full emulated-pixel resolution, so painting is the expensive step and is kept rare:
   - Each graphic keeps its last two painted looks, so a blink alternates between them without repainting.
   - Flow packets are drawn over the look each frame instead of being painted into it.
   - Moving a graphic by position is free. Changing its size, state or pose (a carried move, an explode tween, a drag) repaints it every frame.
-  - The raster fills shapes in row spans and grows outlines only inside the shapes' own area (`lab/js/shade.js`), about 5× faster than before with identical pixels.
+  - The raster fills shapes in row spans (`lab/js/shade.js`), about 5× faster than before with identical pixels. The grown silhouette was removed for cost (see Lines).
+  - Leader anchors on iso parts (the most visible face) are found by scanning only the part's face boxes, not the whole buffer: about 6.6× faster with identical anchors, which took labelled states from about 2.8× a plain repaint to about 1.5×. This relies on a rule: a shape's pixels stay inside the box `Raster.fill()` records for it. Anything new that draws into the raster must keep it.
+  - What's left in every repaint is mostly the per-pixel hatch test in `compose()`, the next target if stutter remains.
   - New scenes should avoid huge areas that change every frame.
 
 ## Open
@@ -140,3 +141,7 @@ The named curves, durations, loops and enter/exit motions are in [motion.md](mot
   - flat polygons that aren't convex
   - flat connectors with automatic routing: authors give the points
 - The minimum graphic or part size for the fixed weights.
+- **Since dropping the silhouette:**
+  - Outer and inner edges share one weight, so in flat diagrams an enclosing box (the page frame in `page-layout`) no longer stands out from the boxes inside it. If that hierarchy is missed, a wider edge on `outline: "outer"` shapes is cheap.
+  - During an explode tween, parts separate from the first frame, where the merged outline used to close gaps under 12 px.
+  - Scenes still leave room for the old outward growth (`page-layout`'s 8-unit shift), so drawings stop about 6 px short of their span edge. Tighten per scene.

@@ -19,7 +19,6 @@ const config = {
     pixel: [1, 1, 8, 1],          // emulated pixel in layout units, snapped to 1/2/4/8
     anchor: { type: "select", options: ["object", "screen"], default: ISO_STYLE.anchor }, // iso faces only
     edges: { type: "select", options: ["all", "iso only", "off"], default: "all" },
-    silhouette: [ISO_STYLE.silhouette, 1, 8, 1], // iso outer outline, emulated pixels
     inner: [ISO_STYLE.inner, 1, 8, 1],           // iso edges between faces
     inkMeans: { type: "select", options: ["shadow", "light", "auto"], default: ISO_STYLE.inkMeans },
     lightAz: [ISO_STYLE.lightAz, -180, 180, 1], // degrees, view space; negative = from the left

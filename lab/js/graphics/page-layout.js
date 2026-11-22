@@ -6,8 +6,7 @@
 const lines = (x, y0, widths, part) =>
   widths.map((w, i) => ({ type: "rect", x, y: y0 + i * 24, w, h: 8, fill: "solid", outline: "none", part }));
 
-// Shapes are written from the frame's corner; DX leaves room for the frame's
-// silhouette, which grows 6 px outward.
+// Shapes are written from the frame's corner; DX shifts them in from the span's edge.
 const DX = 8;
 const shift = (shapes) => shapes.map((sh) => ({ ...sh, x: sh.x + DX }));
 
