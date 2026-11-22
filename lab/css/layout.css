@@ -88,6 +88,11 @@
   --controls-open: 0;
   --controls-push: calc((var(--controls-w) + var(--row-gap)) * var(--controls-open));
   --nav-cols: 0;
+  /* Left nav: covers columns 1-2 the same way, from the left frame margin.
+     --nav-open (0..1) stops the content boxes one row gap short of it. */
+  --nav-w: var(--controls-w);
+  --nav-open: 0;
+  --nav-push: calc((var(--nav-w) + var(--row-gap)) * var(--nav-open));
 
   /* Height an open panel gets: canvas minus top/bottom margin, bars, tab headers and the 4 gaps between 5 rows (840 units). */
   --avail: calc(var(--canvas-h) - 2 * var(--frame-margin) - 2 * var(--bar-height) - 2 * var(--tab-height) - 4 * var(--row-gap));
@@ -129,7 +134,10 @@
 }
 
 /* Panels: the intro and each tab grow by their --w share of the free height. */
-.site .site-panel { margin-right: var(--controls-push); } /* beats the `.site section` reset */
+.site .site-panel { margin-right: var(--controls-push); margin-left: var(--nav-push); } /* beats the `.site section` reset */
+/* The grid never moves with the nav: a panel's slides keep the canvas's
+   columns while its box steps in (js/slides.js moves the text axis to 3). */
+.site-panel .slides { margin-left: calc(-1 * var(--nav-push)); }
 .site-intro {
   flex: var(--w, 0) 1 0;
   min-height: 0;
@@ -272,23 +280,34 @@
   line-height: calc(40 * var(--u));
 }
 
-/* Bottom bar: column-grid toggle. Its text sits on the box inset; hover/focus
-   inverts it (the fill is invisible until then). */
-.site-bar-bottom { padding: 0 calc(var(--box-inset) - var(--space-8)); }
-.site-grid-toggle {
-  --fill-alpha: 0;
-  align-self: stretch;
-  margin: 0;
-  padding: 0 var(--space-8);
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
+/* Bars (docs/design-system/components.md). Button text sits on the box inset:
+   the bars pad 8 less, and each button pads 8. */
+.site-bar-top { padding: 0 calc(var(--box-inset) - var(--space-8)) 0 var(--box-inset); }
+.site-bar-bottom { padding: 0 calc(var(--box-inset) - var(--space-8)); gap: var(--space-8); }
+.site-bar-label { padding-right: var(--space-8); }
+.site-bar .site-fullscreen-toggle { margin-left: auto; }   /* beats .site-bar-button's margin */
+
+/* Palette indicator: the palette's name, then ink, ground and accent as 8x8
+   boxes with a 1-unit outline: ink outlines, except the ink box's, which is
+   accent. On hover the bar inverts behind the text; the boxes keep their own
+   colours (these beat the button's hover rule). */
+.site-bar .site-palette { margin-left: auto; display: flex; align-items: center; gap: var(--space-8); }
+.site-swatches { display: flex; gap: var(--space-4); }
+.site-palette .site-swatch[data-swatch] {
+  --box-line: var(--line-dashed);   /* one emulated pixel */
+  --ink: phosphor;
+  position: relative;
+  box-sizing: border-box;
+  width: var(--space-8);
+  height: var(--space-8);
+  border: var(--line-dashed) solid;
 }
-.site-grid-toggle:focus-visible { outline: none; }
-.site-grid-toggle:is(:hover, :focus-visible) { --fill-alpha: 1; }
-.site-grid-toggle:is(:hover, :focus-visible) span { --ink: ground; }
+.site-palette .site-swatch[data-swatch="ink"] { --ink: accent; }
+/* The button's --fill-alpha (0 at rest) would inherit and hide the fills. */
+.site-palette .site-swatch[data-swatch] > span { position: absolute; inset: 0; --fill-alpha: 1; }
+.site-palette .site-swatch[data-swatch="ink"] > span { --ink: phosphor; }
+.site-palette .site-swatch[data-swatch="ground"] > span { --ink: ground; }
+.site-palette .site-swatch[data-swatch="accent"] > span { --ink: accent; }
 
 /* Column-grid overlay: the canvas grid's columns, over the panels too, at 25% of the primary ink. */
 .site-grid-overlay {
@@ -314,11 +333,14 @@
   cursor: pointer;
 }
 .site-bar-button:focus-visible { outline: none; }
-.site-bar-button:is(:hover, :focus-visible, [aria-pressed="true"]) { --fill-alpha: 1; }
-.site-bar-button:is(:hover, :focus-visible, [aria-pressed="true"]) span { --ink: ground; }
-.site-controls-toggle { margin-left: auto; }
-.site-controls-toggle[aria-expanded="true"] { --fill-alpha: 1; }
-.site-controls-toggle[aria-expanded="true"] span { --ink: ground; }
+/* [data-highlight] is the menu-key highlight (js/layout.js): the hover look. */
+.site-bar-button:is(:hover, :focus-visible, [data-highlight], [aria-pressed="true"]) { --fill-alpha: 1; }
+.site-bar-button:is(:hover, :focus-visible, [data-highlight], [aria-pressed="true"]) span { --ink: ground; }
+/* An arrow at either end of the talk dims and does nothing. */
+.site-bar-button:disabled { --fill-alpha: 0; cursor: default; }
+.site-bar-button:disabled span { --ink: dim; }
+.site-bar-button[aria-expanded="true"] { --fill-alpha: 1; }
+.site-bar-button[aria-expanded="true"] span { --ink: ground; }
 
 /* Controls panel: 384 wide, between the bars, at the right frame margin. It
    slides in from the right as --controls-open goes 0 -> 1. */
@@ -418,12 +440,12 @@
    the right, 24/32 at 700, clipped to the strip so it can rise in and fall out
    when the section changes. */
 .slides .genie-sink {
-  left: var(--box-inset);
+  left: calc(var(--box-inset) + var(--nav-push));
   right: auto;
 }
 .slide-footer {
   position: absolute;
-  left: calc(var(--box-inset) + var(--space-32));
+  left: calc(var(--box-inset) + var(--space-32) + var(--nav-push));
   right: var(--box-inset);
   bottom: var(--box-inset);
   height: var(--space-32);
@@ -438,3 +460,66 @@
   line-height: var(--space-32);
   font-weight: 700;
 }
+
+/* Left nav (docs/design-system/components.md): the panel component mirrored,
+   over columns 1-2. It slides in from the left as --nav-open goes 0 -> 1. */
+.site-nav-clip {
+  position: absolute;
+  top: calc(var(--frame-margin) + var(--bar-height) + var(--row-gap));
+  bottom: calc(var(--frame-margin) + var(--bar-height) + var(--row-gap));
+  left: var(--frame-margin);
+  width: var(--nav-w);
+  overflow: hidden;
+  pointer-events: none;
+}
+.site-nav {
+  position: absolute;
+  inset: 0;
+  transform: translateX(calc((var(--nav-open) - 1) * (100% + var(--frame-margin))));
+  border: var(--line) solid;
+  border-radius: var(--radius);
+  padding: var(--box-inset);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-group);
+  pointer-events: auto;
+  font-size: var(--space-24);       /* label role */
+  line-height: var(--space-32);
+  font-weight: 500;
+}
+.site-nav p { margin: 0; }
+.site-panel-title { font-weight: 700; }
+.site-panel-hint { margin-top: auto; font-size: var(--space-16); line-height: var(--space-24); }
+
+/* The subtree: bar text. Buttons pad 8 and pull back 8, so their text sits on
+   the panel's content edge. Each folder's trunk hangs under its name's first
+   letter; each entry has a trunk segment (the last stops at its middle, the
+   corner) and a 16 tick, and its text sits one indent (24) in. Lines are fills
+   at the chrome weight. */
+.site-nav-tree {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-tight);
+  font-size: var(--space-16);
+  line-height: var(--space-24);
+}
+.site-nav-tree ul { list-style: none; margin: 0; padding: 0; }
+.site-nav-tree .site-bar-button {
+  display: block;
+  width: calc(100% + var(--space-8));
+  padding: var(--space-4) var(--space-8);
+  margin-left: calc(-1 * var(--space-8));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.site-nav-entry {
+  position: relative;
+  padding-left: var(--space-16);    /* the tick; the button's own 8 makes 24 */
+}
+.site-nav-entry .site-bar-button { margin-left: 0; width: 100%; }
+.site-nav-trunk, .site-nav-tick { position: absolute; left: 0; }
+.site-nav-trunk { top: 0; bottom: 0; width: var(--line); }
+.site-nav-entry:last-child .site-nav-trunk { bottom: auto; height: calc(50% + var(--line) / 2); }
+.site-nav-tick { top: calc(50% - var(--line) / 2); width: var(--space-16); height: var(--line); }
+.site-nav-folder[data-collapsed] > ul { display: none; }

@@ -147,10 +147,12 @@ site.querySelector(".site-title").addEventListener("click", (e) => {
   animateTo(0, GOTO_MS);
 });
 
-const KEYS = { ArrowDown: 1, PageDown: 1, " ": 1, ArrowUp: -1, PageUp: -1 };
+// PageDown and PageUp are not here: presentation clickers send them, so they
+// step beats like → and ← (below). ↑ ↓ and Space jump whole tabs.
+const KEYS = { ArrowDown: 1, " ": 1, ArrowUp: -1 };
 document.addEventListener("keydown", (e) => {
   if (!(e.key in KEYS) || e.altKey || e.ctrlKey || e.metaKey) return;
-  if (controlsPanel.contains(e.target)) return; // the panel's own buttons take Space
+  if (e.target.closest?.(".site-controls, .site-nav")) return; // the panels' own buttons take Space
   if (!site.contains(e.target) && e.target !== document.body) return; // leave the dial panel alone
   if (e.target.closest("button")) return; // let buttons take Space
   e.preventDefault();
@@ -158,12 +160,13 @@ document.addEventListener("keydown", (e) => {
   animateTo((anim ? anim.target : settled) + dir, GOTO_MS);
 });
 
-// ---- Steps: ← and → -----------------------------------------------------------
+// ---- Steps: ← and →, and PageDown / PageUp from clickers -----------------------------------------------------------
 // With slides on the page (js/slides.js), they step through every slide's beats
 // and on across sections and tabs. Without (genie.html), they step the graphics
 // on screen between states.
 const slides = createSlides({
   site, panels, relayout,
+  onMove: (pos) => { showStepEnds(pos); nav?.show(pos); },
   goPanel(index, dur) {
     silentTarget = index;
     animateTo(index, dur);
@@ -172,13 +175,25 @@ const slides = createSlides({
 });
 setMotion(viewer.get().motion);
 viewer.subscribe((state) => setMotion(state.motion));
+const STEP_KEYS = { ArrowRight: 1, PageDown: 1, ArrowLeft: -1, PageUp: -1 };
+const stepBy = (dir) => (slides.enabled ? slides.step(dir) : stepGraphics(dir));
 document.addEventListener("keydown", (e) => {
-  if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+  const dir = STEP_KEYS[e.key];
+  if (!dir) return;
   if (e.altKey || e.ctrlKey || e.metaKey) return;
   if (!site.contains(e.target) && e.target !== document.body) return; // leave the dial panel alone
-  const dir = e.key === "ArrowRight" ? 1 : -1;
-  if (slides.enabled ? slides.step(dir) : stepGraphics(dir)) e.preventDefault();
+  if (stepBy(dir)) e.preventDefault();
 });
+
+// The bottom bar's [←] [→]: click to step. At either end of the talk, that
+// arrow dims and does nothing (docs/design-system/components.md).
+const stepButtons = [...site.querySelectorAll(".site-step")];
+stepButtons.forEach((b) => b.addEventListener("click", () => stepBy(Number(b.dataset.step))));
+function showStepEnds(pos) {
+  if (!slides.enabled) return;
+  for (const b of stepButtons) b.disabled = Number(b.dataset.step) < 0 ? pos.first : pos.last;
+  relayout();
+}
 
 // ---- Text genie: l funnels the open panel's text into its sink square and back --
 // (js/genie-play.js, settled defaults). On genie.html, js/genie.js takes these
@@ -200,7 +215,6 @@ const GRID_KEY = "lab-layout-grid";
 function showGrid(on) {
   gridOverlay.hidden = !on;
   gridToggle.setAttribute("aria-pressed", String(on));
-  gridToggle.firstElementChild.textContent = on ? "Grid: on" : "Grid: off";
   try { localStorage.setItem(GRID_KEY, on ? "1" : "0"); } catch {}
   relayout();
 }
@@ -234,45 +248,66 @@ function reflow() {
 window.addEventListener("resize", () => reflow());
 reflow();
 
-// ---- Viewer controls panel ([c]) -------------------------------------------------
-// The panel covers columns 11-12. Opening reflows the content off them, then
-// tweens --controls-open 0 -> 1, which stops the content box short of the
-// panel (layout.css) and slides the panel in. Closing slides it out, then
-// reflows the content back.
-const CONTROLS_MS = 250;
+// ---- Panels: viewer controls ([c], columns 11-12) and left nav ([n], 1-2) ------
+// Opening reflows the content off the panel's columns, then tweens its --*-open
+// 0 -> 1, which stops the content boxes short of it (layout.css) and slides the
+// panel in. Closing slides it out, then reflows the content back. Only one is
+// open at a time: opening one closes the other, and Esc closes it.
+const PANEL_MS = 250, PANEL_COLS = 2;
+const openOrder = [];   // open panels, most recent last
+
+function makePanel({ el, toggles, cssVar, side, items, jumps, onHighlight = () => {} }) {
+  let open = 0, target = 0, raf = 0;
+  const set = (v) => { open = v; root.style.setProperty(cssVar, v.toFixed(4)); relayout(); };
+  const cover = (on) => {
+    if (side === "left") root.style.setProperty("--nav-cols", on ? String(PANEL_COLS) : "0");
+    else coverRight = on ? PANEL_COLS : 0;
+    reflow();
+  };
+  const panel = {
+    el, items, jumps, onHighlight,
+    get isOpen() { return target === 1; },
+    toggle(want = target === 0) {
+      if (want) for (const other of [...openOrder]) if (other !== panel) other.toggle(false);
+      target = want ? 1 : 0;
+      el.inert = !want;
+      toggles.forEach((t) => t.hasAttribute("aria-expanded") && t.setAttribute("aria-expanded", String(want)));
+      const i = openOrder.indexOf(panel);
+      if (i >= 0) openOrder.splice(i, 1);
+      if (want) openOrder.push(panel);
+      cancelAnimationFrame(raf);
+      if (want) menu.open(panel);
+      else menu.close(panel);
+      if (want) cover(true);
+      const closed = () => { if (target === 0) cover(false); };
+      if (reduceMotion()) { set(target); return closed(); }
+      const from = open, start = performance.now();
+      const frame = (now) => {
+        const t = Math.min(1, (now - start) / PANEL_MS);
+        set(from + (target - from) * ease(t));
+        if (t < 1) raf = requestAnimationFrame(frame);
+        else closed();
+      };
+      raf = requestAnimationFrame(frame);
+    },
+  };
+  toggles.forEach((t) => t.addEventListener("click", () => panel.toggle()));
+  return panel;
+}
+
 const controlsPanel = site.querySelector(".site-controls");
 const controlsToggle = site.querySelector(".site-controls-toggle");
+const paletteIndicator = site.querySelector(".site-palette");
+const controls = makePanel({
+  el: controlsPanel,
+  toggles: [controlsToggle, paletteIndicator].filter(Boolean),
+  cssVar: "--controls-open",
+  side: "right",
+  items: () => [...controlsPanel.querySelectorAll("button")],
+  jumps: () => [...controlsPanel.querySelectorAll(".site-controls-group")].map((g) => g.querySelector("button")).filter(Boolean),
+});
 const paletteButtons = [...controlsPanel.querySelectorAll("[data-palette]")];
 const settingButtons = [...controlsPanel.querySelectorAll("[data-setting]")];
-let controlsOpen = 0;   // current 0..1
-let controlsTarget = 0;
-let controlsAnim = 0;
-
-function setControlsOpen(v) {
-  controlsOpen = v;
-  root.style.setProperty("--controls-open", v.toFixed(4));
-  relayout();
-}
-
-function toggleControls(open = controlsTarget === 0) {
-  controlsTarget = open ? 1 : 0;
-  controlsPanel.inert = !open;
-  controlsToggle.setAttribute("aria-expanded", String(open));
-  cancelAnimationFrame(controlsAnim);
-  if (open) { coverRight = CONTROLS_COLS; reflow(); }
-  const closed = () => { if (controlsTarget === 0) { coverRight = 0; reflow(); } };
-  if (reduceMotion()) { setControlsOpen(controlsTarget); return closed(); }
-  const from = controlsOpen;
-  const start = performance.now();
-  const step = (now) => {
-    const t = Math.min(1, (now - start) / CONTROLS_MS);
-    setControlsOpen(from + (controlsTarget - from) * ease(t));
-    if (t < 1) controlsAnim = requestAnimationFrame(step);
-    else closed();
-  };
-  controlsAnim = requestAnimationFrame(step);
-  if (open) controlsPanel.querySelector("[aria-pressed='true']")?.focus({ preventScroll: true });
-}
 
 function showViewer(state) {
   paletteButtons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.palette === state.palette)));
@@ -280,26 +315,212 @@ function showViewer(state) {
     const on = state[b.dataset.setting];
     b.setAttribute("aria-pressed", String((b.dataset.value === "on") === on));
   }
+  const name = paletteButtons.find((b) => b.dataset.palette === state.palette)?.textContent.trim();
+  const nameEl = site.querySelector(".site-palette-name");
+  if (nameEl && name) nameEl.textContent = name;
   relayout();
 }
 
-controlsToggle.addEventListener("click", () => toggleControls());
 paletteButtons.forEach((b) => b.addEventListener("click", () => viewer.set({ palette: b.dataset.palette })));
 settingButtons.forEach((b) => b.addEventListener("click", () => viewer.set({ [b.dataset.setting]: b.dataset.value === "on" })));
 viewer.subscribe(showViewer);
 showViewer(viewer.get());
-for (const b of [controlsToggle, ...paletteButtons, ...settingButtons]) {
+
+// ---- Left nav: the talk as a subtree ---------------------------------------------
+// The hero is a root entry; each tab is a folder ("Max's Section/") whose
+// sections hang from its trunk. A folder opens while the pointer (or the menu
+// highlight) is on it, and the one you're in stays open; the rest are closed
+// and end in "…". Clicking a section lands on its first slide, and clicking a
+// folder lands on its tab's first slide. The current section stays pressed.
+const nav = (() => {
+  const el = site.querySelector(".site-nav");
+  const tree = el?.querySelector(".site-nav-tree");
+  if (!el || !tree || !slides.enabled) return null;
+  const button = (text, cls = "") => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = `site-bar-button ${cls}`.trim();
+    b.dataset.fill = "";
+    const span = document.createElement("span");
+    span.textContent = text;
+    b.append(span);
+    return b;
+  };
+  const line = (cls) => { const l = document.createElement("span"); l.className = cls; l.dataset.fill = ""; return l; };
+
+  const entries = [];   // { button, pi, section }
+  const folders = [];   // { el, nameEl, name, pi, first }
+  let currentPi = -1, hovered = null, highlighted = null;
+
+  const hero = button(site.querySelector(".site-title")?.textContent.trim() || "Home");
+  hero.addEventListener("click", () => slides.goto(0));
+  tree.append(hero);
+  entries.push({ button: hero, pi: 0, section: null });
+
+  // A folder is open if you're in it, the pointer is on it, or the menu
+  // highlight is on it or one of its sections.
+  function showFolders() {
+    for (const f of folders) {
+      const open = f.pi === currentPi || f === hovered || f === highlighted;
+      f.el.toggleAttribute("data-collapsed", !open);
+      f.nameEl.firstElementChild.textContent = open ? `${f.name}/` : `${f.name}/…`;
+    }
+    relayout();
+  }
+
+  panels.forEach((panel, pi) => {
+    if (pi === 0) return; // the intro is the root entry
+    const name = panel.querySelector(".site-tab-label")?.textContent.trim() ?? "";
+    const folder = document.createElement("div");
+    folder.className = "site-nav-folder";
+    const nameEl = button(`${name}/`, "site-nav-folder-name");
+    const list = document.createElement("ul");
+    folder.append(nameEl, list);
+    const f = { el: folder, nameEl, name, pi, first: null };
+    folders.push(f);
+    folder.addEventListener("pointerenter", () => { hovered = f; showFolders(); });
+    folder.addEventListener("pointerleave", () => { if (hovered === f) hovered = null; showFolders(); });
+    const seen = new Set();
+    slides.stops.forEach((stop, i) => {
+      if (stop.pi !== pi || !stop.section || seen.has(stop.section)) return;
+      seen.add(stop.section);
+      const li = document.createElement("li");
+      li.className = "site-nav-entry";
+      const b = button(stop.section);
+      b.addEventListener("click", () => slides.goto(i));
+      li.append(line("site-nav-trunk"), line("site-nav-tick"), b);
+      list.append(li);
+      entries.push({ button: b, pi, section: stop.section });
+      f.first ??= { button: b, i };
+    });
+    nameEl.addEventListener("click", () => slides.goto(slides.stops.findIndex((s) => s.pi === pi)));
+    tree.append(folder);
+  });
+
+  for (const b of el.querySelectorAll("button")) {
+    for (const type of ["pointerenter", "pointerleave", "focus", "blur"]) b.addEventListener(type, relayout);
+  }
+
+  return {
+    el,
+    // Every button you can see, top to bottom (a closed folder's sections are hidden).
+    items: () => [...tree.querySelectorAll("button")].filter((b) => b.offsetParent !== null),
+    // Tab: the hero, then each folder's first section.
+    jumps: () => [hero, ...folders.map((f) => f.first?.button ?? f.nameEl)],
+    highlight(b) {
+      highlighted = b ? folders.find((f) => f.el.contains(b)) ?? null : null;
+      showFolders();
+    },
+    show(pos) {
+      const { pi, section } = pos.stop;
+      currentPi = pi;
+      for (const e of entries) {
+        const on = e.pi === pi && (e.section === null ? pi === 0 : e.section === section);
+        e.button.setAttribute("aria-current", String(on));
+        e.button.setAttribute("aria-pressed", String(on));
+      }
+      showFolders();
+    },
+  };
+})();
+const navToggle = site.querySelector(".site-nav-toggle");
+const navPanel = nav && makePanel({
+  el: nav.el, toggles: [navToggle].filter(Boolean), cssVar: "--nav-open", side: "left",
+  items: nav.items, jumps: nav.jumps, onHighlight: nav.highlight,
+});
+if (!nav) navToggle?.remove();
+
+// ---- Menu keys ----------------------------------------------------------------------
+// While a panel is open it takes the keys (capture phase, so nothing else
+// steps): ↑ ↓ move the highlight through its buttons top to bottom (wrapping),
+// Tab and Shift+Tab jump between its groups (the nav: the hero, then each
+// tab's first section; the controls: Palette, Display), Enter selects, and Esc
+// closes it. Its own key closes it; the other panel's key swaps to that panel.
+// f and g still work. The highlight is the hover look, and the button has focus.
+const menu = (() => {
+  let active = null, cur = null;
+  const mark = (b) => {
+    if (cur) cur.removeAttribute("data-highlight");
+    cur = b;
+    if (b) { b.setAttribute("data-highlight", ""); b.focus({ preventScroll: true }); }
+    active?.onHighlight(b);
+    relayout();
+  };
+  // The next button in a direction, wrapping; from nothing, the first or last.
+  const move = (list, from, dir) => {
+    if (!list.length) return null;
+    const i = list.indexOf(from);
+    if (i < 0) return dir > 0 ? list[0] : list[list.length - 1];
+    return list[(i + dir + list.length) % list.length];
+  };
+  return {
+    get active() { return active; },
+    open(panel) {
+      active = panel;
+      mark(panel.el.querySelector("[aria-current='true'], [aria-pressed='true']") ?? panel.items()[0] ?? null);
+    },
+    close(panel) {
+      if (active !== panel) return;
+      mark(null);
+      active = null;
+    },
+    key(e) {
+      if (!active) return false;
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        mark(move(active.items(), cur, e.key === "ArrowDown" ? 1 : -1));
+      } else if (e.key === "Tab") {
+        const jumps = active.jumps();
+        // From inside a group, Tab goes to the next group's first button.
+        const items = active.items(), at = items.indexOf(cur);
+        const starts = jumps.map((j) => items.indexOf(j));
+        let g = starts.findLastIndex((s) => s >= 0 && s <= at);
+        if (e.shiftKey) g = cur === jumps[g] ? g - 1 : g;
+        else g = g + 1;
+        mark(jumps[(g + jumps.length) % jumps.length]);
+      } else if (e.key === "Enter" || e.key === " ") {
+        cur?.click();
+      } else {
+        return false;
+      }
+      return true;
+    },
+  };
+})();
+
+// ---- Bar buttons and keys ----------------------------------------------------------
+const fullscreenToggle = site.querySelector(".site-fullscreen-toggle");
+fullscreenToggle?.addEventListener("click", () => toggleFullscreen());
+document.addEventListener("fullscreenchange", () => {
+  fullscreenToggle?.setAttribute("aria-pressed", String(!!document.fullscreenElement));
+  relayout();
+});
+
+for (const b of site.querySelectorAll(".site-bar button, .site-controls button")) {
   for (const type of ["pointerenter", "pointerleave", "focus", "blur"]) b.addEventListener(type, relayout);
 }
+
+const MENU_STEALS = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "PageUp", "PageDown", "Home", "End", " ", "Tab", "Enter"]);
+document.addEventListener("keydown", (e) => {
+  if (!menu.active || e.altKey || e.ctrlKey || e.metaKey) return;
+  if (!site.contains(e.target) && e.target !== document.body) return; // leave the dial panel alone
+  if (!MENU_STEALS.has(e.key)) return;
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  menu.key(e);
+}, { capture: true });
 
 document.addEventListener("keydown", (e) => {
   if (e.altKey || e.ctrlKey || e.metaKey) return;
   if (!site.contains(e.target) && e.target !== document.body) return; // leave the dial panel alone
-  if (e.key === "c" || e.key === "C") toggleControls();
-  else if (e.key === "f" || e.key === "F") toggleFullscreen();
-  else if (e.key === "Escape" && controlsTarget === 1) {
-    toggleControls(false);
-    controlsToggle.focus({ preventScroll: true });
+  const k = e.key.toLowerCase();
+  if (k === "c") controls.toggle();
+  else if (k === "n" && navPanel) navPanel.toggle();
+  else if (k === "g") showGrid(gridOverlay.hidden);
+  else if (k === "f") toggleFullscreen();
+  else if (e.key === "Escape" && menu.active) {
+    const panel = menu.active;
+    panel.toggle(false);
+    (panel === controls ? controlsToggle : navToggle)?.focus({ preventScroll: true });
   }
 });
 
@@ -315,3 +536,4 @@ window.addEventListener("hashchange", () => animateTo(indexFromHash(), GOTO_MS))
 
 // Start where the URL says, without animating.
 animateTo(indexFromHash(), 0);
+if (slides.enabled) { showStepEnds(slides.position()); nav?.show(slides.position()); }

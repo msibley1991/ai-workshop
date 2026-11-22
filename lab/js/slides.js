@@ -38,7 +38,7 @@ function setGenie(el, to, animate) {
   genieSettings.duration = d;
 }
 
-export function createSlides({ site, panels, goPanel, relayout }) {
+export function createSlides({ site, panels, goPanel, relayout, onMove = () => {} }) {
   const enabled = !!site.querySelector("[data-slide]");
   const stops = [];
   panels.forEach((panel, pi) => {
@@ -159,6 +159,7 @@ export function createSlides({ site, panels, goPanel, relayout }) {
     setTitle(stop);
     cur = { i, beat };
     relayout();
+    onMove(position());
   }
 
   // ---- Phases ---------------------------------------------------------------
@@ -281,6 +282,7 @@ export function createSlides({ site, panels, goPanel, relayout }) {
     if (!motionOn()) return cut(toI, beat);
     const my = ++epoch;
     busyTarget = { i: toI, beat };
+    onMove(position());
 
     // 1. Text out.
     const outMs = textOut(from, my);
@@ -347,12 +349,33 @@ export function createSlides({ site, panels, goPanel, relayout }) {
         if ((genieT(el) >= 0.5 ? 1 : 0) !== to) setGenie(el, to, true);
       });
       stop.visuals.forEach((g) => setGraphicState(g, stateFor(stop, g, nb), true));
+      onMove(position());
       return true;
     }
     const ni = cur.i + dir;
     if (ni < 0 || ni >= stops.length) return false;
     change(ni, dir > 0 ? 0 : beatsOf(stops[ni]) - 1);
     return true;
+  }
+
+  // Jumps to a stop's first beat (the left nav), with the usual slide change.
+  function goto(i) {
+    if (!enabled || i < 0 || i >= stops.length) return;
+    if (busyTarget) cut(busyTarget.i, busyTarget.beat);
+    if (i === cur.i && cur.beat === 0) return;
+    change(i, 0);
+  }
+
+  // Where the talk is, or is heading during a change: the stop, its beat, and
+  // whether either end has been reached (the bottom bar dims that arrow).
+  function position() {
+    const at = busyTarget ?? cur;
+    return {
+      ...at,
+      stop: stops[at.i],
+      first: at.i === 0 && at.beat === 0,
+      last: at.i === stops.length - 1 && at.beat === beatsOf(stops[at.i]) - 1,
+    };
   }
 
   // The accordion landed on a panel by other means (a click, the hash, scroll):
@@ -368,5 +391,5 @@ export function createSlides({ site, panels, goPanel, relayout }) {
     document.fonts?.ready.then(() => reflow(cover.left, cover.right));
   }
 
-  return { enabled, step, land, reflow, stops, current: () => ({ ...cur }) };
+  return { enabled, step, goto, land, reflow, stops, position, current: () => ({ ...cur }) };
 }
