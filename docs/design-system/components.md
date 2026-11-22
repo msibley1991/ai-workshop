@@ -18,7 +18,7 @@ The chrome is everything that isn't slide content: the bars, the accordion tabs,
 - **Left:** the site title, `how (did you [make] this?)`, which links to the hero.
 - **Right:** the **palette indicator**: `Palette - Ink ■ ■ ■`.
   - The name is the active palette's, in bar text.
-  - Three **8 × 8 boxes** follow, in **ink, ground, accent** order, with no labels.
+  - Three **8 × 8 boxes** follow, in **ground, ink, accent** order, with no labels.
   - Each box has a **1-unit ink outline**, except the **ink box, which has an accent outline**.
   - It's a button: clicking it opens the controls panel, like `[c]`. On hover, the bar fill inverts behind the text, and the boxes keep their own colours so they still show the palette.
 

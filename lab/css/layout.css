@@ -287,7 +287,7 @@
 .site-bar-label { padding-right: var(--space-8); }
 .site-bar .site-fullscreen-toggle { margin-left: auto; }   /* beats .site-bar-button's margin */
 
-/* Palette indicator: the palette's name, then ink, ground and accent as 8x8
+/* Palette indicator: the palette's name, then ground, ink and accent as 8x8
    boxes with a 1-unit outline: ink outlines, except the ink box's, which is
    accent. On hover the bar inverts behind the text; the boxes keep their own
    colours (these beat the button's hover rule). */
