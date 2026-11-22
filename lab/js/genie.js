@@ -96,7 +96,7 @@ document.addEventListener("keydown", (e) => {
 // Only the Genie panel starts open: collapse the Effects Lab and Palette panels
 // (created by main.js, which runs first).
 setTimeout(() => {
-  for (const id of [document.body.dataset.panelId, "lab-palette"]) DialStore.setPanelOpen(id, false);
+  for (const id of ["lab-render", "lab-palette"]) DialStore.setPanelOpen(id, false);
 });
 
 // Opens on the first section, where the body text is longest.

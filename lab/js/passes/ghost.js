@@ -5,6 +5,8 @@ import { inkFns } from "./common.js";
 // ghost's age in layers (0 where fresh ink was just drawn, +uLayerStep per
 // frame), so with more than one layer the color steps 1 -> 2 -> 3 over time.
 // uBands switches to hard color bands that hold brightness until the last layer.
+// Any real ink in the current frame replaces the ghost at once, however dim, so
+// a colour change in place cuts; ghosts only persist on bare ground (trails).
 export const ghost = /* glsl */ `
   ${inkFns}
   uniform sampler2D tCurrent;
@@ -52,8 +54,12 @@ export const ghost = /* glsl */ `
     vec3 cur = texture2D(tCurrent, vUv).rgb;
     vec4 last = previous();
     vec3 prev = max(last.rgb - uGroundInk, 0.0);
-    // Fresh ink at least as bright as the ghost restarts the clock.
-    bool fresh = luma(max(cur - uGroundInk, 0.0)) >= luma(prev * uDecay);
+    // Any real ink is fresh and restarts the clock, even when it's dimmer than
+    // the ghost (in ink space, accent on a light ground is dimmer than ink), so
+    // a colour change lands on its first frame instead of fading in under the
+    // old colour's ghost. INK_MIN skips near-ground antialiasing.
+    const float INK_MIN = 0.02;
+    bool fresh = luma(max(cur - uGroundInk, 0.0)) > INK_MIN;
     // Fresh ink replaces the ghost outright. A per-channel max with the tinted
     // ghost would re-tint still ink every frame: harmless for neutral ink, but
     // it muddies coloured ink (e.g. blue on a light ground) toward the ghost colour.

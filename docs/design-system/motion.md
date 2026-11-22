@@ -74,6 +74,7 @@ All are sine waves unless noted. The size is the travel from rest to the peak, o
   - The sides pull in quickly near the top and hold most of the way down.
   - **Landing:** over the funnel's last 15%, the sides always close onto the square and the swing dies out, whatever the graphs say, so the text visibly goes into it.
   - The spine swings 48 units at most, away from the sink's side (left for a sink on the right, right for one on the left), in three S-bends down the funnel.
+  - **It stays inside its panel** (2026-11-22). The S-bends swing back toward the sink's side too, so each side's swing is scaled down to the room between the funnel and the panel's inner edge (inside its outline). With the text axis at column 1, the swing back toward the edge is about half the full swing, and the swing away from it stays full.
 - **Curvature over time:** two bezier graphs, each played over a line's own run, set how much the funnel curves at each moment. They're edited on the genie page (g).
   - **arc:** eases up to the full swing by three quarters of the run, then holds.
   - **narrowing:** stays wide until about a sixth of the run, then pulls in gradually, reaching full only at the end.

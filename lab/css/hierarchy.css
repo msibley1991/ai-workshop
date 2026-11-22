@@ -53,6 +53,7 @@ body[data-view="section"] .h-open { --w: 1; }
 .site-split .h-graphic { grid-column: 1 / 5; }
 .h-graphic {
   border: var(--line-dashed) dashed;
+  --box-line: var(--line-dashed);
   min-width: 0;
   min-height: 0;
   overflow: hidden;

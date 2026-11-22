@@ -3,9 +3,10 @@
 // layout.js drives the panel. Pages opt in with <body data-viewer>; elsewhere
 // nothing here changes the render.
 //
-// A palette writes its colours into the effects dials (so they can still be
-// tuned by dial). Motion, blur and scanlines are overrides applied on top of the dials,
-// so turning them back on restores the tuned look.
+// On render pages (<body data-render>) every colour comes from the active
+// palette (main.js composes it with the Render dials). Motion, blur and
+// scanlines are overrides applied on top, so turning them back on restores the
+// tuned look.
 
 // Palettes live in presets/palettes.json (edited with the Palette dial panel,
 // js/palette-panel.js). PALETTES is filled once palettesReady resolves; the
@@ -55,8 +56,8 @@ export function modeOf(ground) {
   return luma > 0.5 ? "light" : "dark";
 }
 
-// Effects-dial values for a palette (partial; kit.setValues merges them).
-// The palette's ink is the theme's "phosphor" dial.
+// Render values for a palette: the theme (mode from the ground) and the ghost
+// colours. The palette's ink is the theme's "phosphor".
 export function paletteValues(id) {
   const p = PALETTES[id] ?? PALETTES.ink;
   const mode = modeOf(p.ground);

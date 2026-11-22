@@ -22,11 +22,11 @@
      "Genie" dial panel and the curvature graphs (g) tune the warp (js/genie.js).
      Layout from Figma frames "ref1" (intro, node 313:125) and "ref2" (open
      section, node 313:148), rendered through the effects pipeline. The tabs are
-     an accordion driven by scroll (js/layout.js). data-preset loads that preset
-     on every page load. data-canvas scales the emulated pixel and lines with the
+     an accordion driven by scroll (js/layout.js). data-render uses the shared Render
+     menu (presets/render.json) with colours from the palette. data-canvas scales the emulated pixel and lines with the
      canvas unit (js/main.js). data-viewer turns on the viewer controls panel
      (palette, motion, blur, scanlines; js/viewer.js), opened with [c]. -->
-<body data-preset="light" data-panel-id="effects-lab-genie" data-canvas data-viewer>
+<body data-render data-canvas data-viewer>
   <canvas id="screen" aria-hidden="true"></canvas>
 
   <main id="content" class="site">

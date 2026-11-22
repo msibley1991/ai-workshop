@@ -36,9 +36,9 @@ A palette changes **colours only**: the ground, the ink (the "phosphor" dial), t
 - **Source of truth:** the palettes are in [`lab/presets/palettes.json`](../../lab/presets/palettes.json).
 - **Editing:** the **Palette** dial panel edits the active palette: ground, ink, accent, link and ghost 1–3.
   - Edits show live, and they're kept when you switch palettes.
-  - **Save palettes** writes all four to the file (needs `serve.py`). Unsaved edits are lost on reload.
+  - **Save palette** writes only the active palette to the file (needs `serve.py`); the others stay as saved. Unsaved edits are lost on reload.
 - **Ghost history:** a ground change (a palette switch or a ground edit) clears the trail history for two frames, so old trails don't smear over the new ground.
-- **Effects dials:** the active palette is written into the effects dials after the page's pinned preset loads. Don't tune colour in the Effects Lab's Theme folder on this page, because the palette overwrites it on reload. In that folder, the palette's ink is the `phosphor` colour.
+- **Colours live only in the palettes.** The lab's Render menu (glow, ghosting, blur, scanlines, warp) has no colour dials and no light or dark mode: the active palette sets the ground, ink, accent, link and ghost colours, and light or dark follows its ground. The palette's ink is the renderer's `phosphor` colour.
 - Motion, blur and scanlines are **overrides applied on top of the dials** at render time. Switching them back on restores the tuned values.
 
 ## Open

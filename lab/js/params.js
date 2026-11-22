@@ -1,12 +1,20 @@
 // Every tunable value lives here. Slider tuples are [default, min, max, step?].
 // The panel (js/panel.js) renders this config; the renderer only reads values.
+//
+// Two menus use it:
+// - "Render" (pages with <body data-render>: layout, genie, type, hierarchy):
+//   renderConfig only. Shared by every page, saved to presets/render.json.
+//   Colours aren't dials there: they come from the active palette
+//   (presets/palettes.json, js/viewer.js).
+// - "Effects Lab" on the old specimen (index.html): config, which adds the
+//   theme, ghost colours, type and 3D object dials it still uses.
 
 const typeLevel = (size, lineHeight) => ({
   size: [size, 8, 160, 1],
   lineHeight: [lineHeight, 0.8, 2.2, 0.05],
 });
 
-export const config = {
+export const renderConfig = {
   resolution: {
     pixelScale: [3, 1, 10, 1],   // CSS px per emulated pixel
     hardText: [0.4, 0, 1],       // 0 = antialiased, 1 = thresholded 1-bit edges
@@ -28,9 +36,8 @@ export const config = {
     snapScroll: true,
   },
   phosphor: {
-    persistenceColor: "#F38020", // ghosts drift toward this color as they fade (layer 1)
-    persistenceColor2: "#F3C020", // layer 2: reached as the ghost dims further
-    persistenceColor3: "#8A1A00", // layer 3: the faintest tail
+    // Ghost colours (persistenceColor 1-3) are the palette's ghost 1-3; the
+    // specimen adds them as dials (specimenColors below).
     layers: [1, 1, 3, 1],        // how many persistence colors to step through
     // blend: colors drift in by shift while the ghost fades. bands: each layer
     // switches in at full strength and holds brightness; only the last one fades.
@@ -49,14 +56,27 @@ export const config = {
     speed: [2.5, 0.5, 10, 0.1],  // seconds for a wave to roll top to bottom
     randomness: [0.3, 0, 1],     // 0 = identical, evenly spaced waves; more varies timing, size, strength and adds a ragged edge
   },
+  outline: {
+    width: [4, 1, 16, 1],        // CSS px; sets --line (layout.html bars and tab outlines)
+  },
+};
+
+// Ghost colours: ghosts drift toward these as they fade (layer 1, then 2, then
+// 3, the faintest tail). Dials on the specimen only.
+const specimenColors = {
+  persistenceColor: "#F38020",
+  persistenceColor2: "#F3C020",
+  persistenceColor3: "#8A1A00",
+};
+
+export const config = {
+  ...renderConfig,
+  phosphor: { ...specimenColors, ...renderConfig.phosphor },
   theme: {
     mode: { type: "select", options: ["light", "dark"], default: "light" },
     // link: inline link text (viewer pages set it from the palette).
     light: { ground: "#F4F4F0", phosphor: "#0050FF", accent: "#F38020", link: "#0050FF", _collapsed: true },
     dark: { ground: "#0A0C10", phosphor: "#3D7BFF", accent: "#F38020", link: "#F3C020", _collapsed: true },
-  },
-  outline: {
-    width: [4, 1, 16, 1],        // CSS px; sets --line (layout.html bars and tab outlines)
   },
   type: {
     family: {
@@ -78,14 +98,28 @@ export const config = {
     _collapsed: true,
   },
   presets: {
-    // To add one: drop a JSON file in presets/ and add its name here.
-    file: { type: "select", options: ["light"], default: "light" },
-    load: { type: "action", label: "Load preset" },
-    save: { type: "action", label: "Save to preset" },
+    // The specimen can load the shared render settings, and export or import
+    // its own values as a file. It doesn't save to render.json.
+    load: { type: "action", label: "Load render settings" },
     exportJSON: { type: "action", label: "Export JSON" },
     importJSON: { type: "action", label: "Import JSON" },
   },
 };
+
+// Default values of a config: slider tuples give their first entry, selects
+// their default; actions and _keys are skipped.
+export function defaultsOf(cfg) {
+  const out = {};
+  for (const [k, v] of Object.entries(cfg)) {
+    if (k.startsWith("_")) continue;
+    if (Array.isArray(v)) out[k] = v[0];
+    else if (v && typeof v === "object") {
+      if (v.type === "action") continue;
+      out[k] = v.type === "select" ? v.default : defaultsOf(v);
+    } else out[k] = v;
+  }
+  return out;
+}
 
 // Named presets live as JSON in presets/ so they can be versioned and diffed.
 export async function loadPreset(name) {

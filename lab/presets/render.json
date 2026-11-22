@@ -1,0 +1,40 @@
+{
+  "resolution": {
+    "pixelScale": 1,
+    "hardText": 1
+  },
+  "glow": {
+    "intensity": 1,
+    "radius": 1.5,
+    "tintToPhosphor": 0
+  },
+  "ghost": {
+    "decay": 0.9,
+    "scrollGain": 0,
+    "blur": 0.5
+  },
+  "grid": {
+    "mode": "scanlines",
+    "opacity": 0.5,
+    "pitch": 2,
+    "snapScroll": true
+  },
+  "phosphor": {
+    "layers": 2,
+    "layerMode": "blend",
+    "layerFrames": 5,
+    "shift": 0.4,
+    "jitter": 1.1,
+    "flicker": 0
+  },
+  "warp": {
+    "strength": 4,
+    "size": 0.05,
+    "frequency": 4,
+    "speed": 5.5,
+    "randomness": 0.67
+  },
+  "outline": {
+    "width": 2
+  }
+}

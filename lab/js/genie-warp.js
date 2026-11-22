@@ -183,14 +183,21 @@ function spine(v) {
 // canvas, same transform) into dst. Everything is in low-res pixels:
 // B = { x0, x1, y0, y1, lines: [{ y0, y1 }] } the block's text box and line
 // bands, T = { x0, x1, y } the sink square's width and top edge, arcPx the
-// maximum spine swing.
-export function warpBlock(dst, src, B, T, t, arcPx = 0) {
+// maximum spine swing, and E = { x0, x1 } (optional) the panel's inside: the
+// swing toward each side is scaled down to the room between the funnel and
+// that edge, so the S-bends keep their shape but never leave the panel. (The
+// funnel's sides only move between the block's and the sink's edges, so the
+// room is fixed for the whole run.)
+export function warpBlock(dst, src, B, T, t, arcPx = 0, E = null) {
   if (t <= 0) return dst.drawImage(src, 0, 0);
   if (t >= 1) return;
   const { slideStart, slit } = settings, ease = CURVES[settings.curve];
   const G = graphLookups();
   const band = Math.max(1, Math.round(settings.rowBand));
   const bw = B.x1 - B.x0;
+  const amp = Math.abs(arcPx);
+  const fitL = E && amp ? clamp01((Math.min(B.x0, T.x0) - E.x0 - 1) / amp) : 1; // swing to the left
+  const fitR = E && amp ? clamp01((E.x1 - Math.max(B.x1, T.x1) - 1) / amp) : 1; // swing to the right
   const lines = B.lines?.length ? B.lines : [{ y0: B.y0, y1: B.y1 }];
   const n = lines.length;
   // The bottom line leads on the way out. Lines draw in order of progress, so
@@ -224,7 +231,9 @@ export function warpBlock(dst, src, B, T, t, arcPx = 0) {
         // the sink and the swing dies out, whatever the graphs say, so the
         // text goes into the square.
         const land = clamp01((v - (1 - LANDING)) / LANDING), close = land * land * (3 - 2 * land);
-        const k = profile(v) * narrow + (1 - profile(v) * narrow) * close, shift = arcPx * swing * spine(v) * (1 - close);
+        const k = profile(v) * narrow + (1 - profile(v) * narrow) * close;
+        let shift = arcPx * swing * spine(v) * (1 - close);
+        shift *= shift < 0 ? fitL : fitR;
         const L = Math.round(B.x0 + (T.x0 - B.x0) * k + shift), R = Math.round(B.x1 + (T.x1 - B.x1) * k + shift);
         if (R - L >= 1) dst.drawImage(src, B.x0, r, bw, 1, L, yy, R - L, 1);
       }

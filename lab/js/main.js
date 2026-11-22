@@ -1,8 +1,9 @@
 import { createPanel } from "./panel.js";
+import { config, defaultsOf } from "./params.js";
 import { createRenderer } from "./renderer.js";
 import { measure, selectionRects, draw } from "./text-raster.js";
 import { updateScroll } from "./scroll.js";
-import { viewer, enabled as viewerEnabled, applyViewer } from "./viewer.js";
+import { viewer, enabled as viewerEnabled, applyViewer, palettesReady, paletteValues } from "./viewer.js";
 import { createPalettePanel } from "./palette-panel.js";
 import { ghostBoost } from "./genie-warp.js";
 
@@ -70,42 +71,60 @@ function toHex(color) {
   return "#" + [r, g, b].map((n) => Math.round(n).toString(16).padStart(2, "0")).join("");
 }
 
-// Pages can pin a preset and keep their own saved dial values (see layout.html).
-const panelOptions = { id: document.body.dataset.panelId, preset: document.body.dataset.preset };
+// <body data-render> (layout, genie, type, hierarchy): the shared "Render"
+// menu, saved to presets/render.json, with every colour from the active palette
+// (js/viewer.js). Elsewhere (the specimen) the "Effects Lab" panel holds all of
+// config, colours and type dials included.
+const renderMode = "render" in document.body.dataset;
+const SPECIMEN_DEFAULTS = defaultsOf(config);
+// The invisible-DOM type on render pages (css/text-layer.css). Their own CSS
+// sets the type that shows; these only keep the base styles as they were.
+const RENDER_PAGE_TYPE = {
+  family: "JetBrains Mono", gap: 32,
+  h1: { size: 72, lineHeight: 1.05 }, h2: { size: 44, lineHeight: 1.15 }, h3: { size: 32, lineHeight: 1.25 },
+  body: { size: 28, lineHeight: 1.45 }, small: { size: 20, lineHeight: 1.4 },
+};
 
-// dialValues: the effects dials as set. params: what renders, with the viewer's
-// motion and blur choices on top (js/viewer.js; only on pages with data-viewer).
+// dialValues: the dials as set. params: what renders (palette colours on
+// render pages, then the viewer's motion, blur and scanlines on top; js/viewer.js).
 let dialValues = null;
 // A new ground (palette switch, mode or ground dial) clears the ghost history
 // for a couple of frames: trails carried across a ground change smear the old
 // ground over the whole screen.
 let groundKey = "";
 let clearGhostFrames = 0;
-const kit = createPanel((snapshot) => {
-  const values = structuredClone(snapshot);
+
+function compose() {
+  if (!dialValues) return;
+  let values = structuredClone(dialValues);
+  if (renderMode) {
+    const pal = paletteValues(viewer.get().palette);
+    values = { ...structuredClone(SPECIMEN_DEFAULTS), ...values, type: RENDER_PAGE_TYPE, theme: pal.theme };
+    values.phosphor = { ...values.phosphor, ...pal.phosphor };
+  }
   for (const key of ["light", "dark"]) {
+    if (!values.theme[key]) continue;
     for (const role of ["ground", "phosphor", "accent", "link"]) values.theme[key][role] = toHex(values.theme[key][role]);
   }
   for (const key of ["persistenceColor", "persistenceColor2", "persistenceColor3"]) values.phosphor[key] = toHex(values.phosphor[key]);
   const key = `${values.theme.mode} ${values.theme[values.theme.mode].ground}`;
   if (groundKey && key !== groundKey) clearGhostFrames = 2;
   groundKey = key;
-  dialValues = values;
   params = applyViewer(values);
   applyType(values.type);
   applyLines(values);
   invalidate();
-}, panelOptions);
-
-if (viewerEnabled) {
-  // Palettes write into the effects dials (js/palette-panel.js); motion and
-  // blur re-apply as overrides.
-  createPalettePanel(kit);
-  viewer.subscribe((state, patch) => {
-    if (!("palette" in patch) && dialValues) params = applyViewer(dialValues);
-    invalidate();
-  });
 }
+
+createPanel((values) => { dialValues = values; compose(); }, { render: renderMode });
+
+if (renderMode) {
+  // Palette edits and switches recolour the render (js/palette-panel.js).
+  createPalettePanel(compose);
+  palettesReady.then(compose);
+}
+// The viewer's palette, motion, blur and scanlines (pages with data-viewer).
+viewer.subscribe(() => { compose(); invalidate(); });
 
 window.addEventListener("resize", () => {
   if (canvasMode) unit = readUnit();

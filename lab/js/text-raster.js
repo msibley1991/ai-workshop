@@ -140,7 +140,8 @@ export function measure(root, ctx) {
       ink: inkOf(el, style),
       clip: clipOf(el),
       radius: parseFloat(style.borderTopLeftRadius) || 0,
-      line: parseFloat(style.borderTopWidth) || 1,
+      // --box-line (layout.css) is the declared width; the computed border is snapped.
+      line: parseFloat(style.getPropertyValue("--box-line")) || parseFloat(style.borderTopWidth) || 1,
       dashed: style.borderTopStyle === "dashed",
     };
   });
@@ -239,9 +240,16 @@ export function measure(root, ctx) {
     }
     lines.sort((a, b) => a.y0 - b.y0);
     setLines(el, lines.length);
-    const sinkEl = (el.closest(".site-panel") ?? root).querySelector("[data-genie-sink]");
+    const panel = el.closest(".site-panel");
+    const sinkEl = (panel ?? root).querySelector("[data-genie-sink]");
     const sink = sinkEl ? toDoc(sinkEl.getBoundingClientRect()) : null;
-    return { el, ...box, lines, sink };
+    // The panel's inside, within its outline (--line): the funnel's swing stays in it.
+    let bounds = null;
+    if (panel) {
+      const p = toDoc(panel.getBoundingClientRect()), line = parseFloat(getComputedStyle(panel).getPropertyValue("--line")) || 0;
+      bounds = { x0: p.x + line, x1: p.x + p.w - line };
+    }
+    return { el, ...box, lines, sink, bounds };
   });
   const u = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--u")) || 1;
 
@@ -435,7 +443,8 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
     const side = S.x + S.w / 2 < g.x + g.w / 2 ? -1 : 1;
     warpBlock(ctx, off.canvas,
       { x0: toPx(g.x), x1: toPx(g.x + g.w), y0: toPy(g.y), y1: toPy(g.y + g.h), lines: g.lines.map((l) => ({ y0: toPy(l.y0), y1: toPy(l.y1) })) },
-      { x0: toPx(S.x), x1: toPx(S.x + S.w), y: Math.round(toPy(S.y)) }, t, (side * genieSettings.arc * layout.u) / ps);
+      { x0: toPx(S.x), x1: toPx(S.x + S.w), y: Math.round(toPy(S.y)) }, t, (side * genieSettings.arc * layout.u) / ps,
+      g.bounds && { x0: Math.ceil(toPx(g.bounds.x0)), x1: Math.floor(toPx(g.bounds.x1)) });
   });
 
   // Selection is the inverse: a block of the main ink with the selected text

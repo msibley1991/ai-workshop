@@ -1,6 +1,6 @@
 # Display layer
 
-Status: **exploration**, from the display grilling session (2026-11-21). The look was tuned on the lab layout page ([`lab/layout.html`](../../lab/layout.html)), which is the working basis for the real site. The values below are `lab/presets/light.json`, the preset that page loads. It hasn't been tested on a projector yet (see "Projector test").
+Status: **exploration**, from the display grilling session (2026-11-21). The look was tuned on the lab layout page ([`lab/layout.html`](../../lab/layout.html)), which is the working basis for the real site. The values below are `lab/presets/render.json`, the shared render settings every lab render page loads (colours come from the palettes). It hasn't been tested on a projector yet (see "Projector test").
 
 ## What it is
 - The page is drawn through a WebGL "pre-window" display. The DOM is laid out but transparent. Each frame, [`lab/js/text-raster.js`](../../lab/js/text-raster.js) redraws it into a low-res canvas, and [`lab/js/renderer.js`](../../lab/js/renderer.js) runs the passes: content → ghost → blur → display.
@@ -11,12 +11,12 @@ Status: **exploration**, from the display grilling session (2026-11-21). The loo
 | Effect | Value | What it does |
 |---|---|---|
 | Emulated pixel | 1 unit (locked) | the screen is always 1080 emulated rows tall, rounded to whole device pixels |
-| hardText | 0.22 | pushes antialiased text edges toward 1-bit |
-| Glow | intensity 0.5, radius 1.5, no tint | a soft halo around ink |
-| Ghost | decay 0.85, scrollGain 1, blur 2.5 | phosphor trails behind anything that moves |
-| Ghost colours | 2 layers, blend, 13 frames per layer, shift 0.5 | trails drift through the palette's ghost colours as they fade |
-| Scanlines | opacity 1, pitch 2 emulated px, snap scroll | screen texture; scrolling moves in whole scanline steps |
-| Jitter | 1 emulated px | rows wobble sideways (ambient) |
+| hardText | 1 | text edges thresholded to 1-bit |
+| Glow | intensity 1, radius 1.5, no tint | a soft halo around ink |
+| Ghost | decay 0.9, scrollGain 0, blur 0.5 | phosphor trails behind anything that moves; trails persist only on bare ground, so a colour change in place cuts on its first frame |
+| Ghost colours | 2 layers, blend, 5 frames per layer, shift 0.4 | trails drift through the palette's ghost colours as they fade |
+| Scanlines | opacity 0.5, pitch 2 emulated px, snap scroll | screen texture; scrolling moves in whole scanline steps |
+| Jitter | 1.1 emulated px | rows wobble sideways (ambient) |
 | Warp | strength 4, size 0.05, 4 per minute, 5.5 s to roll, randomness 0.67 | a rolling CRT band shears rows sideways (ambient) |
 | Flicker | 0 | not part of the look |
 
@@ -52,9 +52,7 @@ These are overrides applied on top of the look at render time (`applyViewer()` i
 - **Code:** the raster, the passes, the scene engine and the viewer controls move into the site's `js/`. The dial panels, the preset actions and the vendored dialkit stay in the lab. **The live site has no dial panel.**
 - **The look:** one frozen file (proposed `js/display/look.js`) holding only the display values above, plus the dark-glow exception if it's needed. Colours stay in the palettes file. Layout, type and spacing tokens stay in `:root` in `css/style.css`. The effect values aren't CSS tokens, because only the WebGL passes read them.
 - **Changing the look:** tune on the lab layout page, then update the look file and this doc together.
-- **Lab clean-up (done):** `dark.json`, `presenter.json` and `reader.json` are retired, and `light.json` lost the placeholder 3D object's values.
-  - `light.json` keeps three entries the lab pages still read: `theme` (the colours on pages without viewer controls, such as the type and hierarchy pages), `outline` (the 2-pixel chrome line) and `type` (the old dials behind `css/text-layer.css`).
-  - None of them goes into the site's look file. There, the palettes set colours and the type and line tokens are in `:root`.
+- **Lab clean-up (done):** `dark.json`, `presenter.json` and `reader.json` are retired. `light.json` became `render.json` (2026-11-22): one Render menu shared by the layout, genie, type and hierarchy pages, with one save, and no colours, theme or light/dark mode, which all come from the palettes. Its `outline` (the 2-pixel chrome line) doesn't go into the site's look file: there, the line token is in `:root`.
 
 ## Projector test
 Run once, at the venue or on a comparable projector. Change the one look only for something that fails.

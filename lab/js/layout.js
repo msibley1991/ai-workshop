@@ -296,11 +296,19 @@ document.addEventListener("keydown", (e) => {
   if (e.altKey || e.ctrlKey || e.metaKey) return;
   if (!site.contains(e.target) && e.target !== document.body) return; // leave the dial panel alone
   if (e.key === "c" || e.key === "C") toggleControls();
+  else if (e.key === "f" || e.key === "F") toggleFullscreen();
   else if (e.key === "Escape" && controlsTarget === 1) {
     toggleControls(false);
     controlsToggle.focus({ preventScroll: true });
   }
 });
+
+// f: fullscreen on and off (Esc also leaves it, as the browser does). The canvas
+// unit follows the new screen height through the resize.
+function toggleFullscreen() {
+  if (document.fullscreenElement) document.exitFullscreen?.();
+  else document.documentElement.requestFullscreen?.().catch(() => {});
+}
 
 const indexFromHash = () => Math.max(0, ids.indexOf(location.hash.slice(1)));
 window.addEventListener("hashchange", () => animateTo(indexFromHash(), GOTO_MS));

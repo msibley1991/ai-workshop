@@ -35,6 +35,12 @@
 @property --line { syntax: "<length>"; inherits: true; initial-value: 2px; }
 @property --tab-header { syntax: "<length>"; inherits: true; initial-value: 64px; }
 @property --tab-flap { syntax: "<length>"; inherits: true; initial-value: 453px; }
+/* A box's border width as declared, for the raster. Chrome rounds CSS border
+   widths down to whole device pixels, so reading the border back would draw
+   boxes thinner than tab outlines (which read --line) whenever --u is
+   fractional, e.g. a 1080p screen with the browser not fullscreen. */
+@property --box-line { syntax: "<length>"; inherits: false; initial-value: 0px; }
+[data-box] { --box-line: var(--line); }
 
 :root {
   --u: min(100dvh / 1080, 100vw / 1440);
