@@ -17,6 +17,7 @@ import { viewer } from "./viewer.js";
 import { stepGraphics, setMotion, graphicSpan } from "./graphic.js";
 import { genie } from "./genie-play.js";
 import { createSlides } from "./slides.js";
+import { startSiteLoops } from "./site-loops.js";
 
 // Motion off (viewer controls; it starts off when the OS asks for reduced motion)
 // makes the accordion and the controls panel jump instead of animating.
@@ -164,6 +165,7 @@ document.addEventListener("keydown", (e) => {
 // With slides on the page (js/slides.js), they step through every slide's beats
 // and on across sections and tabs. Without (genie.html), they step the graphics
 // on screen between states.
+startSiteLoops(site); // slide 4's GIFs and feed scroll
 const slides = createSlides({
   site, panels, relayout,
   onMove: (pos) => { showStepEnds(pos); nav?.show(pos); },

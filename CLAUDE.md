@@ -17,6 +17,23 @@ Purpose: _TBD_
 - Use tokens from `:root` and don't hardcode colors, fonts, or spacing.
 - When adding a doc to `docs/`, add a link to it below.
 
+## Git workflow
+
+For now Max works directly on `main`. Once a second person joins the repo:
+
+- Work on a branch, not `main`.
+- To bring in the other person's work:
+  1. Commit.
+  2. Run `git fetch origin`.
+  3. Run `git merge origin/main`, not the local `main`, which is stale until fetched.
+  4. Resolve any conflicts.
+  5. Test the site and the lab pages.
+  6. Push.
+
+  The full steps are in [README.md](README.md#working-together).
+- Merge, push and commit only when the user asks.
+- `lab/presets/*.json` are shared files written by the lab's save buttons, so they are likely to conflict. When resolving a conflict in one, ask the user which values to keep.
+
 ## Docs
 
 - [docs/aesthetic-direction.md](docs/aesthetic-direction.md): visual direction and open questions (exploratory)

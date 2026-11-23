@@ -46,6 +46,11 @@ const fromBeat = (g, key) => (g.dataset[key] != null ? Number(g.dataset[key]) : 
 const cropAt = (g, beat) => fromBeat(g, "crop") != null && beat >= fromBeat(g, "crop");
 const splitAt = (g, beat) => cropAt(g, beat) && beat >= (fromBeat(g, "split") ?? fromBeat(g, "crop"));
 const markAt = (g, beat) => fromBeat(g, "mark") != null && beat >= fromBeat(g, "mark");
+// data-phased on a graphic: its state changes run as a phase of the beat (after
+// visuals leave, before the statement and entering visuals) instead of at the
+// beat's start, so it can make room for what comes in next (slide 2's picture
+// box closing before the prompt field rises) and take it back after it's gone.
+const phased = (g) => g.hasAttribute("data-phased");
 const MARK_PAD = 8;      // units at each end of a mark bar
 const LINK_GAP = 32;     // units between a connector's arrow tip and its phrase
 const ARROW_H = 32;      // units, the height of a connector's open chevron (legs at 45°)
@@ -151,6 +156,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
     }
     for (const g of stop.visuals) placeSolo(stop, g, beat);
     for (const g of stop.visuals) if (shrinks(g)) shrinkItem(g, 0).clear(); // undo a cut-off shrink
+    for (const g of stop.visuals) if (opens(g)) openItem(g, 1).clear();     // or a cut-off open
     for (const g of stop.visuals) {
       if (fromBeat(g, "crop") == null) continue;
       const on = !g.hidden && cropAt(g, beat);
@@ -261,11 +267,13 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
 
   // Links: from the middle of each box's left edge, left, a diagonal centred
   // between the ends, then left onto the link point. k draws them by length.
-  function setLinks(stop, k) {
+  // `from` (0..1) erases them from their start, the way they were drawn, so
+  // only the stretch from there to the tip stays (leaving the slide).
+  function setLinks(stop, k, from = 0) {
     const svg = stop.root.querySelector(".slide-links"), pt = linkPoint(stop);
     if (!svg) return;
     svg.replaceChildren();
-    if (k <= 0 || !pt) return;
+    if (k <= 0 || from >= 1 || !pt) return;
     // The chevron's mitred point sticks out past its vertex by half the stroke
     // times root 2, so the vertex sits back by that and the drawn tip lands on pt.
     const u = unit(), miter = ((parseFloat(svg.dataset.weight) || 0) / 2) * Math.SQRT2 * u;
@@ -278,7 +286,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
       // is more than the run).
       const xm = (x0 + tx) / 2, w = Math.min(dy, Math.max(0, x0 - tx));
       const pts = rounded([[x0, y0], [xm + w / 2, y0], [xm - w / 2, ty], [tx, ty]], LINK_RADIUS * u);
-      const drawn = partial(pts, k);
+      const drawn = from > 0 ? partial(pts.slice().reverse(), 1 - from).reverse() : partial(pts, k);
       const line = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
       line.setAttribute("points", drawn.map((p) => p.join(",")).join(" "));
       line.setAttribute("fill", "none");
@@ -464,7 +472,9 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
     const wanted = t === "text" ? 8 : t === "split" ? (Number(slide.dataset.split) || 6)
       : slide.dataset.statement === "large" ? COLUMNS : 6;
     let text = Math.min(wanted, avail);
-    if (t === "split" && vis[0]) {
+    // Split, and a Text slide with a visual (slide 3): the visual takes the
+    // columns after the statement, down to its scene's minimum span.
+    if ((t === "split" || t === "text") && vis[0]) {
       const [min] = graphicSpan(vis[0].querySelector("[data-graphic]")) ?? [4, 4];
       text = Math.max(Math.min(TEXT_MIN, avail), Math.min(text, avail - min));
       vis[0].style.gridColumn = `${a0 + text} / ${aEnd}`;
@@ -474,6 +484,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
       st.style.gridColumn = `${a0} / span ${text}`;
       st.style.gridRow = "";
       st.style.alignSelf = "";
+      placeRows(st);
     }
     if (t === "wide" || t === "row" || t === "visual") {
       let end = ROWS + 1; // first row the visuals don't reach
@@ -488,6 +499,20 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
         v.style.gridColumn = n === 1 ? `${a0} / ${aEnd}` : `${a0 + k * span} / span ${span}`;
         v.style.gridRow = `1 / ${Math.max(2, end)}`;
       });
+    }
+  }
+
+  // data-middle on a sentence: its centre sits on the vertical middle of the
+  // row fields (slide 2's second sentence), unless the sentences above reach
+  // past that, where it keeps its usual gap.
+  function placeRows(st) {
+    for (const p of st.querySelectorAll(":scope > [data-middle]")) {
+      p.style.marginTop = "";
+      const m0 = parseFloat(getComputedStyle(p).marginTop) || 0;
+      const r = p.getBoundingClientRect();
+      const want = (FRAME_H / 2) * unit() - r.height / 2;
+      const now = r.top - st.getBoundingClientRect().top;
+      p.style.marginTop = `${Math.max(m0, m0 + want - now)}px`;
     }
   }
 
@@ -590,13 +615,13 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
   }
 
   // Tweens visuals for VISUAL_MS: items are { el, from, to, apply(el, k) }.
-  function tween(items, my) {
+  function tween(items, my, ms = VISUAL_MS) {
     if (!items.length) return Promise.resolve();
     return new Promise((resolve) => {
       const t0 = performance.now();
       const frame = (now) => {
         if (my !== epoch) return resolve();
-        const k = ease(Math.min(1, (now - t0) / VISUAL_MS));
+        const k = ease(Math.min(1, (now - t0) / ms));
         items.forEach((it) => it.apply(k));
         relayout();
         if (k < 1) requestAnimationFrame(frame);
@@ -693,9 +718,12 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
     busyTarget = { i: toI, beat };
     onMove(position());
 
-    // 1. Text out.
+    // 1. Text out. Links (slide 1's) erase along with it, start first, over the
+    // same run, then the boxes they came from fall with the other visuals.
     const outMs = textOut(from, my);
-    if (outMs) await wait(outMs);
+    const links = from.root.querySelector?.(".slide-links")?.childElementCount ? from : null;
+    if (links) await Promise.all([wait(outMs), tween([{ apply: (k) => setLinks(links, 1, k) }], my, Math.max(outMs, 1))]);
+    else if (outMs) await wait(outMs);
     if (my !== epoch) return;
 
     // The new slide comes on with its text in the sink.
@@ -708,6 +736,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
       setTemplate(to, beat);
       layoutSlide(to.root);
       const steps = visualSteps(from, to, beat);
+      holdLinks(to);
       relayout();
       // 2. Visuals: exits, then moves, then entrances.
       if (!(await runSteps(steps, my))) return;
@@ -722,6 +751,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
       to.visuals.forEach(cleanVisual);
       setTitle(to);
       placeVisuals(to, beat);
+      holdLinks(to);
       // Its visuals wait below the panel while the accordion moves (set up
       // before any frame draws them); artefacts type in once they've risen.
       const enters = to.visuals.filter((g) => !g.hidden).map((g) => {
@@ -747,9 +777,21 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
     await frames(2);
     if (my !== epoch) return;
     cur = { i: toI, beat };
+    // Links held back on the way in draw with the text, over the same run.
     const inMs = textIn(to, beat, my);
-    await wait(inMs);
-    if (my === epoch) busyTarget = null;
+    if (heldLinks === to) await Promise.all([wait(inMs), tween([{ apply: (k) => setLinks(to, k) }], my, Math.max(inMs, 1))]);
+    else await wait(inMs);
+    if (my !== epoch) return;
+    if (heldLinks === to) { setLinks(to, 1); heldLinks = null; }
+    busyTarget = null;
+  }
+  // A slide entered on a beat with links (back into slide 1's last beat): they
+  // aren't drawn while the old slide's visuals leave and the new ones rise, but
+  // with the text in, the reverse of how they leave.
+  let heldLinks = null;
+  function holdLinks(stop) {
+    heldLinks = stop.root.querySelector?.(".slide-links")?.childElementCount ? stop : null;
+    if (heldLinks) setLinks(stop, 0);
   }
 
   // ---- Input ------------------------------------------------------------------
@@ -762,7 +804,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
       cur.beat = nb;
       // Motion on, statement changes run as the beat's text phase, in order.
       if (!motionOn()) stop.sentences.forEach((el, k) => setGenie(el, shownAt(stop, k, nb) ? 0 : 1, false));
-      stop.visuals.forEach((g) => setState(stop, g, nb, true));
+      stop.visuals.forEach((g) => { if (!phased(g) || !motionOn()) setState(stop, g, nb, true); });
       if (beatPhases(stop, Math.min(nb, nb - dir)).length) {
         if (!motionOn()) { clearMorph(stop); setTemplate(stop, nb); layoutSlide(stop.root); placeVisuals(stop, nb); relayout(); }
         else runBeat(stop, nb - dir, nb);
@@ -791,6 +833,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
     const split = stop.visuals.filter((g) => both(g) && splitAt(g, a) !== splitAt(g, b));
     const mark = stop.visuals.filter((g) => shownVisual(g, b) && markAt(g, a) !== markAt(g, b));
     const text = stop.sentences.some((el, i) => shownAt(stop, i, a) !== shownAt(stop, i, b));
+    const staged = stop.visuals.filter((g) => !isArtefact(g) && phased(g) && both(g) && stateFor(stop, g, a) !== stateFor(stop, g, b));
     const cropIn = (my) => cropRun(stop, crop, "c", 1, my), cropOut = (my) => cropRun(stop, crop, "c", 0, my);
     const ph = [];
     // Visuals leaving and an erase on the same beat run together.
@@ -807,15 +850,25 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
     if (split.length && !splitWithText) ph.push({ fwd: splitIn, back: splitOut });
     if (templateAt(stop, a) !== templateAt(stop, b)) ph.push({ fwd: (my) => morph(stop, b, my), back: (my) => morph(stop, a, my) });
     if (solo.length) ph.push({ fwd: (my) => soloRun(stop, solo, b, my), back: (my) => soloRun(stop, solo, a, my) });
+    if (staged.length) {
+      const to = (beat) => () => { staged.forEach((g) => setGraphicState(g, stateFor(stop, g, beat), true)); return wait(VISUAL_MS); };
+      ph.push({ fwd: to(b), back: to(a) });
+    }
     if (text) ph.push({
       fwd: (my) => textRun(stop, a, b, my, splitWithText ? { withOut: splitIn } : {}),
       back: (my) => textRun(stop, b, a, my, splitWithText ? { withIn: splitOut } : {}),
     });
+    // Marks (and their links, if the slide has any); on an artefact that enters
+    // on this beat they wait until it has typed in.
+    const marks = [];
     if (mark.length) {
-      ph.push({ fwd: (my) => markRun(stop, mark, 1, my), back: (my) => markRun(stop, mark, 0, my) });
-      ph.push({ fwd: (my) => linkRun(stop, 1, my), back: (my) => linkRun(stop, 0, my) });
+      marks.push({ fwd: (my) => markRun(stop, mark, 1, my), back: (my) => markRun(stop, mark, 0, my) });
+      if (stop.root.querySelector(".slide-links")) marks.push({ fwd: (my) => linkRun(stop, 1, my), back: (my) => linkRun(stop, 0, my) });
     }
+    const marksLast = mark.some((g) => enter.includes(g));
+    if (!marksLast) ph.push(...marks);
     if (enter.length) ph.push({ fwd: (my) => bringIn(stop, enter, b, my), back: (my) => takeOut(stop, enter, my) });
+    if (marksLast) ph.push(...marks);
     return ph;
   }
 
@@ -851,12 +904,36 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
     set(from);
     return { apply: (k) => set(from + (to - from) * k), clear: () => { turn.style.width = turn.style.height = turn.style.padding = ""; if (label) label.style.visibility = ""; } };
   }
-  // Visuals leaving within a slide: artefacts erase, then shrink away or fall out.
+  // data-open (slide 4's sites): an artefact enters by its frame opening from
+  // its top-left corner to full size (VISUAL_MS, ease) with its contents and
+  // caption hidden, which then cut in; it leaves the reverse way (contents cut
+  // out, the frame closes onto its top-left corner). Not a rise or fall.
+  const opens = (g) => g.hasAttribute("data-open");
+  function openItem(g, to) {
+    const frame = g.querySelector(".site-frame");
+    const parts = [...frame.children, ...g.querySelectorAll(":scope > .site-caption")];
+    frame.style.width = frame.style.height = frame.style.flex = "";
+    parts.forEach((p) => (p.hidden = false));
+    const r = frame.getBoundingClientRect();
+    parts.forEach((p) => (p.hidden = true));
+    const set = (k) => {
+      frame.style.flex = "none";
+      frame.style.width = `${r.width * k}px`;
+      frame.style.height = `${r.height * k}px`;
+    };
+    const from = to ? 0 : 1;
+    set(from);
+    return {
+      apply: (k) => set(from + (to - from) * k),
+      clear: () => { frame.style.width = frame.style.height = frame.style.flex = ""; parts.forEach((p) => (p.hidden = false)); },
+    };
+  }
+  // Visuals leaving within a slide: artefacts erase, then shrink away, close or fall out.
   async function takeOut(stop, gs, my) {
     await Promise.all(arts(gs).map((b) => typeTo(b, 0, TYPE_MS, () => my !== epoch)));
     if (my !== epoch) return;
-    const sh = gs.filter(shrinks), shItems = sh.map((g) => shrinkItem(g, 1));
-    const items = [...shItems, ...gs.filter((g) => !shrinks(g)).map((g) => fall(g, belowPanel(stop, g)))];
+    const sh = gs.filter(shrinks), shItems = [...sh.map((g) => shrinkItem(g, 1)), ...gs.filter(opens).map((g) => openItem(g, 0))];
+    const items = [...shItems, ...gs.filter((g) => !shrinks(g) && !opens(g)).map((g) => fall(g, belowPanel(stop, g)))];
     if (!(await runSteps([items], my))) return;
     shItems.forEach((it) => it.clear());
     gs.forEach((g) => { g.hidden = true; offsets.delete(g); g.style.transform = ""; });
@@ -871,6 +948,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
       placeSolo(stop, g, beat);
       arts([g]).forEach((b) => setTyped(b, 0));
       if (shrinks(g)) return shrinkItem(g, 0);
+      if (opens(g)) return openItem(g, 1);
       const dy = belowPanel(stop, g);
       g.style.transform = tr(g, dy);
       return rise(g, dy);

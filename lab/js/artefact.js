@@ -19,8 +19,11 @@ function prep(el) {
   // text with a line break per element, and gets the elements back once fully
   // typed, so they can be cropped and marked. A plain block keeps its source
   // line breaks (CSS pre-line); indentation and runs of spaces collapse.
-  const nodes = el.children.length ? [...el.children] : null;
-  const lines = nodes ? nodes.map((n) => n.textContent) : el.textContent.split("\n");
+  // data-type="inline": the block is running text whose inline elements (spans
+  // to mark) type as plain text and come back once fully typed.
+  const inline = el.dataset.type === "inline";
+  const nodes = inline ? [...el.childNodes] : el.children.length ? [...el.children] : null;
+  const lines = inline ? [el.textContent] : nodes ? nodes.map((n) => n.textContent) : el.textContent.split("\n");
   const text = lines.map((l) => l.replace(/\s+/g, " ").trim()).filter(Boolean).join("\n");
   const typed = document.createTextNode(text);
   const cursor = document.createElement("span");

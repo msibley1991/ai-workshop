@@ -21,7 +21,7 @@
 // (`graphicSpan`). Iso scenes put the world origin at `origin` (design units)
 // and draw `scale` design units per world unit.
 import {
-  ISO_STYLE, ISO_YAW, ISO_PITCH, Raster, Spin, hatchInk, stepTone, rotator, boxFaces, lightVector, fillFace, rgb,
+  ISO_STYLE, ISO_YAW, ISO_PITCH, Raster, Spin, hatchInk, stepTone, rotator, boxFaces, lightVector, fillFace, rgb, quantize,
 } from "./shade.js";
 import SCENES from "./graphics/index.js";
 
@@ -72,7 +72,7 @@ export function mountGraphic(el) {
     el.append(span);
     m.labels.set(l.id, span);
   }
-  if (scene.kind === "iso") wireDrag(m);
+  if (scene.kind === "iso" || scene.kind === "persp") wireDrag(m);
   el.addEventListener("pointermove", (ev) => { if (!m.drag) setHover(m, hitTest(m, ev)); });
   el.addEventListener("pointerleave", () => setHover(m, null));
   return m;
@@ -92,7 +92,8 @@ function wireDrag(m) {
   });
   el.addEventListener("pointermove", (ev) => {
     if (!m.drag) return;
-    m.spin.move(ev.clientX - m.drag[0], ev.clientY - m.drag[1]);
+    // Perspective scenes turn only: a tilt would move the horizon.
+    m.spin.move(ev.clientX - m.drag[0], m.scene.kind === "persp" ? 0 : ev.clientY - m.drag[1]);
     m.drag = [ev.clientX, ev.clientY];
   });
   const up = () => {
@@ -126,7 +127,9 @@ function hitTest(m, ev) {
 // ---------- steps ----------
 
 const stateAt = (m, i) => m.scene.states?.[i] ?? {};
-const valuesOf = (st) => ({ explode: st.explode ?? 0 });
+// explode: iso parts apart (0..1). frame: a perspective scene enclosed in its
+// picture box (0..1), see paintPersp.
+const valuesOf = (st) => ({ explode: st.explode ?? 0, frame: st.frame ?? 0 });
 
 // Steps every graphic currently on screen. Returns true if any moved.
 export function stepGraphics(dir) {
@@ -181,7 +184,9 @@ export function setGraphicAlign(el, a) {
   const m = mountGraphic(el);
   if (m) m.alignT = a;
 }
-export const graphicAlign = (el) => mounts.get(el)?.alignT ?? (el.dataset.align === "bottom" ? 1 : 0);
+// data-align: "top" (0), "middle" (0.5) or "bottom" (1) in its box.
+const alignOf = (el) => ({ bottom: 1, middle: 0.5 })[el.dataset.align] ?? 0;
+export const graphicAlign = (el) => mounts.get(el)?.alignT ?? alignOf(el);
 
 // A carried graphic (the same scene on the next slide) starts where the old one is.
 export function copyGraphicState(fromEl, toEl) {
@@ -197,7 +202,7 @@ function currentValues(m, now) {
   const p = Math.min(1, (now - m.tween.t0) / m.tween.dur);
   if (p >= 1) { m.tween = null; return valuesOf(stateAt(m, m.index)); }
   const e = ease(p), { from, to } = m.tween;
-  return { explode: from.explode + (to.explode - from.explode) * e };
+  return { explode: from.explode + (to.explode - from.explode) * e, frame: from.frame + (to.frame - from.frame) * e };
 }
 
 // ---------- labels ----------
@@ -303,6 +308,56 @@ function fit(m, W, H, u, box = null) {
   return { s, ox: aL - dL * s, oy: box ? slack * box.align : slack / 2 };
 }
 
+// A perspective scene's picture box (state `frame: 1`): the element's full
+// width, down to `reserve` units above its bottom (room for what goes under
+// it, on slide 2 the prompt field), with the drawing fitted inside, centred,
+// FRAME_PAD in from the box. No caption room: captions are hidden in it.
+const FRAME_PAD = 16;
+// scene.frameView [x0, y0, x1, y1] (design units) is the part fitted, so the
+// objects can fill the box; it defaults to the whole design box. What falls
+// outside the box (a turn swinging an object out) is clipped in paintPersp.
+function frameFit(scene, W, H, reserve) {
+  const box = [0, 0, W, Math.max(1, H - reserve)];
+  const [vx0, vy0, vx1, vy1] = scene.frameView ?? [0, 0, scene.size[0], scene.size[1]];
+  const iw = W - 2 * FRAME_PAD, ih = box[3] - 2 * FRAME_PAD;
+  const s = Math.max(0.05, Math.min(iw / (vx1 - vx0), ih / (vy1 - vy0)));
+  return { box, s, ox: W / 2 - ((vx0 + vx1) / 2) * s, oy: box[3] / 2 - ((vy0 + vy1) / 2) * s };
+}
+
+// The sway loop (state loop: "sway", a perspective scene's scene.sway
+// { yaw, ms }): the scene turns `yaw` degrees and back, `ms` each way, on a
+// sine ease, added to any drag. Its clock runs only while it draws with motion
+// on and nobody's dragging (a loop pauses during a drag), and starts again
+// from rest when the graphic comes back on screen.
+function swayYaw(m, now, st) {
+  const sw = m.scene.sway, T = loopClock(m, now, st);
+  if (st.loop !== "sway" || !sw || T == null) return 0;
+  const phase = (T % (2 * sw.ms)) / (2 * sw.ms);
+  return (sw.yaw * (1 - Math.cos(2 * Math.PI * phase))) / 2;
+}
+// A state's loop clock (ms): runs while the graphic draws with motion on and
+// nobody's dragging, restarts from 0 when it comes back on screen (not drawn
+// for 500 ms) or its state has no loop. null while no loop runs.
+function loopClock(m, now, st) {
+  if (m.loopAt === now) return m.loopT; // once per frame
+  const last = m.drawnAt ?? 0;
+  m.drawnAt = m.loopAt = now;
+  if (!st.loop || !motion) return (m.loopT = null);
+  if (m.loopT == null || now - last > 500) m.loopT = 0;
+  else if (!m.spin.held) m.loopT += now - last;
+  return m.loopT;
+}
+// The twist loop (state loop: "twist", an iso scene's scene.twist { deg, ms,
+// stagger }): an angle that turns `deg` and back, `ms` each leg on the
+// standard ease, starting `delay` ms after the loop does. 0 before it starts.
+function twistAngle(tw, T, delay = 0) {
+  if (T == null) return 0;
+  const t = T - delay;
+  if (t <= 0) return 0;
+  const local = t % (2 * tw.ms);
+  return local < tw.ms ? ease(local / tw.ms) * tw.deg : (1 - ease((local - tw.ms) / tw.ms)) * tw.deg;
+}
+
 // ---------- drawing ----------
 
 // item: { el, x, y, w, h } in document CSS px (from text-raster measure).
@@ -319,10 +374,19 @@ export function drawGraphic(ctx, item, ps, u, colors) {
     m.looks = [];
   }
   const vals = currentValues(m, now), st = stateAt(m, m.index);
-  const box = item.el.dataset.fit === "box" ? { align: m.alignT ?? (item.el.dataset.align === "bottom" ? 1 : 0) } : null;
-  const { s, ox, oy } = fit(m, item.w / u, item.h / u, u, box); // design units -> element units
+  m.viewYaw = m.spin.yaw + swayYaw(m, now, st);
+  m.twistT = st.loop === "twist" ? loopClock(m, now, st) : null;
+  const box = item.el.dataset.fit === "box" ? { align: m.alignT ?? alignOf(item.el) } : null;
+  let { s, ox, oy } = fit(m, item.w / u, item.h / u, u, box); // design units -> element units
+  let frameBox = null;
+  if (vals.frame > 0) { // perspective scenes: on the way into their picture box
+    const fb = frameFit(m.scene, item.w / u, item.h / u, stateAt(m, m.index).reserve ?? 0), k = vals.frame;
+    const S = m.scene.size, a = [ox, oy, ox + S[0] * s, oy + S[1] * s]; // the design box as fitted
+    frameBox = a.map((v, i) => v + (fb.box[i] - v) * k);
+    s += (fb.s - s) * k; ox += (fb.ox - ox) * k; oy += (fb.oy - oy) * k;
+  }
   const f = u / ps; // buffer px per unit
-  m.geom = { ps, bw, bh, ox, oy, f, s, u };
+  m.geom = { ps, bw, bh, ox, oy, f, s, u, frameBox };
   placeLabels(m, ox, oy, s);
 
   // A look is one painted image. Painting is the expensive part, so the last
@@ -330,7 +394,7 @@ export function drawGraphic(ctx, item, ps, u, colors) {
   // and flow packets are drawn over the look each frame instead of in it.
   const blinkOn = !motion || st.loop !== "blink" || Math.floor(now / BLINK_MS) % 2 === 0;
   const flowing = motion && (st.flow?.length ?? 0) > 0;
-  const key = [bw, bh, ox, oy, f, s, m.index, vals.explode, m.spin.yaw, m.spin.pitch, m.hover, blinkOn,
+  const key = [bw, bh, ox, oy, f, s, m.index, vals.explode, vals.frame, m.viewYaw, m.twistT, m.spin.pitch, m.hover, blinkOn,
     colors.phosphor, colors.accent, colors.ground].join("|");
   let look = m.looks.find((l) => l.key === key);
   if (!look) {
@@ -380,10 +444,15 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
     resolve = (p) => (Array.isArray(p) ? P(p[0], p[1]) : proj(world(byId.get(p.part), p.point)).slice(0, 2));
 
     const vis = [];
+    const tw = scene.twist, T = m.twistT;
     for (const part of scene.parts) {
       if (!visible(part.id)) continue;
       const o = offsetOf(part);
-      for (const face of boxFaces(part.box)) {
+      // part.twist: the twist loop's delay index (times scene.twist.stagger):
+      // the part turns about its own vertical axis.
+      const turn = tw && part.twist != null ? yAbout(part.box.c, twistAngle(tw, T, part.twist * (tw.stagger ?? 0))) : null;
+      for (const face0 of boxFaces(part.box)) {
+        const face = turn ? { n: turn.n(face0.n), v: face0.v.map(turn.p) } : face0;
         const n = R(face.n);
         if (n[2] <= 1e-4) continue;
         const v = face.v.map((p) => [p[0] + o[0], p[1] + o[1], p[2] + o[2]]);
@@ -391,9 +460,28 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
         vis.push({ part, face: { ...face, v }, n, pts, depth: pts.reduce((a, p) => a + p[2], 0) / 4 });
       }
     }
+    // scene.rings: circles about the world origin, drawn as 4 lines in short
+    // segments (or `weight`; slide 3's are 8), sorted in among the faces by
+    // depth so the object hides the stretch behind it. { id, r, tilt: [x°, z°], spin: "x" | "z" }: the twist
+    // loop's angle (no delay) turns the ring about that axis of its own plane,
+    // then it's tilted into place.
+    for (const ring of scene.rings ?? []) {
+      if (!visible(ring.id)) continue;
+      const a = tw ? twistAngle(tw, T) : 0, N = 96;
+      const spin = ring.spin === "z" ? zRot(a) : xRot(a), tx = xRot(ring.tilt?.[0] ?? 0), tz = zRot(ring.tilt?.[1] ?? 0);
+      const pts = Array.from({ length: N }, (_, i) => {
+        const t = (i / N) * 2 * Math.PI;
+        return proj(tz(tx(spin([ring.r * Math.cos(t), 0, ring.r * Math.sin(t)]))));
+      });
+      for (let i = 0; i < N; i++) {
+        const p = pts[i], q = pts[(i + 1) % N];
+        vis.push({ part: ring, seg: [p, q], depth: (p[2] + q[2]) / 2, weight: ring.weight ?? INNER });
+      }
+    }
     vis.sort((a, b) => a.depth - b.depth);
     const facesOf = new Map();
-    for (const { part, face, n, pts } of vis) {
+    for (const { part, face, n, pts, seg, weight } of vis) {
+      if (seg) { r.line(seg[0], seg[1], own(r.count++, part.id), weight); continue; }
       const id = own(fillFace(r, face, n, pts, { k, spec: ISO_STYLE.hatch, style: ISO_STYLE, L }), part.id);
       if (!facesOf.has(part.id)) facesOf.set(part.id, []);
       facesOf.get(part.id).push(id);
@@ -406,6 +494,8 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
       const pt = autoAnchor(r, facesOf.get(l.anchor.part) ?? [], l.side ?? "right");
       if (pt) anchors.set(l.id, pt);
     }
+  } else if (scene.kind === "persp") {
+    paintPersp(m, r, st, { P, own, visible, anchors, scale, f });
   } else {
     // Flat shapes, in order. fill: "none" (ground), "solid", or a hatch step 1..3.
     // outline: "none", or anything else: 4 for a shape on the outermost layer,
@@ -437,6 +527,7 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
   const on = shownLabels(m);
   for (const l of scene.labels ?? []) {
     if (!on.has(l.id) || !l.anchor) continue;
+    if (anchors.has(l.id) && !anchors.get(l.id)) continue; // its anchor is out of the drawing (a vanishing point, mid-turn)
     const a = anchors.get(l.id) ?? resolve(l.anchor), b = leaderEnd(m, l, P, f), pts = route(a, b, l.id);
     for (let i = 0; i + 1 < pts.length; i++) r.line(pts[i], pts[i + 1], 0, LINE + 2 * CASING, { clear: true });
     // Squares of exactly n pixels (the fill includes pixels on both edges).
@@ -446,6 +537,208 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
     const id = own(r.count++, l.for);
     for (let i = 0; i + 1 < pts.length; i++) r.line(pts[i], pts[i + 1], id, LINE);
     own(r.fill(square(d), 1), l.for);
+  }
+}
+
+// Rotations for iso parts and rings (degrees; world y up).
+const xRot = (deg) => { const a = (deg * Math.PI) / 180, c = Math.cos(a), s = Math.sin(a); return ([x, y, z]) => [x, y * c - z * s, y * s + z * c]; };
+const zRot = (deg) => { const a = (deg * Math.PI) / 180, c = Math.cos(a), s = Math.sin(a); return ([x, y, z]) => [x * c - y * s, x * s + y * c, z]; };
+// A turn about the vertical axis through centre c: points and normals.
+function yAbout(c, deg) {
+  const a = (deg * Math.PI) / 180, co = Math.cos(a), si = Math.sin(a);
+  const r = ([x, y, z]) => [x * co + z * si, y, -x * si + z * co];
+  return { n: r, p: ([x, y, z]) => { const q = r([x - c[0], y, z - c[2]]); return [q[0] + c[0], q[1], q[2] + c[2]]; } };
+}
+
+// ---------- perspective scenes ----------
+//
+// kind "persp": objects on a ground plane seen by a level camera, so verticals
+// stay vertical and horizontals run to vanishing points on the horizon (two-
+// point perspective). World units, y up, the ground at y 0, the camera at
+// (0, camera.eye, 0) looking down -z. camera.f is the focal length in design
+// units; the horizon sits at design y camera.horizon and the centre of view at
+// design x camera.cx. Parts: { id, type: "box" | "pyramid" | "sphere", c: [x, 0, z]
+// on the ground, s: [w, h, d] (box, pyramid) or r (sphere, with bands and
+// segments for its low-poly facets), yaw in degrees }. Dragging turns the
+// group about scene.pivot, or each part in place without one (turn only; the
+// spring brings it back).
+// Shading is hatching from the global light, one step per face.
+//
+// guides: { thirds, horizon, vanish: part id } are drawn when a state sets
+// guides: true, under the objects: the rule-of-thirds grid (solid, 2), the
+// horizon and construction lines from the vanish part's horizontal edges to
+// their vanishing points (dashed, 2). A label anchor { vp: "right" | "left" }
+// sits on that part's vanishing point on that side of the centre of view, and
+// { vp: 0 | 1 } on the one its own x or z edges run to, wherever it goes.
+// State frame: 1 encloses the drawing in a 4/8 picture box (frameFit).
+const GUIDE = 2;
+
+function partFaces(part, yawOffset) {
+  const a = (((part.yaw ?? 0) + yawOffset) * Math.PI) / 180, co = Math.cos(a), si = Math.sin(a);
+  const [cx, , cz] = part.c;
+  const place = ([x, y, z]) => [cx + x * co + z * si, y, cz - x * si + z * co];
+  const turn = ([x, y, z]) => [x * co + z * si, y, -x * si + z * co];
+  if (part.type === "box") {
+    const [w, h, d] = part.s;
+    return boxFaces({ c: [0, h / 2, 0], s: [w, h, d] }).map((fc) => ({ v: fc.v.map(place), n: turn(fc.n) }));
+  }
+  if (part.type === "pyramid") {
+    const [w, h, d] = part.s, x = w / 2, z = d / 2, apex = place([0, h, 0]);
+    const base = [[-x, 0, -z], [x, 0, -z], [x, 0, z], [-x, 0, z]].map(place);
+    const faces = [{ v: [base[3], base[2], base[1], base[0]] }];
+    for (let i = 0; i < 4; i++) faces.push({ v: [base[i], base[(i + 1) % 4], apex] });
+    return faces.map((fc) => ({ v: fc.v, n: outward(fc.v, [cx, h / 3, cz]) }));
+  }
+  // sphere: bands of latitude by segments of longitude; the caps are triangles.
+  const { r, bands = 4, segments = 8 } = part, ctr = [0, r, 0];
+  const at = (j, i) => {
+    const ph = (j / bands) * Math.PI, th = (i / segments) * 2 * Math.PI;
+    return place([r * Math.sin(ph) * Math.cos(th), r + r * Math.cos(ph), r * Math.sin(ph) * Math.sin(th)]);
+  };
+  const faces = [], C = place(ctr);
+  for (let j = 0; j < bands; j++) for (let i = 0; i < segments; i++) {
+    let v = [at(j, i), at(j, i + 1), at(j + 1, i + 1), at(j + 1, i)];
+    if (j === 0) v = [v[0], v[2], v[3]];
+    else if (j === bands - 1) v = [v[0], v[1], v[2]];
+    faces.push({ v, n: outward(v, C) });
+  }
+  return faces;
+}
+// A face's unit normal, turned away from an inside point.
+function outward(v, inside) {
+  const a = v[0], b = v[1], c = v[v.length - 1];
+  const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], w = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+  let n = [u[1] * w[2] - u[2] * w[1], u[2] * w[0] - u[0] * w[2], u[0] * w[1] - u[1] * w[0]];
+  const len = Math.hypot(...n) || 1;
+  n = n.map((q) => q / len);
+  const m = v.reduce((s, p) => s.map((q, i) => q + p[i] / v.length), [0, 0, 0]);
+  return n[0] * (m[0] - inside[0]) + n[1] * (m[1] - inside[1]) + n[2] * (m[2] - inside[2]) < 0 ? n.map((q) => -q) : n;
+}
+
+// The segment a-b clipped to the buffer grown by `pad` (Liang-Barsky), or null.
+function clipSeg(a, b, w, h, pad = 8) {
+  let t0 = 0, t1 = 1;
+  const dx = b[0] - a[0], dy = b[1] - a[1];
+  for (const [p, q] of [[-dx, a[0] + pad], [dx, w + pad - a[0]], [-dy, a[1] + pad], [dy, h + pad - a[1]]]) {
+    if (p === 0) { if (q < 0) return null; continue; }
+    const t = q / p;
+    if (p < 0) { if (t > t1) return null; t0 = Math.max(t0, t); } else { if (t < t0) return null; t1 = Math.min(t1, t); }
+  }
+  return [[a[0] + dx * t0, a[1] + dy * t0], [a[0] + dx * t1, a[1] + dy * t1]];
+}
+
+function paintPersp(m, r, st, { P, own, visible, anchors, scale, f }) {
+  const scene = m.scene, cam = scene.camera, [W, H] = scene.size, L = lightVector(ISO_STYLE);
+  // World -> design units -> buffer px. Points behind the camera don't occur.
+  const D = ([x, y, z]) => [cam.cx + (cam.f * x) / -z, cam.horizon - (cam.f * (y - cam.eye)) / -z];
+  const proj = (p) => P(...D(p));
+  const eyeAt = [0, cam.eye, 0];
+  const yaw = m.viewYaw ?? m.spin.yaw; // drag plus the sway loop
+  // scene.pivot [x, 0, z]: dragging turns the whole group about it, like a
+  // turntable (each part also turns by the same angle); without one, each part
+  // turns in place.
+  const pv = scene.pivot, ya = (yaw * Math.PI) / 180, yc = Math.cos(ya), ys = Math.sin(ya);
+  const parts = !pv ? scene.parts : scene.parts.map((p) => {
+    const dx = p.c[0] - pv[0], dz = p.c[2] - pv[2];
+    return { ...p, c: [pv[0] + dx * yc + dz * ys, p.c[1], pv[2] - dx * ys + dz * yc] };
+  });
+
+  // Guides, under the objects (the faces fill over them).
+  const g = scene.guides ?? {};
+  if (st.guides) {
+    if (g.thirds) {
+      const id = own(r.count++, "thirds");
+      for (const k of [1, 2]) {
+        r.line(P((W * k) / 3, 0), P((W * k) / 3, H), id, GUIDE);
+        r.line(P(0, (H * k) / 3), P(W, (H * k) / 3), id, GUIDE);
+      }
+    }
+    if (g.horizon) r.line(P(0, cam.horizon), P(W, cam.horizon), own(r.count++, "horizon"), GUIDE, { dash: DASH });
+  }
+  // The vanish part's vanishing points: its two horizontal edge directions,
+  // run off to infinity. A direction square-on to the view has none.
+  const vp = { left: null, right: null, byDir: [null, null] };
+  const vpart = parts.find((p) => p.id === g.vanish);
+  if (vpart) {
+    const a = (((vpart.yaw ?? 0) + yaw) * Math.PI) / 180;
+    [[Math.cos(a), -Math.sin(a)], [Math.sin(a), Math.cos(a)]].forEach(([dx, dz], k) => {
+      if (Math.abs(dz) < 1e-3) return;
+      const x = cam.cx + (cam.f * dx) / -dz;
+      vp[x >= cam.cx ? "right" : "left"] = vp.byDir[k] = { design: [x, cam.horizon], dir: [dx, dz] };
+    });
+    if (st.guides) {
+      const id = own(r.count++, "construction");
+      for (const fc of partFaces(vpart, yaw)) {
+        if (Math.abs(fc.n[1]) < 0.5) continue; // the top and bottom faces hold every horizontal edge
+        for (let i = 0; i < fc.v.length; i++) {
+          const A = fc.v[i], B = fc.v[(i + 1) % fc.v.length];
+          const e = [B[0] - A[0], B[2] - A[2]], len = Math.hypot(...e);
+          const point = vp.byDir.find((q) => q && Math.abs(Math.abs((e[0] * q.dir[0] + e[1] * q.dir[1]) / len) - 1) < 1e-6);
+          if (!point) continue;
+          // From the edge's end farther from the vanishing point, through the edge, to it.
+          const v = P(...point.design), pa = proj(A), pb = proj(B);
+          const far = Math.hypot(pa[0] - v[0], pa[1] - v[1]) > Math.hypot(pb[0] - v[0], pb[1] - v[1]) ? pa : pb;
+          const seg = clipSeg(far, v, r.w, r.h);
+          if (seg) r.line(seg[0], seg[1], id, GUIDE, { dash: DASH });
+        }
+      }
+    }
+  }
+
+  // Objects, farthest first; within one (convex), only faces toward the camera.
+  const dist = (p) => Math.hypot(p.c[0], cam.eye, p.c[2]);
+  const facesOf = new Map();
+  for (const part of [...parts].filter((p) => visible(p.id)).sort((a, b) => dist(b) - dist(a))) {
+    const ids = [];
+    for (const fc of partFaces(part, yaw)) {
+      const v0 = fc.v[0], toEye = [eyeAt[0] - v0[0], eyeAt[1] - v0[1], eyeAt[2] - v0[2]];
+      if (fc.n[0] * toEye[0] + fc.n[1] * toEye[1] + fc.n[2] * toEye[2] <= 1e-6) continue;
+      const lit = Math.max(0, fc.n[0] * L[0] + fc.n[1] * L[1] + fc.n[2] * L[2]);
+      const t = quantize(ISO_STYLE.hatch, 1 - lit);
+      const pts = fc.v.map(proj);
+      // Hatching anchored to the face: pattern coords along its first and last edges.
+      const p0 = pts[0], p1 = pts[1], pl = pts[pts.length - 1];
+      const ax = p1[0] - p0[0], ay = p1[1] - p0[1], bx = pl[0] - p0[0], by = pl[1] - p0[1], det = ax * by - bx * ay;
+      const basis = Math.abs(det) > 1 ? { ox: p0[0], oy: p0[1], inv: [by / det, -bx / det, -ay / det, ax / det], la: Math.hypot(ax, ay), lb: Math.hypot(bx, by) } : null;
+      ids.push(own(r.fill(pts, t, { edges: true, edgeWidth: INNER, basis }), part.id));
+    }
+    facesOf.set(part.id, ids);
+  }
+
+  // The picture box, on the way in (frame > 0): 4 thick, 8 corners, in from
+  // the element's edge by half its line so it all draws.
+  const fbox = m.geom.frameBox;
+  if (fbox) {
+    const h = INNER / 2 / f, [x0, y0, x1, y1] = [fbox[0] + h, fbox[1] + h, fbox[2] - h, fbox[3] - h];
+    // Nothing draws outside the box.
+    const cx0 = Math.max(0, Math.floor(x0 * f)), cy0 = Math.max(0, Math.floor(y0 * f));
+    const cx1 = Math.min(r.w, Math.ceil(x1 * f)), cy1 = Math.min(r.h, Math.ceil(y1 * f));
+    for (let y = 0; y < r.h; y++) {
+      const row = y * r.w, inY = y >= cy0 && y < cy1;
+      for (let x = 0; x < r.w; x++) {
+        if (inY && x >= cx0 && x < cx1) { x = cx1 - 1; continue; }
+        r.tone[row + x] = -1; r.fid[row + x] = -1; r.edge[row + x] = 0;
+      }
+    }
+    const pts = rounded([[x0 * f, y0 * f], [x1 * f, y0 * f], [x1 * f, y1 * f], [x0 * f, y1 * f]], RADIUS, true);
+    const id = own(r.count++, "frame");
+    for (let i = 0; i < pts.length; i++) r.line(pts[i], pts[(i + 1) % pts.length], id, INNER);
+  }
+
+  // Leader anchors: a vanishing point (only while it's in the drawing), or a
+  // part's most visible face.
+  const shownNow = shownLabels(m);
+  for (const l of scene.labels ?? []) {
+    if (!shownNow.has(l.id) || !l.anchor || Array.isArray(l.anchor)) continue;
+    if (l.anchor.vp != null) {
+      // "left" / "right": whichever is on that side; 0 / 1: the vanishing point
+      // of the part's own x or z edges, followed as the part turns.
+      const q = typeof l.anchor.vp === "number" ? vp.byDir[l.anchor.vp] : vp[l.anchor.vp];
+      anchors.set(l.id, q && q.design[0] >= 0 && q.design[0] <= W ? P(...q.design) : null);
+    } else if (l.anchor.part && !l.anchor.point) {
+      const pt = autoAnchor(r, facesOf.get(l.anchor.part) ?? [], l.side ?? "right");
+      if (pt) anchors.set(l.id, pt);
+    }
   }
 }
 

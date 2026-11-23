@@ -3,6 +3,7 @@
 // draw() runs every frame and only translates by the render scroll offset.
 
 import { mountGraphic, drawGraphic } from "./graphic.js";
+import { ISO_STYLE, hatchInk, stepTone } from "./shade.js";
 import { genieT, warpBlock, setLines, settings as genieSettings } from "./genie-warp.js";
 
 // Ink comes from the CSS custom property --ink (so states like :hover can set it),
@@ -114,7 +115,7 @@ export function measure(root, ctx) {
       if (!rects.length) continue;
       if (rects.length === 1) {
         const r = toDoc(rects[0]);
-        words.push({ text: tx(m[0], true), x: r.x, baseline: r.y + ascent, font, spacing, ink, clip, underline, genie });
+        words.push({ text: tx(m[0], true), x: r.x, baseline: r.y + ascent, font, spacing, ink, clip, underline, genie, el: parent });
         continue;
       }
       // Word wraps (e.g. at a hyphen): split it into one segment per line.
@@ -128,7 +129,7 @@ export function measure(root, ctx) {
         if (segment && Math.abs(segment.top - r.y) < 1) {
           segment.text += tx(m[0][i], false);
         } else {
-          segment = { text: tx(m[0][i], i === 0), x: r.x, top: r.y, baseline: r.y + ascent, font, spacing, ink, clip, underline, genie };
+          segment = { text: tx(m[0][i], i === 0), x: r.x, top: r.y, baseline: r.y + ascent, font, spacing, ink, clip, underline, genie, el: parent };
           words.push(segment);
         }
       }
@@ -140,6 +141,7 @@ export function measure(root, ctx) {
     const style = getComputedStyle(el);
     return {
       ...toDoc(el.getBoundingClientRect()),
+      el,
       ink: inkOf(el, style),
       clip: clipOf(el),
       radius: parseFloat(style.borderTopLeftRadius) || 0,
@@ -147,18 +149,26 @@ export function measure(root, ctx) {
       line: parseFloat(style.getPropertyValue("--box-line")) || parseFloat(style.borderTopWidth) || 1,
       dashed: style.borderTopStyle === "dashed",
     };
-  });
+  }).filter((b) => b.w > 0 && b.h > 0); // a frame opening from nothing (slide 4) draws nothing at 0
   // img[data-draw]: the image is stretched to its box and tinted with its ink.
   // Hidden images (display: none) have no size and are skipped.
   const images = [...root.querySelectorAll("img[data-draw]")]
     .map((el) => ({ ...toDoc(el.getBoundingClientRect()), el, ink: inkOf(el), clip: clipOf(el) }))
     .filter((im) => im.w > 0 && im.h > 0);
   // [data-fill]: CSS --fill-alpha (0..1, default 1) sets its opacity. Hidden fills are skipped.
+  // data-hatch="1|2|3" fills with that hatch step (the graphics ramp, anchored
+  // to the page) instead of solid; CSS --hatch-shift (emulated px) slides the
+  // pattern along (marching stripes). CSS border-radius rounds the fill.
   const fills = [...root.querySelectorAll("[data-fill]")]
     .map((el) => {
       const style = getComputedStyle(el);
       const alpha = parseFloat(style.getPropertyValue("--fill-alpha"));
-      return { ...toDoc(el.getBoundingClientRect()), ink: inkOf(el, style), clip: clipOf(el), alpha: Number.isNaN(alpha) ? 1 : alpha };
+      return {
+        ...toDoc(el.getBoundingClientRect()), el, ink: inkOf(el, style), clip: clipOf(el), alpha: Number.isNaN(alpha) ? 1 : alpha,
+        hatch: Number(el.dataset.hatch) || 0, shift: parseFloat(style.getPropertyValue("--hatch-shift")) || 0,
+        // Per corner (top-left, top-right, bottom-right, bottom-left), for canvas roundRect.
+        radius: [style.borderTopLeftRadius, style.borderTopRightRadius, style.borderBottomRightRadius, style.borderBottomLeftRadius].map((v) => parseFloat(v) || 0),
+      };
     })
     .filter((f) => f.w > 0 && f.h > 0 && f.alpha > 0)
     .sort((a, b) => (b.alpha < 1) - (a.alpha < 1)); // translucent first, under solid fills
@@ -202,6 +212,9 @@ export function measure(root, ctx) {
   // SVG shapes become polylines in document space via each element's screen matrix.
   const paths = [];
   for (const shape of root.querySelectorAll("svg[data-draw] :is(rect, line, polyline, circle)")) {
+    // getScreenCTM still answers inside a [hidden] (display: none) subtree, so
+    // skip those, or a hidden slide's links keep drawing.
+    if (!shown(shape)) continue;
     const ctm = shape.getScreenCTM();
     if (!ctm) continue;
     const pt = (x, y) => {
@@ -223,7 +236,8 @@ export function measure(root, ctx) {
     }
     // data-weight on the svg: the stroke in units (default one emulated pixel).
     const weight = parseFloat(shape.closest("svg").dataset.weight) || 0;
-    paths.push({ points, weight, ink: shape.dataset.ink ?? inkOf(shape.closest("svg")) });
+    // Clipped like everything else (slide 4's feed icons scroll inside the phone).
+    paths.push({ points, weight, ink: shape.dataset.ink ?? inkOf(shape.closest("svg")), clip: clipOf(shape.closest("svg")), fill: shape.dataset.fillInk ?? null, el: shape });
   }
 
   // Genie blocks: the box around their text (not the element, which may be a
@@ -259,7 +273,13 @@ export function measure(root, ctx) {
   const u = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--u")) || 1;
 
   tintCache.clear();
-  return { words: words.concat(bullets), boxes, fills, paths, images, tabs, graphics, genies, u };
+  // [data-top]: everything inside goes to a last pass over all the rest.
+  const allWords = words.concat(bullets);
+  const isTop = (x) => !!x.el?.closest?.("[data-top]");
+  const split = (list) => [list.filter((x) => !isTop(x)), list.filter(isTop)];
+  const [w0, w1] = split(allWords), [f0, f1] = split(fills), [b0, b1] = split(boxes), [p0, p1] = split(paths);
+  const top = w1.length + f1.length + b1.length + p1.length ? { words: w1, fills: f1, boxes: b1, paths: p1 } : null;
+  return { words: w0, boxes: b0, fills: f0, paths: p0, images, tabs, graphics, genies, u, top };
 }
 
 // Tinted copies of data-draw images, keyed by source, size and color.
@@ -311,6 +331,27 @@ function offscreen(canvas) {
   return offCtx;
 }
 
+// A hatch-step fill pattern in `color`: the graphics ramp (shade.js ISO_STYLE,
+// 45° lines 4 px wide every 24, 12 or 8 px) in emulated pixels, one pattern
+// pixel per emulated pixel, slid by `shift` px. 24 is a whole period of every
+// step, so a 24 x 24 tile repeats seamlessly.
+const hatchTiles = new Map();
+function hatchPattern(ctx, color, step, shift, ps) {
+  const key = `${color}|${step}`;
+  let tile = hatchTiles.get(key);
+  if (!tile) {
+    tile = document.createElement("canvas");
+    tile.width = tile.height = 24;
+    const c = tile.getContext("2d"), spec = ISO_STYLE.hatch, t = stepTone(spec, step);
+    c.fillStyle = color;
+    for (let y = 0; y < 24; y++) for (let x = 0; x < 24; x++) if (hatchInk(spec, t, x + 0.5, y + 0.5)) c.fillRect(x, y, 1, 1);
+    hatchTiles.set(key, tile);
+  }
+  const pat = ctx.createPattern(tile, "repeat");
+  pat.setTransform(new DOMMatrix().scale(ps).translate(shift, 0));
+  return pat;
+}
+
 // Runs fn clipped to item.clip (document space), if it has one.
 function clipped(ctx, item, fn) {
   if (!item.clip) return fn();
@@ -346,7 +387,7 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
   ctx.clearRect(0, 0, width, height);
   ctx.setTransform(1 / ps, 0, 0, 1 / ps, 0, -renderY / ps);
 
-  for (const f of layout.fills) {
+  const drawFills = (list) => { for (const f of list) {
     if (!visible(f.y, f.h)) continue;
     const rect = [snap(f.x), snap(f.y), snap(f.w), snap(f.h)];
     clipped(ctx, f, () => {
@@ -357,11 +398,12 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
         ctx.fillRect(...rect);
         ctx.globalAlpha = f.alpha;
       }
-      ctx.fillStyle = colors[f.ink];
-      ctx.fillRect(...rect);
+      ctx.fillStyle = f.hatch ? hatchPattern(ctx, colors[f.ink], f.hatch, f.shift, ps) : colors[f.ink];
+      if (f.radius.some((r) => r > 0)) { ctx.beginPath(); ctx.roundRect(...rect, f.radius); ctx.fill(); } else ctx.fillRect(...rect);
       ctx.globalAlpha = 1;
     });
-  }
+  } };
+  drawFills(layout.fills);
 
   for (const t of layout.tabs) {
     if (!visible(t.y, t.h)) continue;
@@ -379,7 +421,7 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
     ctx.stroke();
   }
 
-  for (const b of layout.boxes) {
+  const drawBoxes = (list) => { for (const b of list) {
     if (!visible(b.y, b.h)) continue;
     // CSS border width, rounded up to whole emulated pixels (min 1), drawn inside the box.
     const lw = Math.max(1, Math.ceil(b.line / ps - 0.01)) * ps;
@@ -393,7 +435,8 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
     });
   }
   ctx.lineWidth = ps;
-  ctx.setLineDash([]);
+  ctx.setLineDash([]); };
+  drawBoxes(layout.boxes);
 
   for (const im of layout.images) {
     if (!visible(im.y, im.h) || !im.el.complete || !im.el.naturalWidth) continue;
@@ -405,14 +448,19 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
     clipped(ctx, g, () => drawGraphic(ctx, { ...g, x: snap(g.x), y: snap(g.y) }, ps, g.u, colors));
   }
 
-  for (const p of layout.paths) {
+  // A shape with data-fill-ink (an ink name) is filled with it under its stroke.
+  const drawPaths = (list) => { for (const p of list) {
     ctx.lineWidth = p.weight ? Math.max(ps, snap(p.weight * layout.u)) : ps;
     ctx.strokeStyle = colors[p.ink];
-    ctx.beginPath();
-    p.points.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
-    ctx.stroke();
+    clipped(ctx, p, () => {
+      ctx.beginPath();
+      p.points.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+      if (p.fill) { ctx.fillStyle = colors[p.fill]; ctx.fill(); }
+      ctx.stroke();
+    });
   }
-  ctx.lineWidth = ps;
+  ctx.lineWidth = ps; };
+  drawPaths(layout.paths);
 
   // Genie blocks in motion (0 < t < 1) are drawn offscreen and warped; at
   // t = 1 they're in the sink and draw nothing; at 0 they draw as normal words.
@@ -420,9 +468,9 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
   const genieTs = (layout.genies ?? []).map((g) => genieT(g.el, now));
   const plain = (w) => !(w.genie >= 0 && genieTs[w.genie] > 0);
 
-  const drawWords = (colorOf, keep = plain, c = ctx) => {
+  const drawWords = (colorOf, keep = plain, c = ctx, list = layout.words) => {
     c.textBaseline = "alphabetic";
-    for (const w of layout.words) {
+    for (const w of list) {
       if (!keep(w) || !visible(w.baseline - 200, 400)) continue;
       setFont(c, w.font);
       if ("letterSpacing" in c) c.letterSpacing = w.spacing ?? "0px";
@@ -453,6 +501,15 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
       { x0: toPx(S.x), x1: toPx(S.x + S.w), y: Math.round(toPy(S.y)) }, t, (side * genieSettings.arc * layout.u) / ps,
       g.bounds && { x0: Math.ceil(toPx(g.bounds.x0)), x1: Math.floor(toPx(g.bounds.x1)) });
   });
+
+  // The top layer ([data-top]: slide 4's NEW! badge): drawn last, over every
+  // other fill, box, shape and word, so it covers what's under it.
+  if (layout.top) {
+    drawFills(layout.top.fills);
+    drawBoxes(layout.top.boxes);
+    drawPaths(layout.top.paths);
+    drawWords((w) => colors[w.ink], () => true, ctx, layout.top.words);
+  }
 
   // Selection is the inverse: a block of the main ink with the selected text
   // knocked out in the ground colour (every ink inverts to ground).

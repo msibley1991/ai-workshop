@@ -119,16 +119,89 @@
               </div>
               <svg class="slide-links" data-draw data-weight="4" aria-hidden="true"></svg>
             </section>
-            <section class="slide" data-slide data-template="text">
-              <div class="slide-statement"><p data-genie>Design school teaches <em>syntax</em> and <em>application</em> of creative decisions. This knowledge enhances capabilities with AI; it does not become irrelevant.</p></div>
+            <!-- Slide 2 (script bullet 3), Split 6:
+                 beat 1, the still life (two-point perspective, hatching, rule of
+                 thirds) with a caption on each technique; beat 2, guides and
+                 captions go and a picture box closes around the drawing
+                 (data-phased: before the statement), then the prompt field that
+                 would make it rises under it and types, its three terms marked. -->
+            <section class="slide" data-slide data-template="split" data-split="6">
+              <div class="slide-statement">
+                <p data-genie>Design school teaches <em>syntax</em> and <em>application</em> of creative decisions.</p>
+                <p data-genie data-middle>This knowledge enhances capabilities with AI; it does not become irrelevant.</p>
+              </div>
+              <div class="slide-visual">
+                <div data-graphic="still-life" data-fit="box" data-align="top" data-phased></div>
+                <div class="artefact artefact-prompt" data-artefact="prompt" data-enter="1" data-mark="1">
+                  <div class="prompt-field" data-box data-clip><div class="chat-sheet"><p><strong class="prompt-label">Prompt:</strong> <span data-type="inline">Draw a low-poly sphere, a pyramid and a cube in a diagonal row on a ground plane, in <span data-crop-area>two-point perspective</span>. Shade them with <span data-crop-area>hatching</span>, lit from the top left, and compose them on the <span data-crop-area>rule of thirds</span>.</span></p></div></div>
+                </div>
+              </div>
             </section>
             <section class="slide" data-slide data-template="text">
-              <div class="slide-statement"><p data-genie>Design school does <em>not</em> teach <em>correct</em> creative decisions. AI will not give you <em>correct</em> creative decisions. Only you can determine what feels <em>correct</em>.</p></div>
+              <!-- Slide 3: one sentence per beat. The first two run on in one paragraph
+                 (inline genie blocks); the third starts two blank lines further down (data-gap).
+                 On beat 3 the twisting layered cube in its rings stands on the
+                 last 4 columns (a Text slide's visual). -->
+              <div class="slide-statement"><span data-genie>Design school does not teach <em>correct</em> creative decisions. </span><span data-genie>AI will not give you <em>correct</em> creative decisions.</span><p data-genie data-gap="2">Only you can determine what feels <em>correct</em>.</p></div>
+              <div class="slide-visual"><div data-graphic="layer-cube" data-fit="box" data-align="middle" data-enter="2"></div></div>
             </section>
           </div>
           <div data-section="State of digital media">
-            <section class="slide" data-slide data-template="text">
-              <div class="slide-statement"><p data-genie>Digital design constrained by technical limitations &amp; knowledge.</p></div>
+            <!-- Slide 4, Row: beat 1 the statement; beats 2-4 one site each, left to
+                 right, its frame opening from its top-left corner (data-open), then
+                 its page and caption cut in and its loops start (js/site-loops.js):
+                 plain HTML (static), GeoCities (stepped GIFs), a phone feed (smooth
+                 endless scroll). -->
+            <section class="slide" data-slide data-template="row">
+              <div class="slide-statement"><p data-genie>Digital design has been constrained by technical limitations &amp; knowledge.</p></div>
+              <div class="slide-visual">
+                <div class="artefact era-site" data-artefact="site" data-enter="1" data-open>
+                  <div class="site-frame" data-box data-clip>
+                    <div class="site-bar"><span class="site-dot" data-box></span><span class="site-dot" data-box></span><span class="site-dot" data-box></span><span class="site-address" data-box></span></div><span class="site-rule" data-fill></span>
+                    <div class="site-page site-html">
+                      <p class="site-h1">My Home Page</p>
+                      <span class="site-rule" data-fill></span>
+                      <span class="site-line" data-fill style="width: 96%"></span><span class="site-line" data-fill style="width: 88%"></span><span class="site-line" data-fill style="width: 93%"></span><span class="site-line" data-fill style="width: 54%"></span>
+                      <ul class="site-links"><li><u>About me</u></li><li><u>My links</u></li><li><u>Guestbook</u></li></ul>
+                      <span class="site-rule" data-fill></span>
+                      <span class="site-line" data-fill style="width: 40%"></span>
+                    </div>
+                  </div>
+                  <p class="site-caption">Beginnings of the web</p>
+                </div>
+              </div>
+              <div class="slide-visual">
+                <div class="artefact era-site" data-artefact="site" data-enter="2" data-open>
+                  <div class="site-frame" data-box data-clip>
+                    <div class="site-bar"><span class="site-dot" data-box></span><span class="site-dot" data-box></span><span class="site-dot" data-box></span><span class="site-address" data-box></span></div><span class="site-rule" data-fill></span>
+                    <div class="site-page site-geo">
+                      <span class="geo-tile" data-fill data-hatch="1"></span>
+                      <div class="geo-marquee geo-panel" data-box data-clip><span class="geo-ground" data-fill data-ink="ground"></span><span class="geo-marquee-text" data-marquee>Welcome to my page!!!</span></div>
+                      <div class="geo-table">
+                        <div class="geo-links geo-panel" data-box><span class="geo-ground" data-fill data-ink="ground"></span><p><u>Cool links</u></p><p><u>My pets</u></p><p><u>Sign my guestbook!</u></p><p><u>Webrings</u></p><p><u>MIDI jukebox</u></p><p><u>My awards</u></p></div>
+                        <span class="geo-photo" data-fill></span>
+                        <div class="geo-new" data-blink data-top><svg viewBox="0 0 72 48" data-draw data-weight="2" aria-hidden="true"><polyline points="36.0,2.0 42.2,10.5 53.0,4.9 53.0,14.1 65.4,13.0 59.2,20.4 70.0,24.0 59.2,27.6 65.4,35.0 53.0,33.9 53.0,43.1 42.2,37.5 36.0,46.0 29.8,37.5 19.0,43.1 19.0,33.9 6.6,35.0 12.8,27.6 2.0,24.0 12.8,20.4 6.6,13.0 19.0,14.1 19.0,4.9 29.8,10.5 36.0,2.0" data-fill-ink="ground"/></svg><span class="geo-new-text">NEW!</span></div>
+                      </div>
+                      <div class="geo-construction" data-box><span class="geo-ground" data-fill data-ink="ground"></span><span class="geo-stripes" data-fill data-hatch="3" data-march></span><span class="geo-construction-label" data-fill></span><span class="geo-construction-text" data-ink="ground">Under construction</span></div>
+                      <div class="geo-counter geo-panel" data-box><span class="geo-ground" data-fill data-ink="ground"></span><span>You are visitor</span><span class="geo-digits" data-counter="417"></span></div>
+                    </div>
+                  </div>
+                  <p class="site-caption">Websites for everyone</p>
+                </div>
+              </div>
+              <div class="slide-visual">
+                <div class="artefact era-site" data-artefact="site" data-enter="3" data-open>
+                  <div class="site-frame site-phone" data-box data-clip>
+                    <div class="phone-status"><span class="phone-bit" data-fill></span><span class="phone-bit phone-bit-short" data-fill></span></div>
+                    <p class="phone-title">Feed</p>
+                    <span class="site-rule" data-fill></span>
+                    <div class="feed-window" data-clip><div class="feed-list" data-scroll><div class="feed-post"><div class="feed-head"><span class="feed-avatar" data-box></span><span class="feed-user">@studio.mara</span><span class="feed-more">···</span></div><span class="feed-image" data-fill data-hatch="2"></span><div class="feed-actions"><svg class="feed-icon" viewBox="0 0 16 16" data-draw data-weight="2" aria-hidden="true"><polyline points="8,14 2,8 2,4 5,2 8,5 11,2 14,4 14,8 8,14"/></svg><svg class="feed-icon" viewBox="0 0 16 16" data-draw data-weight="2" aria-hidden="true"><polyline points="2,3 14,3 14,11 7,11 3,14 4,11 2,11 2,3"/></svg><svg class="feed-icon" viewBox="0 0 16 16" data-draw data-weight="2" aria-hidden="true"><polyline points="2,7 14,2 9,14 7,9 2,7"/><polyline points="7,9 14,2"/></svg></div><p class="feed-likes">1,204 likes</p><span class="site-line" data-fill style="width: 92%"></span><span class="site-line" data-fill style="width: 60%"></span></div><div class="feed-post"><div class="feed-head"><span class="feed-avatar" data-box></span><span class="feed-user">@kofi.makes</span><span class="feed-more">···</span></div><span class="feed-image" data-fill data-hatch="1"></span><div class="feed-actions"><svg class="feed-icon" viewBox="0 0 16 16" data-draw data-weight="2" aria-hidden="true"><polyline points="8,14 2,8 2,4 5,2 8,5 11,2 14,4 14,8 8,14"/></svg><svg class="feed-icon" viewBox="0 0 16 16" data-draw data-weight="2" aria-hidden="true"><polyline points="2,3 14,3 14,11 7,11 3,14 4,11 2,11 2,3"/></svg><svg class="feed-icon" viewBox="0 0 16 16" data-draw data-weight="2" aria-hidden="true"><polyline points="2,7 14,2 9,14 7,9 2,7"/><polyline points="7,9 14,2"/></svg></div><p class="feed-likes">873 likes</p><span class="site-line" data-fill style="width: 92%"></span><span class="site-line" data-fill style="width: 60%"></span></div><div class="feed-post"><div class="feed-head"><span class="feed-avatar" data-box></span><span class="feed-user">@lena.draws</span><span class="feed-more">···</span></div><span class="feed-image" data-fill data-hatch="3"></span><div class="feed-actions"><svg class="feed-icon" viewBox="0 0 16 16" data-draw data-weight="2" aria-hidden="true"><polyline points="8,14 2,8 2,4 5,2 8,5 11,2 14,4 14,8 8,14"/></svg><svg class="feed-icon" viewBox="0 0 16 16" data-draw data-weight="2" aria-hidden="true"><polyline points="2,3 14,3 14,11 7,11 3,14 4,11 2,11 2,3"/></svg><svg class="feed-icon" viewBox="0 0 16 16" data-draw data-weight="2" aria-hidden="true"><polyline points="2,7 14,2 9,14 7,9 2,7"/><polyline points="7,9 14,2"/></svg></div><p class="feed-likes">2,391 likes</p><span class="site-line" data-fill style="width: 92%"></span><span class="site-line" data-fill style="width: 60%"></span></div><div class="feed-copy" aria-hidden="true"><div class="feed-post"><div class="feed-head"><span class="feed-avatar" data-box></span><span class="feed-user">@studio.mara</span><span class="feed-more">···</span></div><span class="feed-image" data-fill data-hatch="2"></span><div class="feed-actions"><svg class="feed-icon" viewBox="0 0 16 16" data-draw data-weight="2" aria-hidden="true"><polyline points="8,14 2,8 2,4 5,2 8,5 11,2 14,4 14,8 8,14"/></svg><svg class="feed-icon" viewBox="0 0 16 16" data-draw data-weight="2" aria-hidden="true"><polyline points="2,3 14,3 14,11 7,11 3,14 4,11 2,11 2,3"/></svg><svg class="feed-icon" viewBox="0 0 16 16" data-draw data-weight="2" aria-hidden="true"><polyline points="2,7 14,2 9,14 7,9 2,7"/><polyline points="7,9 14,2"/></svg></div><p class="feed-likes">1,204 likes</p><span class="site-line" data-fill style="width: 92%"></span><span class="site-line" data-fill style="width: 60%"></span></div><div class="feed-post"><div class="feed-head"><span class="feed-avatar" data-box></span><span class="feed-user">@kofi.makes</span><span class="feed-more">···</span></div><span class="feed-image" data-fill data-hatch="1"></span><div class="feed-actions"><svg class="feed-icon" viewBox="0 0 16 16" data-draw data-weight="2" aria-hidden="true"><polyline points="8,14 2,8 2,4 5,2 8,5 11,2 14,4 14,8 8,14"/></svg><svg class="feed-icon" viewBox="0 0 16 16" data-draw data-weight="2" aria-hidden="true"><polyline points="2,3 14,3 14,11 7,11 3,14 4,11 2,11 2,3"/></svg><svg class="feed-icon" viewBox="0 0 16 16" data-draw data-weight="2" aria-hidden="true"><polyline points="2,7 14,2 9,14 7,9 2,7"/><polyline points="7,9 14,2"/></svg></div><p class="feed-likes">873 likes</p><span class="site-line" data-fill style="width: 92%"></span><span class="site-line" data-fill style="width: 60%"></span></div><div class="feed-post"><div class="feed-head"><span class="feed-avatar" data-box></span><span class="feed-user">@lena.draws</span><span class="feed-more">···</span></div><span class="feed-image" data-fill data-hatch="3"></span><div class="feed-actions"><svg class="feed-icon" viewBox="0 0 16 16" data-draw data-weight="2" aria-hidden="true"><polyline points="8,14 2,8 2,4 5,2 8,5 11,2 14,4 14,8 8,14"/></svg><svg class="feed-icon" viewBox="0 0 16 16" data-draw data-weight="2" aria-hidden="true"><polyline points="2,3 14,3 14,11 7,11 3,14 4,11 2,11 2,3"/></svg><svg class="feed-icon" viewBox="0 0 16 16" data-draw data-weight="2" aria-hidden="true"><polyline points="2,7 14,2 9,14 7,9 2,7"/><polyline points="7,9 14,2"/></svg></div><p class="feed-likes">2,391 likes</p><span class="site-line" data-fill style="width: 92%"></span><span class="site-line" data-fill style="width: 60%"></span></div></div></div></div>
+                    <span class="site-rule" data-fill></span>
+                    <div class="phone-tabs"><span data-box></span><span data-box></span><span data-box></span><span data-box></span><span data-box></span></div>
+                  </div>
+                  <p class="site-caption">Platforms and templates</p>
+                </div>
+              </div>
             </section>
             <section class="slide" data-slide data-template="text">
               <div class="slide-statement"><p data-genie>Current system = ∞ programs that all do similar but slightly different things for different uses.</p></div>

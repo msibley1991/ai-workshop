@@ -219,6 +219,10 @@
   height: var(--space-8);
 }
 
+/* Emphasis (typography.md): a step up to 700, no italic, no colour, as in
+   css/style.css. Literal values: the lab has no --weight-* tokens. */
+.site em { font-style: normal; font-weight: 700; }
+
 /* Scene graphic labels (js/graphic.js): label role, placed by the engine. */
 .graphic-label {
   position: absolute;
@@ -424,6 +428,9 @@
   font-weight: 500;
 }
 .site .slide-statement > p { margin: 0; font-weight: inherit; } /* over text-layer.css's p 400 */
+/* data-gap="1" / "2" on a sentence: that many blank lines of the statement above it. */
+.site .slide-statement > [data-gap="1"] { margin-top: 1lh; }
+.site .slide-statement > [data-gap="2"] { margin-top: 2lh; }
 .site .slide[data-template="text"] .slide-statement,
 .site .slide[data-statement="large"] .slide-statement {
   font-size: var(--space-64);
@@ -488,6 +495,25 @@
   white-space: pre-line; /* a new line per design area */
   min-height: var(--chat-lh); /* one line while it's empty, before typing */
 }
+/* A prompt field (text-artefacts.md, "Prompt"): an input box across its visual,
+   standing on the bottom of the box, a fixed 168 tall like a real input (the
+   still-life scene reserves 168 + 16 above it: js/graphics/still-life.js).
+   Sans, 24/32, with a bold "Prompt:" label that doesn't type. */
+.artefact-prompt { position: absolute; left: 0; right: 0; bottom: 0; }
+.prompt-field {
+  box-sizing: border-box;
+  height: calc(168 * var(--u));
+  padding: var(--space-16) var(--space-24);
+  overflow: hidden;
+}
+.site .prompt-field p {
+  margin: 0;
+  font-size: var(--space-24);
+  line-height: var(--space-32);
+  font-weight: 400;
+}
+.prompt-label { font-weight: 700; }
+
 /* Typing (js/artefact.js): the rest of the word being typed keeps its room but
    isn't drawn; the cursor is a block one em tall that takes no width. */
 .type-rest { visibility: hidden; }
@@ -598,3 +624,82 @@
 .site-nav-entry:last-child .site-nav-trunk { bottom: auto; height: calc(50% + var(--line) / 2); }
 .site-nav-tick { top: calc(50% - var(--line) / 2); width: var(--space-16); height: var(--line); }
 .site-nav-folder[data-collapsed] > ul { display: none; }
+
+/* Site artefacts (slide 4, data-artefact="site"): era websites redrawn as flat
+   wireframes in a browser window or a phone, with a caption under the frame.
+   All three frames share the box height (less the caption), so the captions
+   sit on one line across the row; the phone keeps phone proportions and stands
+   on its box's left edge. Outer frames 4/8, everything nested inside 2. Page
+   text is 16/24. Hatching: data-fill data-hatch (js/text-raster.js). The
+   frame opens from its top-left corner (data-open, js/slides.js) and the loops
+   are js/site-loops.js. */
+.era-site [hidden] { display: none !important; }
+/* :not([hidden]): display: flex would otherwise beat .artefact[hidden] (same specificity, later). */
+.artefact.era-site:not([hidden]) { height: 100%; display: flex; flex-direction: column; align-items: flex-start; }
+.site-frame { box-sizing: border-box; flex: 1 1 0; min-height: 0; width: 100%; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+.site-frame [data-box] { --box-line: calc(2 * var(--u)); }
+.site-phone { width: auto; aspect-ratio: 9 / 19.5; }
+.site .site-caption { margin: var(--space-16) 0 0; font-size: var(--space-24); line-height: var(--space-32); font-weight: 500; flex: none; }
+.site .era-site .site-frame :is(p, li) { margin: 0; font-size: var(--space-16); line-height: var(--space-24); font-weight: 400; }
+
+/* Browser chrome: three squares and an address line, then a rule. */
+.site-bar { flex: none; height: var(--space-32); display: flex; align-items: center; gap: var(--space-8); padding: 0 var(--space-16); }
+.artefact .site-dot { width: var(--space-8); height: var(--space-8); border-radius: 0; flex: none; }
+.site-address { flex: 1; height: var(--space-16); margin-left: var(--space-8); }
+.site-rule { display: block; flex: none; height: calc(2 * var(--u)); width: 100%; }
+.site-line { display: block; height: var(--space-8); margin: var(--space-8) 0 var(--space-16); }
+.site-page { flex: 1; min-height: 0; position: relative; padding: var(--space-16); display: flex; flex-direction: column; }
+
+/* Plain HTML: one column, heading, rules, ragged lines, a bulleted link list. */
+.site .era-site .site-frame .site-h1 { font-size: var(--space-24); line-height: var(--space-32); font-weight: 700; margin-bottom: var(--space-8); }
+.site-html .site-rule { margin: var(--space-8) 0; }
+.site .site-links { margin: var(--space-8) 0; padding-left: var(--space-24); }
+
+/* GeoCities: a tiled (hatched) page; text only on ground panels or knocked out
+   of solid blocks; a little off-centre and crowded on purpose. */
+.site-geo { gap: var(--space-16); padding: var(--space-16) var(--space-24) var(--space-24) var(--space-16); }
+/* In from the frame's sides and bottom by its 4 outline, its bottom corners rounded to the frame's inside (8 - 4). */
+.geo-tile { position: absolute; inset: 0 var(--space-4) var(--space-4); border-radius: 0 0 var(--space-4) var(--space-4); }
+.geo-panel { position: relative; box-sizing: border-box; }
+.geo-ground { position: absolute; inset: 0; }
+.geo-marquee { height: var(--space-32); flex: none; overflow: hidden; }
+.site .geo-marquee-text { position: absolute; top: var(--space-4); left: 0; white-space: nowrap; font-size: var(--space-16); line-height: var(--space-24); font-weight: 700; }
+.geo-table { position: relative; display: flex; gap: var(--space-16); flex: none; margin-left: var(--space-16); }
+.geo-links { flex: 1; padding: var(--space-8) var(--space-16); }
+.site .era-site .site-frame .geo-links p + p { margin-top: var(--space-8); }
+.geo-photo { flex: none; width: 34%; align-self: stretch; }
+.geo-new { position: absolute; left: calc(-28 * var(--u)); top: calc(-20 * var(--u)); width: calc(72 * var(--u)); height: calc(48 * var(--u)); }
+.geo-new svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.site .geo-new-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: var(--space-16); line-height: var(--space-24); font-weight: 700; }
+.geo-construction { position: relative; height: var(--space-32); flex: none; display: flex; align-items: center; justify-content: center; }
+.geo-stripes { position: absolute; inset: 0; }
+.geo-construction-label { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: calc(176 * var(--u)); height: var(--space-24); }
+.site .geo-construction-text { position: relative; font-size: var(--space-16); line-height: var(--space-24); font-weight: 700; }
+.geo-counter { align-self: center; display: flex; align-items: center; gap: var(--space-8); padding: var(--space-4) var(--space-8); margin-left: var(--space-32); }
+.geo-counter > span:not(.geo-ground) { position: relative; font-size: var(--space-16); line-height: var(--space-24); }
+.geo-digits { display: flex; gap: calc(2 * var(--u)); }
+.site .geo-digits > span { position: relative; display: inline-block; width: var(--space-16); text-align: center; font-size: var(--space-16); line-height: var(--space-24); }
+
+/* The phone: status bar, title, the feed window (scrolling, clipped), tabs. */
+.phone-status { flex: none; height: var(--space-24); display: flex; align-items: center; justify-content: space-between; padding: 0 var(--space-16); }
+.phone-bit { display: block; width: var(--space-24); height: calc(6 * var(--u)); }
+.phone-bit-short { width: var(--space-16); }
+.site .era-site .site-frame .phone-title { margin: 0; padding: 0 var(--space-16) var(--space-8); font-size: var(--space-16); line-height: var(--space-24); font-weight: 700; }
+.feed-window { flex: 1; min-height: 0; position: relative; overflow: hidden; }
+.feed-list { position: absolute; left: 0; right: 0; top: 0; }
+.feed-post { padding: var(--space-8) var(--space-8) var(--space-16); }
+.feed-head { display: flex; align-items: center; gap: var(--space-8); height: var(--space-32); }
+.artefact .feed-avatar { width: var(--space-24); height: var(--space-24); border-radius: 50%; flex: none; }
+.site .feed-user, .site .feed-more { font-size: var(--space-16); line-height: var(--space-24); }
+.feed-more { margin-left: auto; }
+.feed-image { display: block; width: 100%; aspect-ratio: 1; margin-top: var(--space-8); }
+.feed-actions { display: flex; gap: var(--space-8); margin: var(--space-8) 0 var(--space-4); }
+.feed-icon { width: var(--space-16); height: var(--space-16); overflow: visible; }
+.site .era-site .site-frame .feed-likes { font-weight: 700; }
+.feed-post .site-line { margin: var(--space-8) 0 0; }
+.phone-tabs { flex: none; height: var(--space-32); display: flex; align-items: center; justify-content: space-around; padding: 0 var(--space-8); }
+.artefact .phone-tabs > span { width: calc(12 * var(--u)); height: calc(12 * var(--u)); border-radius: 0; }
+.artefact .geo-digits > span { border-radius: 0; }
+/* Links in the era sites are in the palette's link colour (the only colour
+   besides ink in these graphics). */
+.era-site u { --ink: link; }

@@ -13,6 +13,10 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+/* svg[data-draw] shapes are traced by the raster; in the DOM they're layout
+   only. SVG fills shapes black by default, which would show over the canvas. */
+svg[data-draw], svg[data-draw] * { fill: none !important; stroke: none !important; }
+
 html, body {
   margin: 0;
   background: transparent;

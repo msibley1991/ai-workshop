@@ -5,8 +5,8 @@
   **Text:** Specific Instructions = specific results.
 
   **Visual:** *generic vs detailed prompt*
-
-- **Spoken:** Specific instructions are creative decisions.
+  
+  **Spoken:** Specific instructions are creative decisions.
 
   **Text:** Specific instructions = creative decisions.
 
@@ -28,7 +28,7 @@
 
 - **Spoken:** Before a few years ago, digital media was very much constricted by technological limitations, or the technical knowledge of designers. Admittedly, there have been ebbs and flows of periods where personal taste was applied more or less dramatically.
 
-  **Text:** Digital design constrained by technical limitations & knowledge.
+  **Text:** Digital design has been constrained by technical limitations & knowledge.
 
   **Visual:** *comparison of plain HTML site (caption: beginnings of the web), GeoCities site (caption: websites for everyone), Twitter (caption: platforms and templates).*
 
