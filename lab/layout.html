@@ -97,7 +97,7 @@
                  beat 1, the vague request alone, centred and larger (data-solo);
                  beat 2, it moves into the left half and the specific request
                  comes in beside it; beat 3, the statement; beat 4, the vague
-                 request erases and shrinks away while the specific one erases
+                 request erases and its frame closes while the specific one erases
                  all but its colour, type and layout lines and splits into three
                  boxes (data-crop), then the statement sinks and a stacked one
                  pours in top left; beat 5, "creative decisions" pours in below
@@ -106,15 +106,15 @@
               <div class="slide-statement"><p data-genie data-enter="2" data-exit="4">Specific Instructions = specific results.</p></div>
               <div class="slide-statement" data-place="stack"><p data-genie data-enter="4">Specific instructions<br>=</p><p data-genie data-enter="5" data-link-target>creative decisions</p></div>
               <div class="slide-visual">
-                <div class="artefact artefact-chat" data-artefact="chat" data-enter="0" data-exit="3" data-leave="shrink" data-solo="0">
+                <div class="artefact artefact-chat" data-artefact="chat" data-enter="0" data-exit="3" data-solo="0">
                   <p class="chat-speaker">You</p>
-                  <div class="chat-turn" data-box data-clip><div class="chat-sheet"><p data-type>Make me a high converting website for my coffee shop. Make it pretty and modern, make it pop. Make no mistakes.</p></div></div>
+                  <div class="chat-turn" data-box data-clip data-frame><div class="chat-sheet"><p data-type>Make me a high converting website for my coffee shop. Make it pretty and modern, make it pop. Make no mistakes.</p></div></div>
                 </div>
               </div>
               <div class="slide-visual">
                 <div class="artefact artefact-chat" data-artefact="chat" data-enter="1" data-crop="3" data-split="4" data-mark="5">
                   <p class="chat-speaker">You</p>
-                  <div class="chat-turn" data-box data-clip><div class="chat-sheet"><p data-type><span class="chat-line">Build a one-page shop for my coffee roastery with Astro and Tailwind CSS.</span><span class="chat-line" data-crop-area><span>Colours: background #F4EFE6, text #2B211A, primary #C8553D for buy buttons only.</span></span><span class="chat-line" data-crop-area><span>Type: Fraunces 600 for headings, Inter 400 at 18/28 for body.</span></span><span class="chat-line" data-crop-area><span>Layout: 12-column grid, 1280 max width, 24 gutters.</span></span><span class="chat-line">Products in a 3-up grid: name, origin, roast and price.</span><span class="chat-line">Hero: a three.js coffee bag that turns with the pointer, flat-shaded, no textures.</span><span class="chat-line">Checkout with Stripe Payment Links. Images as AVIF, lazy-loaded. Respect prefers-reduced-motion.</span></p></div></div>
+                  <div class="chat-turn" data-box data-clip data-frame><div class="chat-sheet"><p data-type><span class="chat-line">Build a one-page shop for my coffee roastery with Astro and Tailwind CSS.</span><span class="chat-line" data-crop-area><span>Colours: background #F4EFE6, text #2B211A, primary #C8553D for buy buttons only.</span></span><span class="chat-line" data-crop-area><span>Type: Fraunces 600 for headings, Inter 400 at 18/28 for body.</span></span><span class="chat-line" data-crop-area><span>Layout: 12-column grid, 1280 max width, 24 gutters.</span></span><span class="chat-line">Products in a 3-up grid: name, origin, roast and price.</span><span class="chat-line">Hero: a three.js coffee bag that turns with the pointer, flat-shaded, no textures.</span><span class="chat-line">Checkout with Stripe Payment Links. Images as AVIF, lazy-loaded. Respect prefers-reduced-motion.</span></p></div></div>
                 </div>
               </div>
               <svg class="slide-links" data-draw data-weight="4" aria-hidden="true"></svg>
@@ -133,7 +133,7 @@
               <div class="slide-visual">
                 <div data-graphic="still-life" data-fit="box" data-align="top" data-phased></div>
                 <div class="artefact artefact-prompt" data-artefact="prompt" data-enter="1" data-mark="1">
-                  <div class="prompt-field" data-box data-clip><div class="chat-sheet"><p><strong class="prompt-label">Prompt:</strong> <span data-type="inline">Draw a low-poly sphere, a pyramid and a cube in a diagonal row on a ground plane, in <span data-crop-area>two-point perspective</span>. Shade them with <span data-crop-area>hatching</span>, lit from the top left, and compose them on the <span data-crop-area>rule of thirds</span>.</span></p></div></div>
+                  <div class="prompt-field" data-box data-clip data-frame><div class="chat-sheet"><p><strong class="prompt-label">Prompt:</strong> <span data-type="inline">Draw a low-poly sphere, a pyramid and a cube in a diagonal row on a ground plane, in <span data-crop-area>two-point perspective</span>. Shade them with <span data-crop-area>hatching</span>, lit from the top left, and compose them on the <span data-crop-area>rule of thirds</span>.</span></p></div></div>
                 </div>
               </div>
             </section>
@@ -148,15 +148,15 @@
           </div>
           <div data-section="State of digital media">
             <!-- Slide 4, Row: beat 1 the statement; beats 2-4 one site each, left to
-                 right, its frame opening from its top-left corner (data-open), then
-                 its page and caption cut in and its loops start (js/site-loops.js):
+                 right, its frame opening from its top-left corner (data-frame), then
+                 its page wiping in downward and its caption cutting in, its loops running (js/site-loops.js):
                  plain HTML (static), GeoCities (stepped GIFs), a phone feed (smooth
                  endless scroll). -->
             <section class="slide" data-slide data-template="row">
               <div class="slide-statement"><p data-genie>Digital design has been constrained by technical limitations &amp; knowledge.</p></div>
               <div class="slide-visual">
-                <div class="artefact era-site" data-artefact="site" data-enter="1" data-open>
-                  <div class="site-frame" data-box data-clip>
+                <div class="artefact era-site" data-artefact="site" data-enter="1">
+                  <div class="site-frame" data-box data-clip data-frame>
                     <div class="site-bar"><span class="site-dot" data-box></span><span class="site-dot" data-box></span><span class="site-dot" data-box></span><span class="site-address" data-box></span></div><span class="site-rule" data-fill></span>
                     <div class="site-page site-html">
                       <p class="site-h1">My Home Page</p>
@@ -171,8 +171,8 @@
                 </div>
               </div>
               <div class="slide-visual">
-                <div class="artefact era-site" data-artefact="site" data-enter="2" data-open>
-                  <div class="site-frame" data-box data-clip>
+                <div class="artefact era-site" data-artefact="site" data-enter="2">
+                  <div class="site-frame" data-box data-clip data-frame>
                     <div class="site-bar"><span class="site-dot" data-box></span><span class="site-dot" data-box></span><span class="site-dot" data-box></span><span class="site-address" data-box></span></div><span class="site-rule" data-fill></span>
                     <div class="site-page site-geo">
                       <span class="geo-tile" data-fill data-hatch="1"></span>
@@ -190,8 +190,8 @@
                 </div>
               </div>
               <div class="slide-visual">
-                <div class="artefact era-site" data-artefact="site" data-enter="3" data-open>
-                  <div class="site-frame site-phone" data-box data-clip>
+                <div class="artefact era-site" data-artefact="site" data-enter="3">
+                  <div class="site-frame site-phone" data-box data-clip data-frame>
                     <div class="phone-status"><span class="phone-bit" data-fill></span><span class="phone-bit phone-bit-short" data-fill></span></div>
                     <p class="phone-title">Feed</p>
                     <span class="site-rule" data-fill></span>

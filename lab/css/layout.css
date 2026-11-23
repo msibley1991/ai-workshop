@@ -631,7 +631,7 @@
    sit on one line across the row; the phone keeps phone proportions and stands
    on its box's left edge. Outer frames 4/8, everything nested inside 2. Page
    text is 16/24. Hatching: data-fill data-hatch (js/text-raster.js). The
-   frame opens from its top-left corner (data-open, js/slides.js) and the loops
+   frame opens from its top-left corner (data-frame, js/slides.js) and the loops
    are js/site-loops.js. */
 .era-site [hidden] { display: none !important; }
 /* :not([hidden]): display: flex would otherwise beat .artefact[hidden] (same specificity, later). */

@@ -49,6 +49,20 @@ const mounts = new Map(); // el -> mount
 // A scene's span range in columns, for the page's reflow; null if none mounts here.
 export function graphicSpan(el) { return SCENES[el?.dataset.graphic]?.span ?? null; }
 export function graphicStates(el) { return SCENES[el?.dataset.graphic]?.states?.length ?? 1; }
+// A flat scene with a container shape (`container: true`) is a framed visual:
+// it enters by the container growing from its top-left corner, then the rest
+// wiping in downward (js/slides.js frameItem), through setGraphicOpen.
+export const graphicFramed = (el) => !!SCENES[el?.dataset.graphic]?.shapes?.some((sh) => sh.container);
+// o: the container's size (0..1, from its top-left); w: how far down the rest
+// is drawn (0..1 of the container's height). 1, 1 is fully open. While it isn't,
+// labels are hidden.
+export function setGraphicOpen(el, o, w) {
+  const m = mountGraphic(el);
+  if (!m) return;
+  const was = !!m.open;
+  m.open = o >= 1 && w >= 1 ? null : { o, w };
+  if (was !== !!m.open) syncLabels(m);
+}
 
 // ---------- mounting ----------
 
@@ -208,6 +222,7 @@ function currentValues(m, now) {
 // ---------- labels ----------
 
 function shownLabels(m) {
+  if (m.open) return new Set();
   const st = stateAt(m, m.index), on = new Set(st.labels ?? []);
   for (const l of m.scene.labels ?? []) if (l.hover && m.hover && l.for === m.hover) on.add(l.id);
   return on;
@@ -394,7 +409,7 @@ export function drawGraphic(ctx, item, ps, u, colors) {
   // and flow packets are drawn over the look each frame instead of in it.
   const blinkOn = !motion || st.loop !== "blink" || Math.floor(now / BLINK_MS) % 2 === 0;
   const flowing = motion && (st.flow?.length ?? 0) > 0;
-  const key = [bw, bh, ox, oy, f, s, m.index, vals.explode, vals.frame, m.viewYaw, m.twistT, m.spin.pitch, m.hover, blinkOn,
+  const key = [bw, bh, ox, oy, f, s, m.index, vals.explode, vals.frame, m.viewYaw, m.twistT, m.spin.pitch, m.hover, blinkOn, m.open?.o, m.open?.w,
     colors.phosphor, colors.accent, colors.ground].join("|");
   let look = m.looks.find((l) => l.key === key);
   if (!look) {
@@ -502,12 +517,24 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
     // 2 for one inside another shape. Rects and polygons get 8 corners.
     const shapes = (scene.shapes ?? []).filter((s) => visible(s.id)), boxes = shapes.map(shapeBox);
     const inside = (a, b) => a !== b && b[0] <= a[0] && b[1] <= a[1] && b[2] >= a[2] && b[3] >= a[3];
+    // Opening (m.open): the container is drawn at o of its size from its
+    // top-left, and everything else only inside it, down to w of its height.
+    const box = m.open && shapes.find((sh) => sh.container);
+    const cut = box && (() => {
+      const [x0, y0] = P(box.x, box.y), [x1, y1] = P(box.x + box.w * m.open.o, box.y + box.h * Math.min(m.open.o, m.open.w));
+      return [Math.floor(x0), Math.floor(y0), Math.ceil(x1), Math.ceil(y1)];
+    })();
     shapes.forEach((s, i) => {
       const t = s.fill === "solid" ? 1 : typeof s.fill === "number" ? stepTone(ISO_STYLE.hatch, s.fill) : 0;
       const nested = boxes.some((b, j) => j !== i && inside(boxes[i], b));
-      const pts = s.type === "circle" ? shapePoints(s, P) : rounded(shapePoints(s, P), RADIUS, true);
-      own(r.fill(pts, t, { edges: s.outline !== "none", edgeWidth: nested ? NESTED : INNER }), s.part ?? s.id);
+      const sh = box && s === box ? { ...s, w: s.w * m.open.o, h: s.h * m.open.o } : s;
+      if (box && s === box && (sh.w * scale * f < 1 || sh.h * scale * f < 1)) return; // nothing yet
+      r.clip = box && s !== box ? cut : null;
+      const rad = Math.min(RADIUS, (sh.w ?? Infinity) * scale * f / 2, (sh.h ?? Infinity) * scale * f / 2);
+      const pts = sh.type === "circle" ? shapePoints(sh, P) : rounded(shapePoints(sh, P), rad, true);
+      own(r.fill(pts, t, { edges: sh.outline !== "none", edgeWidth: nested ? NESTED : INNER }), sh.part ?? sh.id);
     });
+    r.clip = box ? cut : null; // connectors too
   }
 
   // Connectors: 4-pixel lines, orthogonal or 45°, bends rounded; open chevron
@@ -524,6 +551,7 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
   }
 
   // Leader lines for shown labels: cased in ground, square dot on the object.
+  r.clip = null;
   const on = shownLabels(m);
   for (const l of scene.labels ?? []) {
     if (!on.has(l.id) || !l.anchor) continue;

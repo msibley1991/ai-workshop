@@ -182,7 +182,9 @@ export class Raster {
     this.fid = new Int32Array(n); this.edge = new Int32Array(n); // edge: owner id + 1
     this.clear();
   }
-  clear() { this.tone.fill(-1); this.fid.fill(-1); this.edge.fill(0); this.count = 0; this.boxes = []; }
+  // clip: null, or [x0, y0, x1, y1] in buffer px (x1, y1 exclusive): fills and
+  // lines draw only inside it (a flat scene's content wiping in, graphic.js).
+  clear() { this.tone.fill(-1); this.fid.fill(-1); this.edge.fill(0); this.count = 0; this.boxes = []; this.clip = null; }
 
   // pts in buffer px; basis maps buffer px to face-local coords; edgeWidth is the
   // outline in pixels. Returns the shape id.
@@ -205,8 +207,9 @@ export class Raster {
       }
       return true;
     };
-    const bx0 = Math.max(0, Math.floor(x0)), bx1 = Math.min(w - 1, Math.ceil(x1));
-    const by0 = Math.max(0, Math.floor(y0)), by1 = Math.min(h - 1, Math.ceil(y1));
+    const c = this.clip ?? [0, 0, w, h];
+    const bx0 = Math.max(0, c[0], Math.floor(x0)), bx1 = Math.min(w - 1, c[2] - 1, Math.ceil(x1));
+    const by0 = Math.max(0, c[1], Math.floor(y0)), by1 = Math.min(h - 1, c[3] - 1, Math.ceil(y1));
     for (let y = by0; y <= by1; y++) {
       const py = y + 0.5;
       let lo = -Infinity, hi = Infinity;
@@ -248,14 +251,14 @@ export class Raster {
   // Bresenham line stamped with a lw x lw square, owned by shape id. dash:
   // [on, off] in pixel steps. clear: stamp ground instead (casing).
   line([ax, ay], [cx, cy], id = 0, lw = 1, { dash = null, clear = false } = {}) {
-    const { w, h, edge, tone, fid } = this;
+    const { w, h, edge, tone, fid } = this, [cx0, cy0, cx1, cy1] = this.clip ?? [0, 0, w, h];
     const o0 = -(lw >> 1), o1 = lw - (lw >> 1);
     let n = 0;
     const stamp = (x, y) => {
       if (dash && n++ % (dash[0] + dash[1]) >= dash[0]) return;
       for (let sy = o0; sy < o1; sy++) for (let sx = o0; sx < o1; sx++) {
         const px = x + sx, py = y + sy;
-        if (px < 0 || py < 0 || px >= w || py >= h) continue;
+        if (px < cx0 || py < cy0 || px >= cx1 || py >= cy1) continue;
         const i = py * w + px;
         if (clear) { tone[i] = 0; fid[i] = -1; edge[i] = 0; } else edge[i] = id + 1;
       }

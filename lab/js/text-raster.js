@@ -58,13 +58,36 @@ const toDoc = (r) => ({ x: r.left + window.scrollX, y: r.top + window.scrollY, w
 
 // [data-clip]: anything inside is drawn clipped to that element's rect, and
 // to every [data-clip] around it (a footer strip inside a closing tab body).
+// A framed visual opening (slides.js frameItem) sets two inline fractions on
+// its frame: --open draws the frame's box at that fraction of its size from
+// its top-left corner, and --wipe cuts its content off below that fraction of
+// its height (the content generating downward). On a clip element both cut
+// its descendants, not its own box.
+const frac = (el, name) => {
+  const v = el.style?.getPropertyValue(name);
+  return v ? Math.max(0, Math.min(1, parseFloat(v) || 0)) : 1;
+};
 function clipper() {
-  const cache = new Map();
-  const clipOf = (el) => {
-    const c = el.closest?.("[data-clip]");
+  const cache = new Map(), opened = new Map();
+  // inner: el's clip as its children see it (a nested clip's parent may be a
+  // frame whose --open and --wipe cut it).
+  const clipOf = (el, inner = false) => {
+    const c = el?.closest?.("[data-clip]");
     if (!c) return null;
+    const own = clipRect(c);
+    if (el === c && !inner) return own;
+    const o = frac(c, "--open"), w = frac(c, "--wipe");
+    if (o >= 1 && w >= 1) return own;
+    if (!opened.has(c)) {
+      const r = toDoc(c.getBoundingClientRect());
+      const x1 = Math.min(own.x + own.w, r.x + r.w * o), y1 = Math.min(own.y + own.h, r.y + r.h * Math.min(o, w));
+      opened.set(c, { x: own.x, y: own.y, w: Math.max(0, x1 - own.x), h: Math.max(0, y1 - own.y) });
+    }
+    return opened.get(c);
+  };
+  const clipRect = (c) => {
     if (!cache.has(c)) {
-      const r = toDoc(c.getBoundingClientRect()), outer = clipOf(c.parentElement);
+      const r = toDoc(c.getBoundingClientRect()), outer = clipOf(c.parentElement, true);
       if (!outer) cache.set(c, r);
       else {
         const x = Math.max(r.x, outer.x), y = Math.max(r.y, outer.y);
@@ -138,9 +161,9 @@ export function measure(root, ctx) {
 
   // Boxes pick up CSS border-radius and dashed borders.
   const boxes = [...root.querySelectorAll("[data-box]")].map((el) => {
-    const style = getComputedStyle(el);
+    const style = getComputedStyle(el), r = toDoc(el.getBoundingClientRect()), o = frac(el, "--open");
     return {
-      ...toDoc(el.getBoundingClientRect()),
+      ...r, w: r.w * o, h: r.h * o, // --open: drawn from its top-left corner at that fraction
       el,
       ink: inkOf(el, style),
       clip: clipOf(el),
@@ -430,7 +453,7 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
     ctx.setLineDash(b.dashed ? [lw * 3, lw * 2] : []);
     clipped(ctx, b, () => {
       ctx.beginPath();
-      ctx.roundRect(snap(b.x) + lw / 2, snap(b.y) + lw / 2, snap(b.w) - lw, snap(b.h) - lw, b.radius);
+      ctx.roundRect(snap(b.x) + lw / 2, snap(b.y) + lw / 2, Math.max(0, snap(b.w) - lw), Math.max(0, snap(b.h) - lw), Math.min(b.radius, b.w / 2, b.h / 2));
       ctx.stroke();
     });
   }

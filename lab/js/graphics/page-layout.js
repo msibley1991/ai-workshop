@@ -15,7 +15,7 @@ export default {
   size: [520, 560],   // design units; fitted to the span
   span: [3, 4],       // columns (graphic + captions)
   shapes: shift([
-    { id: "frame", part: "page", type: "rect", x: 0, y: 24, w: 352, h: 512, fill: "none", outline: "outer" },
+    { id: "frame", part: "page", type: "rect", x: 0, y: 24, w: 352, h: 512, fill: "none", outline: "outer", container: true }, // grows open first (graphicFramed)
     { id: "header", part: "header", type: "rect", x: 16, y: 40, w: 320, h: 56, fill: 2 },
     { id: "nav", part: "nav", type: "rect", x: 16, y: 112, w: 88, h: 352, fill: "none" },
     ...lines(32, 128, [56, 40, 56, 48], "nav"),
