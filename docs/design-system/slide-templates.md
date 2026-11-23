@@ -120,6 +120,12 @@ As built on the lab layout page:
 - `data-solo="0"` on a text artefact shows it alone at those beats: centred on both axes over the slide's visual area, with its type at 32/40. On the next beat it moves to its own box and shrinks to 24/32 together (400, ease), before that beat's visuals enter.
 - `data-exit` on a statement sentence or a visual is the beat it leaves on. A statement can change within a slide: on that beat the leaving sentences genie out first, then the entering ones pour in (slide 1, beat 4).
 - `data-frame` marks a visual's frame (`.chat-turn`, `.prompt-field`, `.site-frame`); a flat scene's frame is its `container: true` shape. Framed visuals open and close (motion.md). It replaced `data-open` and `data-leave="shrink"` (2026-11-23).
+- `data-cols`, `data-at` and `data-rows` on a `.slide-visual` place it by hand: its column span, its first column and its row fields (slide 7's knot on columns 1–5, its site on 7–10; slide 8's knot box across all 12 columns and 6 rows).
+- `.slide-statement[data-place="grid"]` lays the statement on the slide's own grid as a subgrid, so words can sit under or between visuals (slide 7: a caption under each visual on row 5, "or" centred in column 6, "Old way:" on the base line at 64/72). Its phrases use `data-enter` to follow the graphics.
+- `data-carry="<name>"` on an artefact carries it to the next slide's artefact of the same name, which moves to its new box instead of leaving and re-entering (slide 6's artist site to slides 7 and 8). Scenes carry by scene name as before, and a carry backwards cuts.
+- `data-stack="<beat>"` on an artefact slides it onto the slide's `data-stack-target` on that beat and cuts it away (slide 6; motion.md).
+- `data-handover` on a carried template hands it to a scene that owns it (slide 8: the knot scene hides it once its sculpture takes over).
+- Graphic boxes: `data-inset` pads the fit, `data-fit-rows="4"` fits the drawing to the first rows of a taller box (so a carried knot keeps its scale), and `data-knot-col` / `data-node-col` place the knot and folder by column.
 - `.slide-statement[data-place="stack"]` is a second statement on 6 columns, hung from row 1 and moved so its `[data-link-target]` line is centred in the frame (slide 1: "Specific instructions / =" then "creative decisions").
 - **Within a beat** the phases run in order: leaving and erasing artefacts (together), then a split, then the statement change, then marks, then links. A split on the same beat as a statement change runs with the old sentences' genie out, before the new ones pour in (slide 1, beat 5).
 
@@ -127,12 +133,13 @@ As built on the lab layout page:
 - **`lab/layout.html`, tab 2:** Max's Section from the script, 26 slides in its eight sections, one per bullet. Each statement is the bullet's Text line. For now they're all on the Text template, one beat each, and bullets with no Text line show a `[Placeholder]` statement. Templates, visuals and beats get worked out slide by slide.
 - **Hero and tab 1** are on templates too: the hero is Split 6 (see Templates), and tab 1 (the placeholder for Nora's part) has one Split 4 slide with the page layout, in a placeholder section.
 - **Tab names** are temporarily "Nora's Section" and "Max's Section", for a layout recording. The hashes are still `#foundations` and `#advanced-topics`.
-- **Keys:** ← and →, and PageUp and PageDown from clickers, step beats and flow on across slides, sections and tabs. Clicking a tab, the URL hash or a scroll snap lands on that tab's first slide. The old l toggle is off on this page; the genie page still has it.
+- **Keys:** ← and →, and PageUp and PageDown from clickers, step beats and flow on across slides, sections and tabs. Clicking a tab or a scroll snap lands on that tab's first slide.
+- **Links:** the URL follows the talk: `#advanced-topics/8` is slide 8 of that tab, and `#advanced-topics/7.2` is slide 7's second beat. A reload or a pasted link cuts straight there. `#<tab>` alone is the tab's first slide. The old l toggle is off on this page; the genie page still has it.
 - **Rendering cost:** painting a graphic is the expensive step, so the lab keeps its last two painted looks and draws flow packets on top instead of repainting. A carried move or an explode tween still repaints its graphic every frame.
 - **Code:** `lab/js/slides.js` (stops, beats, the phases, template placement); box fitting, `setGraphicState()` and `copyGraphicState()` in `lab/js/graphic.js`; the slide grid and footer strip in `lab/css/layout.css`.
 
 ## Not built yet
-- Real slides from the script: tab 2 is laid out as text only (see "In the lab"); templates, visuals and beats are next.
+- Real slides from the script: slides 1–8 of tab 2 are built; the rest are still text only (see "In the lab").
 - The left nav, and the axis moving to column 3 with it (the code reads `--nav-cols`).
 - Reader mode.
 

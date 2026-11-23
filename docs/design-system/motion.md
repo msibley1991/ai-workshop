@@ -71,6 +71,14 @@ Added 2026-11-23: every visual on a slide now enters and leaves by **open / clos
 - **cut:** instant.
 - **Exits reverse their entrance.**
 
+- **Stack (slide 6):** copies of a template slide onto the one that stays (800, ease) while their content wipes out upward over the first half, so their empty outlines land on its boxes. Then they're **cut** away. A close animation there read as the remaining outline glitching. Back reverses it.
+
+## One-beat sequences (exploration)
+Added 2026-11-23. A graphic may run a longer, ordered sequence in one beat, on one clock, as long as the order holds. Slide 8's merge-and-make is one state (5700 in all):
+1. **Merge (2400):** the knot drifts, then drains into the folder (250–1300), the folder pops (backed out, 1300–1650), then the tiles fan out 90 ms apart.
+2. **Make (3300):** the template's content wipes out (400), its face pivots to iso (400–1200), the link draws (1200–1500), the cards extrude (1500–1900), then swap into solids 300 ms apart (1900–3300).
+3. **Bob:** the solids bob as a loop, and the connectors carry flow packets.
+
 ## Timing within a step
 - Everything in a step starts together.
 - A step can opt into a **stagger**: elements start 100 ms apart in reading order (top to bottom, then left to right). The whole step stays at or under 800.

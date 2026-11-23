@@ -60,9 +60,19 @@ function settle(index) {
   p = settled = index;
   if (index !== silentTarget) slides?.land(index);
   silentTarget = -1;
-  const hash = ids[index] ? `#${ids[index]}` : "";
-  if (location.hash !== hash) history.replaceState(null, "", hash || location.pathname + location.search);
+  writeHash();
   labels.forEach((a, i) => (i + 1 === index ? a.setAttribute("aria-current", "true") : a.removeAttribute("aria-current")));
+}
+
+// The URL says where the talk is: #<tab> on a tab, and on a tab with slides
+// #<tab>/<slide> (its number in the tab) or #<tab>/<slide>.<beat> past the
+// first beat, so a reload lands back there.
+function writeHash() {
+  const pos = slides?.enabled ? slides.position() : null;
+  const id = ids[pos ? pos.stop.pi : settled];
+  let hash = id ? `#${id}` : "";
+  if (pos && !pos.stop.implicit && (pos.stop.number > 1 || pos.beat > 0)) hash += `${id ? "" : "#"}/${pos.stop.number}${pos.beat > 0 ? `.${pos.beat + 1}` : ""}`;
+  if (location.hash !== hash) history.replaceState(null, "", hash || location.pathname + location.search);
 }
 
 // Tween the weights to a target (whole section index or, for snapping, the same).
@@ -168,7 +178,7 @@ document.addEventListener("keydown", (e) => {
 startSiteLoops(site); // slide 4's GIFs and feed scroll
 const slides = createSlides({
   site, panels, relayout,
-  onMove: (pos) => { showStepEnds(pos); nav?.show(pos); },
+  onMove: (pos) => { showStepEnds(pos); nav?.show(pos); writeHash(); },
   goPanel(index, dur) {
     silentTarget = index;
     animateTo(index, dur);
@@ -533,9 +543,21 @@ function toggleFullscreen() {
   else document.documentElement.requestFullscreen?.().catch(() => {});
 }
 
-const indexFromHash = () => Math.max(0, ids.indexOf(location.hash.slice(1)));
-window.addEventListener("hashchange", () => animateTo(indexFromHash(), GOTO_MS));
+// #<tab>[/<slide>[.<beat>]] -> the panel, and the stop and beat if it names a slide.
+function fromHash() {
+  const [id, at = ""] = decodeURIComponent(location.hash.slice(1)).split("/");
+  const index = Math.max(0, ids.indexOf(id));
+  const [n, b] = at.split(".").map(Number);
+  const i = slides.enabled && n ? slides.stops.findIndex((s) => s.pi === index && s.number === n) : -1;
+  return { index, i, beat: Math.max(0, (b || 1) - 1) };
+}
+function goHash(dur) {
+  const { index, i, beat } = fromHash();
+  if (i >= 0) slides.jump(i, beat);
+  else animateTo(index, dur);
+}
+window.addEventListener("hashchange", () => goHash(GOTO_MS));
 
 // Start where the URL says, without animating.
-animateTo(indexFromHash(), 0);
+goHash(0);
 if (slides.enabled) { showStepEnds(slides.position()); nav?.show(slides.position()); }

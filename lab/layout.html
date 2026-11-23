@@ -203,17 +203,113 @@
                 </div>
               </div>
             </section>
-            <section class="slide" data-slide data-template="text">
+            <section class="slide" data-slide data-template="split" data-split="4">
+              <!-- Slide 5: beat 1 the files apart; beat 2 the cord ties them into the knot (js/knot.js). -->
               <div class="slide-statement"><p data-genie>Current system = ∞ programs that all do similar but slightly different things for different uses.</p></div>
+              <div class="slide-visual"><div data-graphic="filetype-knot" data-fit="box" data-align="middle" data-states="0,1"></div></div>
             </section>
-            <section class="slide" data-slide data-template="text">
+            <section class="slide" data-slide data-template="row">
+              <!-- Slide 6, Row: one template filled three ways (shop, artist, café).
+                 Beat 1 the statement, all three open together. Beat 2 the shop and
+                 café slide in onto the artist page in the middle as their content
+                 wipes out (data-stack, onto data-stack-target): their empty boxes
+                 land on its boxes and are cut away, leaving the artist page for slide 7. -->
               <div class="slide-statement"><p data-genie>Templates made using the web easy, but boring.</p></div>
+              <div class="slide-visual">
+                <div class="artefact era-site tpl-site" data-artefact="site" data-stack="1">
+                  <div class="site-frame" data-box data-clip data-frame>
+                    <div class="site-bar"><span class="tpl-content tpl-bar" data-clip><span class="site-dot" data-box></span><span class="site-dot" data-box></span><span class="site-dot" data-box></span><span class="site-address" data-box></span></span></div><span class="site-rule" data-fill></span>
+                    <div class="tpl-page">
+                      <div class="tpl-nav" data-box><div class="tpl-content" data-clip><p class="tpl-logo">Supply Co.</p><span class="tpl-links"><span class="site-line" data-fill></span><span class="site-line" data-fill></span><span class="site-line" data-fill></span></span><span class="tpl-button" data-box>Cart</span></div></div>
+                      <div class="tpl-hero" data-box><div class="tpl-content" data-clip><span class="tpl-image" data-fill data-hatch="2"></span><div class="tpl-panel"><span class="tpl-ground" data-fill data-ink="ground"></span><p class="tpl-headline">New season</p><span class="tpl-button" data-box>Shop now</span></div></div></div>
+                      <div class="tpl-cards"><div class="tpl-card" data-box><div class="tpl-content" data-clip><span class="tpl-image" data-fill data-hatch="1"></span><p class="tpl-title">Tote</p><span class="site-line" data-fill style="width: 72%"></span></div></div><div class="tpl-card" data-box><div class="tpl-content" data-clip><span class="tpl-image" data-fill data-hatch="3"></span><p class="tpl-title">Mug</p><span class="site-line" data-fill style="width: 56%"></span></div></div><div class="tpl-card" data-box><div class="tpl-content" data-clip><span class="tpl-image" data-fill data-hatch="2"></span><p class="tpl-title">Cap</p><span class="site-line" data-fill style="width: 64%"></span></div></div></div>
+                      <div class="tpl-footer" data-box><div class="tpl-content" data-clip><span class="tpl-links"><span class="site-line" data-fill></span><span class="site-line" data-fill></span><span class="site-line" data-fill></span></span><p class="tpl-copy">© 2025</p></div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="slide-visual">
+                <div class="artefact era-site tpl-site" data-artefact="site" data-stack-target data-carry="artist-site">
+                  <div class="site-frame" data-box data-clip data-frame>
+                    <div class="site-bar"><span class="tpl-content tpl-bar" data-clip><span class="site-dot" data-box></span><span class="site-dot" data-box></span><span class="site-dot" data-box></span><span class="site-address" data-box></span></span></div><span class="site-rule" data-fill></span>
+                    <div class="tpl-page">
+                      <div class="tpl-nav" data-box><div class="tpl-content" data-clip><p class="tpl-logo">Mara Lind</p><span class="tpl-links"><span class="site-line" data-fill></span><span class="site-line" data-fill></span><span class="site-line" data-fill></span></span><span class="tpl-button" data-box>Contact</span></div></div>
+                      <div class="tpl-hero" data-box><div class="tpl-content" data-clip><span class="tpl-image" data-fill data-hatch="3"></span><div class="tpl-panel"><span class="tpl-ground" data-fill data-ink="ground"></span><p class="tpl-headline">Selected works</p><span class="tpl-button" data-box>View work</span></div></div></div>
+                      <div class="tpl-cards"><div class="tpl-card" data-box><div class="tpl-content" data-clip><span class="tpl-image" data-fill data-hatch="3"></span><p class="tpl-title">Paintings</p><span class="site-line" data-fill style="width: 56%"></span></div></div><div class="tpl-card" data-box><div class="tpl-content" data-clip><span class="tpl-image" data-fill data-hatch="2"></span><p class="tpl-title">Prints</p><span class="site-line" data-fill style="width: 72%"></span></div></div><div class="tpl-card" data-box><div class="tpl-content" data-clip><span class="tpl-image" data-fill data-hatch="1"></span><p class="tpl-title">About</p><span class="site-line" data-fill style="width: 64%"></span></div></div></div>
+                      <div class="tpl-footer" data-box><div class="tpl-content" data-clip><span class="tpl-links"><span class="site-line" data-fill></span><span class="site-line" data-fill></span><span class="site-line" data-fill></span></span><p class="tpl-copy">© 2025</p></div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="slide-visual">
+                <div class="artefact era-site tpl-site" data-artefact="site" data-stack="1">
+                  <div class="site-frame" data-box data-clip data-frame>
+                    <div class="site-bar"><span class="tpl-content tpl-bar" data-clip><span class="site-dot" data-box></span><span class="site-dot" data-box></span><span class="site-dot" data-box></span><span class="site-address" data-box></span></span></div><span class="site-rule" data-fill></span>
+                    <div class="tpl-page">
+                      <div class="tpl-nav" data-box><div class="tpl-content" data-clip><p class="tpl-logo">Corner Café</p><span class="tpl-links"><span class="site-line" data-fill></span><span class="site-line" data-fill></span><span class="site-line" data-fill></span></span><span class="tpl-button" data-box>Book</span></div></div>
+                      <div class="tpl-hero" data-box><div class="tpl-content" data-clip><span class="tpl-image" data-fill data-hatch="1"></span><div class="tpl-panel"><span class="tpl-ground" data-fill data-ink="ground"></span><p class="tpl-headline">Fresh every morning</p><span class="tpl-button" data-box>See the menu</span></div></div></div>
+                      <div class="tpl-cards"><div class="tpl-card" data-box><div class="tpl-content" data-clip><span class="tpl-image" data-fill data-hatch="2"></span><p class="tpl-title">Coffee</p><span class="site-line" data-fill style="width: 64%"></span></div></div><div class="tpl-card" data-box><div class="tpl-content" data-clip><span class="tpl-image" data-fill data-hatch="1"></span><p class="tpl-title">Pastries</p><span class="site-line" data-fill style="width: 72%"></span></div></div><div class="tpl-card" data-box><div class="tpl-content" data-clip><span class="tpl-image" data-fill data-hatch="3"></span><p class="tpl-title">Brunch</p><span class="site-line" data-fill style="width: 56%"></span></div></div></div>
+                      <div class="tpl-footer" data-box><div class="tpl-content" data-clip><span class="tpl-links"><span class="site-line" data-fill></span><span class="site-line" data-fill></span><span class="site-line" data-fill></span></span><p class="tpl-copy">© 2025</p></div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </section>
-            <section class="slide" data-slide data-template="text">
-              <div class="slide-statement"><p data-genie>Old way = tech: hard but visuals: interesting or tech: easy but visuals: boring.</p></div>
+            <section class="slide" data-slide data-template="row">
+              <!-- Slide 7, Row: beat 1 the knot (columns 1-5, tied and tumbling,
+                 widened to its box: knot.stretch) wipes back in, and slide 6's artist
+                 site is carried over into columns 7-10 (data-carry). Beat 2 the words
+                 pour in, each in its own cell of a grid statement (data-place="grid"):
+                 "Old way:" on the base line, a caption under each graphic, "or"
+                 in column 6, between them. -->
+              <div class="slide-statement slide-pair" data-place="grid">
+                <p data-genie data-enter="1" class="pair-lead">Old way:</p>
+                <p data-genie data-enter="1" class="pair-caption pair-left">Hard tech, cool graphics</p>
+                <p data-genie data-enter="1" class="pair-or">or</p>
+                <p data-genie data-enter="1" class="pair-caption pair-right">Easy tech, boring graphics</p>
+              </div>
+              <div class="slide-visual" data-cols="5"><div data-graphic="filetype-knot" data-fit="box" data-align="middle" data-states="1" data-inset="64"></div></div>
+              <div class="slide-visual" data-cols="4" data-at="7">
+                <div class="artefact era-site tpl-site" data-artefact="site" data-carry="artist-site">
+                  <div class="site-frame" data-box data-clip data-frame>
+                    <div class="site-bar"><span class="tpl-content tpl-bar" data-clip><span class="site-dot" data-box></span><span class="site-dot" data-box></span><span class="site-dot" data-box></span><span class="site-address" data-box></span></span></div><span class="site-rule" data-fill></span>
+                    <div class="tpl-page">
+                      <div class="tpl-nav" data-box><div class="tpl-content" data-clip><p class="tpl-logo">Mara Lind</p><span class="tpl-links"><span class="site-line" data-fill></span><span class="site-line" data-fill></span><span class="site-line" data-fill></span></span><span class="tpl-button" data-box>Contact</span></div></div>
+                      <div class="tpl-hero" data-box><div class="tpl-content" data-clip><span class="tpl-image" data-fill data-hatch="3"></span><div class="tpl-panel"><span class="tpl-ground" data-fill data-ink="ground"></span><p class="tpl-headline">Selected works</p><span class="tpl-button" data-box>View work</span></div></div></div>
+                      <div class="tpl-cards"><div class="tpl-card" data-box><div class="tpl-content" data-clip><span class="tpl-image" data-fill data-hatch="3"></span><p class="tpl-title">Paintings</p><span class="site-line" data-fill style="width: 56%"></span></div></div><div class="tpl-card" data-box><div class="tpl-content" data-clip><span class="tpl-image" data-fill data-hatch="2"></span><p class="tpl-title">Prints</p><span class="site-line" data-fill style="width: 72%"></span></div></div><div class="tpl-card" data-box><div class="tpl-content" data-clip><span class="tpl-image" data-fill data-hatch="1"></span><p class="tpl-title">About</p><span class="site-line" data-fill style="width: 64%"></span></div></div></div>
+                      <div class="tpl-footer" data-box><div class="tpl-content" data-clip><span class="tpl-links"><span class="site-line" data-fill></span><span class="site-line" data-fill></span><span class="site-line" data-fill></span></span><p class="tpl-copy">© 2025</p></div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </section>
-            <section class="slide" data-slide data-template="text">
+            <section class="slide" data-slide data-template="row">
+              <!-- Slide 8, Row (graphics in rows 1-4, the statement on the base line),
+                 one beat, one graphic sequence (js/knot.js): the knot is carried from
+                 slide 7 into a box over every column and row (fitted to rows 1-4 as on
+                 slide 7: data-fit-rows; data-knot-col: still centred on column 3),
+                 drifts to column 5 and drains into the project folder like
+                 a whirlpool, and the four symbols' tiles fan out to the left (merge).
+                 Then (make) the artist site, carried in place and owned by the knot
+                 scene from here (data-handover), wipes its content out and hands its
+                 boxes to the sculpture (js/sculpt.js): it turns to iso, links to the
+                 folder, its cards come out of its face and spin-swap into three
+                 bobbing solids. -->
               <div class="slide-statement"><p data-genie>But what if it <em>stopped</em> being technically challenging to make what you want digitally?</p></div>
+              <div class="slide-visual" data-cols="12" data-at="1" data-rows="6"><div data-graphic="filetype-knot" data-fit="box" data-align="middle" data-fit-rows="4" data-states="2" data-inset="64" data-stretch="1.2" data-knot-col="3" data-node-col="5"></div></div>
+              <div class="slide-visual" data-cols="4" data-at="7">
+                <div class="artefact era-site tpl-site" data-artefact="site" data-carry="artist-site" data-handover>
+                  <div class="site-frame" data-box data-clip data-frame>
+                    <div class="site-bar"><span class="tpl-content tpl-bar" data-clip><span class="site-dot" data-box></span><span class="site-dot" data-box></span><span class="site-dot" data-box></span><span class="site-address" data-box></span></span></div><span class="site-rule" data-fill></span>
+                    <div class="tpl-page">
+                      <div class="tpl-nav" data-box><div class="tpl-content" data-clip><p class="tpl-logo">Mara Lind</p><span class="tpl-links"><span class="site-line" data-fill></span><span class="site-line" data-fill></span><span class="site-line" data-fill></span></span><span class="tpl-button" data-box>Contact</span></div></div>
+                      <div class="tpl-hero" data-box><div class="tpl-content" data-clip><span class="tpl-image" data-fill data-hatch="3"></span><div class="tpl-panel"><span class="tpl-ground" data-fill data-ink="ground"></span><p class="tpl-headline">Selected works</p><span class="tpl-button" data-box>View work</span></div></div></div>
+                      <div class="tpl-cards"><div class="tpl-card" data-box><div class="tpl-content" data-clip><span class="tpl-image" data-fill data-hatch="3"></span><p class="tpl-title">Paintings</p><span class="site-line" data-fill style="width: 56%"></span></div></div><div class="tpl-card" data-box><div class="tpl-content" data-clip><span class="tpl-image" data-fill data-hatch="2"></span><p class="tpl-title">Prints</p><span class="site-line" data-fill style="width: 72%"></span></div></div><div class="tpl-card" data-box><div class="tpl-content" data-clip><span class="tpl-image" data-fill data-hatch="1"></span><p class="tpl-title">About</p><span class="site-line" data-fill style="width: 64%"></span></div></div></div>
+                      <div class="tpl-footer" data-box><div class="tpl-content" data-clip><span class="tpl-links"><span class="site-line" data-fill></span><span class="site-line" data-fill></span><span class="site-line" data-fill></span></span><p class="tpl-copy">© 2025</p></div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </section>
             <section class="slide" data-slide data-template="text">
               <div class="slide-statement"><p data-genie>But old tools had a <em>purpose</em>. Old tools were a bridge between traditional design techniques and digital capabilities. How can I design by just chatting to a robot? (Spoiler: Chat becomes just 10% of the process)</p></div>

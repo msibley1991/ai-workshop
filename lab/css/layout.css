@@ -440,6 +440,23 @@
    Text size, in bold, across every open column (js/slides.js), still on the
    base line. */
 .site .slide[data-statement="large"] .slide-statement { font-weight: 700; }
+/* A grid statement (data-place="grid", slide 7): a subgrid over the open
+   columns and every row field, each sentence placed in its own cell (columns
+   from the text axis). The lead and "or" at the Text size, the captions at the
+   caption size one step up (32/40), under the visuals (rows 1-4). */
+.site .slide-statement[data-place="grid"] {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-template-rows: subgrid;
+  align-self: stretch;
+  font-size: var(--space-64);
+  line-height: calc(72 * var(--u));
+}
+.site .slide-pair .pair-lead { grid-column: 1 / -1; grid-row: 6; align-self: end; }
+.site .slide-pair .pair-or { grid-column: 6; grid-row: 1 / 5; align-self: center; justify-self: center; }
+.site .slide-pair .pair-caption { grid-row: 5; align-self: start; font-size: var(--space-32); line-height: calc(40 * var(--u)); }
+.site .slide-pair .pair-left { grid-column: 1 / span 5; }
+.site .slide-pair .pair-right { grid-column: 7 / span 4; }
 
 /* A visual region: a box of columns x row fields. The graphic fills it and is
    fitted inside (data-fit="box"; js/graphic.js). */
@@ -703,3 +720,32 @@
 /* Links in the era sites are in the palette's link colour (the only colour
    besides ink in these graphics). */
 .era-site u { --ink: link; }
+
+/* Slide 6: one template filled three ways (shop, café, artist). The region
+   boxes (nav, hero, cards, footer) are the structure; everything inside each
+   region sits in a .tpl-content clip, so it can wipe out while the boxes stay
+   (js/slides.js stackRun, --wipe). */
+.tpl-page { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: var(--space-8); padding: var(--space-16); }
+.tpl-content { position: relative; box-sizing: border-box; height: 100%; }
+.tpl-bar { display: flex; align-items: center; gap: var(--space-8); flex: 1; } /* the bar's dots and address, stripped with the content */
+.tpl-nav { flex: none; height: var(--space-48); }
+.tpl-nav .tpl-content, .tpl-footer .tpl-content { display: flex; align-items: center; gap: var(--space-16); padding: 0 var(--space-16); }
+.tpl-links { flex: 1; display: flex; justify-content: flex-end; gap: var(--space-16); }
+.tpl-links .site-line { width: var(--space-32); margin: 0; }
+.tpl-footer .tpl-links { justify-content: flex-start; }
+.tpl-hero { flex: 1 1 0; min-height: 0; }
+.tpl-image { position: absolute; inset: 0; border-radius: var(--space-8); }
+.tpl-panel { position: absolute; left: var(--space-16); bottom: var(--space-16); padding: var(--space-16); display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-16); }
+.tpl-ground { position: absolute; inset: 0; border-radius: var(--space-8); }
+.tpl-cards { flex: none; display: flex; gap: var(--space-8); height: calc(144 * var(--u)); }
+.tpl-card { flex: 1 1 0; min-width: 0; }
+.tpl-card .tpl-content { display: flex; flex-direction: column; }
+.tpl-card .tpl-image { position: relative; inset: auto; flex: 1; border-radius: var(--space-8) var(--space-8) 0 0; }
+.tpl-card .tpl-title { padding: var(--space-8) var(--space-8) 0; }
+.tpl-card .site-line { margin: var(--space-8); }
+.tpl-footer { flex: none; height: calc(40 * var(--u)); }
+.tpl-footer .tpl-copy { margin-left: auto; }
+.site .era-site .site-frame .tpl-logo { font-weight: 700; white-space: nowrap; }
+.site .era-site .site-frame .tpl-headline { position: relative; font-size: var(--space-24); line-height: var(--space-32); font-weight: 700; }
+.tpl-site .tpl-button { position: relative; flex: none; padding: 0 var(--space-16); border-radius: var(--space-24); font-size: var(--space-16); line-height: var(--space-32); font-weight: 500; white-space: nowrap; }
+.tpl-nav .tpl-button { line-height: var(--space-24); }

@@ -24,6 +24,8 @@ import {
   ISO_STYLE, ISO_YAW, ISO_PITCH, Raster, Spin, hatchInk, stepTone, rotator, boxFaces, lightVector, fillFace, rgb, quantize,
 } from "./shade.js";
 import SCENES from "./graphics/index.js";
+import { paintKnot, wireKnotDrag, releaseKnot, syncTemplate } from "./knot.js";
+import { paintSculpt } from "./sculpt.js";
 
 const INNER = ISO_STYLE.inner;    // 4, iso edges and outermost flat shapes
 const NESTED = 2;                 // flat shapes inside another shape
@@ -94,6 +96,7 @@ export function mountGraphic(el) {
     m.labels.set(l.id, span);
   }
   if (scene.kind === "iso" || scene.kind === "persp") wireDrag(m);
+  if (scene.kind === "knot") wireKnotDrag(m, () => motion);
   el.addEventListener("pointermove", (ev) => { if (!m.drag) setHover(m, hitTest(m, ev)); });
   el.addEventListener("pointerleave", () => setHover(m, null));
   return m;
@@ -149,8 +152,10 @@ function hitTest(m, ev) {
 
 const stateAt = (m, i) => m.scene.states?.[i] ?? {};
 // explode: iso parts apart (0..1). frame: a perspective scene enclosed in its
-// picture box (0..1), see paintPersp.
-const valuesOf = (st) => ({ explode: st.explode ?? 0, frame: st.frame ?? 0 });
+// picture box (0..1), see paintPersp. tie, draw: a knot scene's cord (js/knot.js).
+// merge, make: slide 8's knot draining into the project folder, then the
+// template's sculpture (js/knot.js, js/sculpt.js).
+const valuesOf = (st) => ({ explode: st.explode ?? 0, frame: st.frame ?? 0, tie: st.tie ?? 0, draw: st.draw ?? 0, merge: st.merge ?? 0, make: st.make ?? 0 });
 
 // Steps every graphic currently on screen. Returns true if any moved.
 export function stepGraphics(dir) {
@@ -177,7 +182,7 @@ function step(m, dir) {
   const dur = motion ? (stateAt(m, Math.max(m.index, next)).duration ?? 400) : 0;
   m.index = next;
   m.tween = dur > 0 ? { from, to: valuesOf(stateAt(m, next)), t0: now, dur } : null;
-  if (m.tween) { m.spin.release(); m.spin.yaw = m.spin.pitch = m.spin.vy = m.spin.vp = 0; m.drag = null; }
+  if (m.tween) { m.spin.release(); m.spin.yaw = m.spin.pitch = m.spin.vy = m.spin.vp = 0; m.drag = null; releaseKnot(m); }
   syncLabels(m);
   return true;
 }
@@ -194,9 +199,12 @@ export function setGraphicState(el, index, animate = true) {
   const dur = animate && motion ? (stateAt(m, Math.max(m.index, next)).duration ?? 400) : 0;
   m.index = next;
   m.tween = dur > 0 ? { from, to: valuesOf(stateAt(m, next)), t0: performance.now(), dur } : null;
-  if (m.tween) { m.spin.release(); m.spin.yaw = m.spin.pitch = m.spin.vy = m.spin.vp = 0; m.drag = null; }
+  if (m.tween) { m.spin.release(); m.spin.yaw = m.spin.pitch = m.spin.vy = m.spin.vp = 0; m.drag = null; releaseKnot(m); }
+  else if (m.scene.kind === "knot") syncTemplate(m); // a cut: the template it owns too, before the next draw
   syncLabels(m);
 }
+// The state a graphic is in (or tweening to).
+export const graphicIndex = (el) => mounts.get(el)?.index ?? 0;
 
 // Overrides where a box-fitted graphic sits in its box: 0 hangs from the top,
 // 1 stands on the bottom, null goes back to data-align. A carried graphic's
@@ -215,6 +223,8 @@ export function copyGraphicState(fromEl, toEl) {
   if (!a || !b) return;
   b.index = a.index;
   b.tween = null;
+  // A knot carries its sim (its pose and tumble), so it doesn't jump.
+  if (a.knot) b.knot = { ...a.knot, pos: a.knot.pos.slice(), vel: a.knot.vel.slice(), tgt: a.knot.tgt.slice(), drag: null, glyphs: [] };
   syncLabels(b);
 }
 
@@ -223,7 +233,7 @@ function currentValues(m, now) {
   const p = Math.min(1, (now - m.tween.t0) / m.tween.dur);
   if (p >= 1) { m.tween = null; return valuesOf(stateAt(m, m.index)); }
   const e = ease(p), { from, to } = m.tween;
-  return { explode: from.explode + (to.explode - from.explode) * e, frame: from.frame + (to.frame - from.frame) * e };
+  return Object.fromEntries(Object.keys(to).map((k) => [k, from[k] + (to[k] - from[k]) * e]));
 }
 
 // ---------- labels ----------
@@ -380,6 +390,15 @@ function twistAngle(tw, T, delay = 0) {
   return local < tw.ms ? ease(local / tw.ms) * tw.deg : (1 - ease((local - tw.ms) / tw.ms)) * tw.deg;
 }
 
+// The height (units) of the slide's first data-fit-rows row fields, or null.
+function fitRows(el, u) {
+  const n = Number(el.dataset.fitRows);
+  const slide = n && el.closest(".slide");
+  if (!slide) return null;
+  const cs = getComputedStyle(slide), rows = cs.gridTemplateRows.split(" ").map(parseFloat), gap = parseFloat(cs.rowGap) || 0;
+  return (rows.slice(0, n).reduce((a, b) => a + b, 0) + gap * (n - 1)) / u;
+}
+
 // ---------- drawing ----------
 
 // item: { el, x, y, w, h } in document CSS px (from text-raster measure).
@@ -399,7 +418,14 @@ export function drawGraphic(ctx, item, ps, u, colors) {
   m.viewYaw = m.spin.yaw + swayYaw(m, now, st);
   m.twistT = st.loop === "twist" ? loopClock(m, now, st) : null;
   const box = item.el.dataset.fit === "box" ? { align: m.alignT ?? alignOf(item.el) } : null;
-  let { s, ox, oy } = fit(m, item.w / u, item.h / u, u, box); // design units -> element units
+  // data-inset (units): the drawing is fitted that far in from the box's top
+  // and bottom, so a moving scene (slide 7's knot) has room to swing.
+  const inset = Number(item.el.dataset.inset) || 0;
+  // data-fit-rows="4": fitted to the slide's first rows, not the whole box (slide
+  // 8's knot keeps slide 7's rows 1-4 while its box reaches down past them).
+  m.fitH = fitRows(item.el, u) ?? item.h / u;
+  let { s, ox, oy } = fit(m, item.w / u, Math.max(1, m.fitH - 2 * inset), u, box); // design units -> element units
+  oy += inset;
   let frameBox = null;
   if (vals.frame > 0) { // perspective scenes: on the way into their picture box
     const fb = frameFit(m.scene, item.w / u, item.h / u, stateAt(m, m.index).reserve ?? 0), k = vals.frame;
@@ -416,7 +442,8 @@ export function drawGraphic(ctx, item, ps, u, colors) {
   // and flow packets are drawn over the look each frame instead of in it.
   const blinkOn = !motion || st.loop !== "blink" || Math.floor(now / BLINK_MS) % 2 === 0;
   const flowing = motion && (st.flow?.length ?? 0) > 0;
-  const key = [bw, bh, ox, oy, f, s, m.index, vals.explode, vals.frame, m.viewYaw, m.twistT, m.spin.pitch, m.hover, blinkOn, m.open?.o, m.open?.w,
+  // A knot moves every frame (its sim and tumble), so it always repaints.
+  const key = [m.scene.kind === "knot" ? now : "", bw, bh, ox, oy, f, s, m.index, vals.explode, vals.frame, m.viewYaw, m.twistT, m.spin.pitch, m.hover, blinkOn, m.open?.o, m.open?.w,
     colors.phosphor, colors.accent, colors.ground].join("|");
   let look = m.looks.find((l) => l.key === key);
   if (!look) {
@@ -518,6 +545,8 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
     }
   } else if (scene.kind === "persp") {
     paintPersp(m, r, st, { P, own, visible, anchors, scale, f });
+  } else if (scene.kind === "knot") {
+    paintKnot(m, r, st, vals, { P, own, scale, f, now, motion, rounded, chevron, pullBack, paintSculpt });
   } else {
     // Flat shapes, in order. fill: "none" (ground), "solid", or a hatch step 1..3.
     // outline: "none", or anything else: 4 for a shape on the outermost layer,

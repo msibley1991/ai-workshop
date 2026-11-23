@@ -18,7 +18,7 @@
 // accordion moves, then the new ones rise in. Rapid presses skip to the end
 // state; motion off cuts.
 import { play, genieT, lineCount, totalFor, settings as genieSettings } from "./genie-warp.js";
-import { setGraphicState, copyGraphicState, graphicStates, graphicSpan, setGraphicAlign, graphicAlign, graphicFramed, graphicBoxed, setGraphicOpen } from "./graphic.js";
+import { setGraphicState, copyGraphicState, graphicIndex, graphicStates, graphicSpan, setGraphicAlign, graphicAlign, graphicFramed, graphicBoxed, setGraphicOpen } from "./graphic.js";
 import { viewer } from "./viewer.js";
 import { setTyped, typeTo, typeBlocks } from "./artefact.js";
 
@@ -38,7 +38,10 @@ const isArtefact = (g) => g.hasAttribute("data-artefact");
 // The beat a visual enters on (data-enter, default 0); before it, it's hidden.
 const enterOf = (g) => Number(g.dataset.enter) || 0;
 // The beat a visual or sentence leaves on (data-exit); it's shown before it.
-const exitOf = (g) => (g.dataset.exit != null ? Number(g.dataset.exit) : Infinity);
+// data-stack="1" (slide 6): from that beat the visual slides onto the slide's
+// [data-stack-target] and closes there (stackRun), so that's its exit beat too.
+const stackOf = (g) => (g.dataset.stack != null ? Number(g.dataset.stack) : null);
+const exitOf = (g) => (g.dataset.exit != null ? Number(g.dataset.exit) : stackOf(g) ?? Infinity);
 const fromBeat = (g, key) => (g.dataset[key] != null ? Number(g.dataset[key]) : null);
 // data-crop="3": from that beat the artefact erases all but its
 // [data-crop-area] lines; data-split="4": from that beat it splits into one
@@ -99,7 +102,9 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
   stops.forEach((s) => { s.number = stops.filter((t) => t.panel === s.panel).indexOf(s) + 1; });
   stops.filter((s) => s.number === 1).forEach(setNumber); // every tab's footer starts numbered
 
-  const beatsOf = (stop) => Math.max(1, stop.implicit ? 1 : stop.sentences.length,
+  // A sentence shows from its data-enter beat, or its own index (one per beat).
+  const beatsOf = (stop) => Math.max(1, stop.implicit ? 1 : 0,
+    ...stop.sentences.map((el, i) => (el.dataset.enter != null ? Number(el.dataset.enter) : i) + 1),
     ...[...stop.states.values()].map((s) => s.length), ...stop.visuals.map((g) => enterOf(g) + 1),
     ...stop.sentences.map((el) => (el.dataset.enter != null ? Number(el.dataset.enter) + 1 : 0)),
     ...[...stop.visuals, ...stop.sentences].flatMap((g) => [exitOf(g), fromBeat(g, "crop"), fromBeat(g, "split"), fromBeat(g, "mark"), fromBeat(g, "enter")])
@@ -158,6 +163,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
     }
     for (const g of stop.visuals) placeSolo(stop, g, beat);
     for (const g of stop.visuals) clearFrame(g); // undo a cut-off open or close
+    for (const g of stop.visuals) setContentWipe(g, 1); // and a cut-off stack
     for (const g of stop.visuals) {
       if (fromBeat(g, "crop") == null) continue;
       setAreaText(g, 0);
@@ -472,6 +478,14 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
       s2.style.gridRow = `1 / ${ROWS + 1}`;
       s2.style.alignSelf = "start";
     }
+    // A grid statement ([data-place="grid"], slide 7) covers the open columns
+    // and every row field as a subgrid; its sentences each take their own cell
+    // (CSS), and the visuals stop two row fields short (captions, base line).
+    const grid = slide.querySelector('.slide-statement[data-place="grid"]');
+    if (grid) {
+      grid.style.gridColumn = `${a0} / ${aEnd}`;
+      grid.style.gridRow = `1 / ${ROWS + 1}`;
+    }
     const wanted = t === "text" ? 8 : t === "split" ? (Number(slide.dataset.split) || 6)
       : slide.dataset.statement === "large" ? COLUMNS : 6;
     let text = Math.min(wanted, avail);
@@ -490,17 +504,28 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
       placeRows(st);
     }
     if (t === "wide" || t === "row" || t === "visual") {
-      let end = ROWS + 1; // first row the visuals don't reach
+      let end = grid ? ROWS - 1 : ROWS + 1; // first row the visuals don't reach
       if (st && t !== "visual") {
         const rows = statementRows(st);
         end = ROWS + 1 - rows;
         st.style.gridRow = `${end} / ${ROWS + 1}`;
         st.style.alignSelf = "end";
       }
-      const n = Math.max(1, vis.length), span = Math.floor(avail / n);
-      vis.forEach((v, k) => {
-        v.style.gridColumn = n === 1 ? `${a0} / ${aEnd}` : `${a0 + k * span} / span ${span}`;
-        v.style.gridRow = `1 / ${Math.max(2, end)}`;
+      // data-cols on a visual fixes its span, and data-at its first column
+      // (from the text axis; slide 7: the knot 1-5, the site 8-12); the others
+      // share what's left equally.
+      const n = Math.max(1, vis.length), fixed = vis.filter((v) => v.dataset.cols);
+      const taken = fixed.reduce((sum, v) => sum + Number(v.dataset.cols), 0);
+      const span = Math.floor((avail - taken) / Math.max(1, n - fixed.length));
+      let col = a0;
+      vis.forEach((v) => {
+        const w = v.dataset.cols ? Number(v.dataset.cols) : span;
+        if (v.dataset.at) col = a0 + Number(v.dataset.at) - 1;
+        v.style.gridColumn = n === 1 ? `${a0} / ${aEnd}` : `${col} / span ${w}`;
+        // data-rows: a visual reaching further down than the others (slide 8's
+        // sculpture, past the base-line statement's columns).
+        v.style.gridRow = `1 / ${v.dataset.rows ? Number(v.dataset.rows) + 1 : Math.max(2, end)}`;
+        col += w;
       });
     }
   }
@@ -537,7 +562,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
   // ---- Cuts -----------------------------------------------------------------
   function cleanVisual(g) {
     clearFrame(g);
-    setGraphicAlign(g, null);
+    if (g.dataset.graphic) setGraphicAlign(g, null);
     g.style.transform = g.style.left = g.style.top = g.style.width = g.style.height = "";
     g.style.transform = tr(g); // a solo artefact keeps its centring offset
     if (g.style.position === "absolute") g.style.position = "relative";
@@ -657,6 +682,29 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
     placeVisuals(to, beat);
     for (const g of to.visuals) {
       if (g.hidden) continue;
+      // data-carry="<key>" (slide 6 -> 7, the artist site): an artefact with the
+      // same key on the old slide moves to its new box instead of closing and
+      // opening. The new one draws exactly where the old one was, then its box
+      // moves with the carried scenes.
+      const ck = isArtefact(g) && g.dataset.carry;
+      const oc = ck ? outs.findIndex((o) => o.dataset.carry === ck) : -1;
+      if (oc >= 0) {
+        const og = outs.splice(oc, 1)[0];
+        const r0 = og.getBoundingClientRect(), wrap = g.parentElement.getBoundingClientRect();
+        og.style.display = "none";
+        const box0 = { x: r0.left - wrap.left, y: r0.top - wrap.top, w: r0.width, h: r0.height };
+        const box1 = { x: 0, y: 0, w: wrap.width, h: wrap.height };
+        g.style.position = "absolute";
+        const at = (k) => {
+          g.style.left = `${box0.x + (box1.x - box0.x) * k}px`;
+          g.style.top = `${box0.y + (box1.y - box0.y) * k}px`;
+          g.style.width = `${box0.w + (box1.w - box0.w) * k}px`;
+          g.style.height = `${box0.h + (box1.h - box0.h) * k}px`;
+        };
+        at(0);
+        moves.push({ apply: at });
+        continue;
+      }
       if (isArtefact(g)) {
         emptyArtefact(to, g, beat); // it types in once its frame is open
         enters.push(frameItem(g, 1));
@@ -684,7 +732,11 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
           setGraphicAlign(g, al0 + (al1 - al0) * k);
         };
         at(0);
-        moves.push({ start: () => setGraphicState(g, target, true), apply: at });
+        // A carry back to an earlier state (slide 8's merge back to slide 7's
+        // tied knot) cuts to it, rather than playing the sequence backwards in
+        // the new, smaller box.
+        const forward = graphicIndex(og) <= target;
+        moves.push({ start: () => setGraphicState(g, target, forward), apply: at });
       } else {
         setGraphicState(g, target, false);
         enters.push(enterItem(to, g)); // drawn closed or wiped out until it runs
@@ -837,7 +889,8 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
   // backwards, each phase reversed, so back undoes forward exactly.
   function beatPhases(stop, a) {
     const b = a + 1, both = (g) => shownVisual(g, a) && shownVisual(g, b);
-    const leave = stop.visuals.filter((g) => shownVisual(g, a) && !shownVisual(g, b));
+    const stack = stop.visuals.filter((g) => stackOf(g) === b);
+    const leave = stop.visuals.filter((g) => shownVisual(g, a) && !shownVisual(g, b) && !stack.includes(g));
     const enter = stop.visuals.filter((g) => !shownVisual(g, a) && shownVisual(g, b));
     const solo = stop.visuals.filter((g) => isArtefact(g) && both(g) && soloAt(g, a) !== soloAt(g, b));
     const crop = stop.visuals.filter((g) => both(g) && cropAt(g, a) !== cropAt(g, b));
@@ -869,6 +922,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
       fwd: (my) => textRun(stop, a, b, my, splitWithText ? { withOut: splitIn } : {}),
       back: (my) => textRun(stop, b, a, my, splitWithText ? { withIn: splitOut } : {}),
     });
+    if (stack.length) ph.push({ fwd: (my) => stackRun(stop, stack, 1, my), back: (my) => stackRun(stop, stack, 0, my) });
     // Marks (and their links, if the slide has any); on an artefact that enters
     // on this beat they wait until it has typed in.
     const marks = [];
@@ -954,6 +1008,48 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
     g.style.transform = tr(g, dy);
     return rise(g, dy);
   }
+  // ---- Stacking (slide 6) -------------------------------------------------------
+  // Visuals with data-stack slide onto the slide's [data-stack-target] while
+  // their content (each region's .tpl-content clip) wipes out upward, so only
+  // their boxes land, exactly on the target's, and they're cut away there (no
+  // close: it would read as the target's own outline glitching). Back: they cut
+  // in on the target with their content cut, then slide home while it wipes
+  // back in.
+  function setContentWipe(g, w) { // hoisted: placeVisuals uses it from the start
+    g.querySelectorAll(".tpl-content").forEach((c) => (w >= 1 ? c.style.removeProperty("--wipe") : c.style.setProperty("--wipe", w)));
+  }
+  async function stackRun(stop, gs, to, my) {
+    const target = stop.visuals.find((g) => g.hasAttribute("data-stack-target"))?.querySelector("[data-frame]");
+    if (!target) return;
+    if (!to) gs.forEach((g) => { g.hidden = false; });
+    // Each one's offset onto the target, measured from its own place.
+    const moves = gs.map((g) => {
+      offsets.delete(g);
+      g.style.transform = "";
+      const a = g.querySelector("[data-frame]").getBoundingClientRect(), b = target.getBoundingClientRect();
+      return { g, dx: b.left - a.left, dy: b.top - a.top };
+    });
+    const place = (k) => moves.forEach(({ g, dx, dy }) => { offsets.set(g, { x: dx * k, y: dy * k }); g.style.transform = tr(g); });
+    const slide = (k0, k1, wipe) => moves.map(({ g }, i) => ({
+      ms: 2 * FRAME_MS,
+      apply: (k, t) => { if (i === 0) place(k0 + (k1 - k0) * k); setContentWipe(g, wipe(t)); },
+    }));
+    if (to) {
+      // Content out over the first half of the slide.
+      await tween(slide(0, 1, (t) => 1 - ease(Math.min(1, t * 2))), my);
+      if (my !== epoch) return;
+      gs.forEach((g) => { g.hidden = true; offsets.delete(g); g.style.transform = ""; setContentWipe(g, 1); });
+    } else {
+      place(1);
+      gs.forEach((g) => setContentWipe(g, 0));
+      // Content back in over the second half.
+      await tween(slide(1, 0, (t) => ease(Math.max(0, t * 2 - 1))), my);
+      if (my !== epoch) return;
+      gs.forEach((g) => { offsets.delete(g); g.style.transform = ""; setContentWipe(g, 1); });
+    }
+    relayout();
+  }
+
   // A boxed scene's drawing wipes up (TYPE_MS, so it ends with the artefacts' erase).
   const wipeBoxed = (stop, my) => {
     const gs = stop.visuals.filter((g) => !g.hidden && graphicBoxed(g));
@@ -1056,5 +1152,11 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
     document.fonts?.ready.then(() => reflow(cover.left, cover.right));
   }
 
-  return { enabled, step, goto, land, reflow, stops, position, current: () => ({ ...cur }) };
+  // Straight to a stop and beat with no motion (a reload on a #tab/slide.beat link).
+  function jump(i, beat) {
+    if (!enabled || i < 0 || i >= stops.length) return;
+    cut(i, Math.min(beat, beatsOf(stops[i]) - 1));
+  }
+
+  return { enabled, step, goto, jump, land, reflow, stops, position, current: () => ({ ...cur }) };
 }

@@ -137,6 +137,23 @@ The named curves, durations, loops and enter/exit motions are in [motion.md](mot
   - What's left in every repaint is mostly the per-pixel hatch test in `compose()`, the next target if stutter remains.
   - New scenes should avoid huge areas that change every frame.
 
+## Knot scenes and the sculpture (slides 5–8, exploration)
+Added 2026-11-23. A third scene kind, `kind: "knot"` ([`lab/js/knot.js`](../../lab/js/knot.js)), built for the "filetype knot" that runs through slides 5–8.
+
+- **The knot:** 8 file glyphs (an outlined page with a dog-ear and its extension in the code face, lowercase) on one elastic cord tied as a trefoil.
+  - It's 3D positions drawn flat: the glyphs are upright billboards and always draw above the cord, so the cord never crosses a file's face. The cord is 4 with a clear casing.
+  - It tumbles slowly (24 s a turn). `phase` turns the knot so no file sits on the tumble axis and stays still.
+  - **Pulling:** a file can be dragged. The cord is an underdamped spring (ζ 0.4, neighbours coupled), so a pulled file stretches its neighbours and springs back. The tumble pauses while one is held.
+  - **Untied** (state `tie: 0`): the files sit apart in their groups and the cord isn't drawn.
+- **Merge (slide 8):** the knot drifts to the folder's column and drains like a whirlpool (an in-plane spiral, 2 turns) into a `project/` folder glyph. Then four icon tiles (3D, Texture, Layout, Motion) fan out to its left on connectors carrying flow packets. Tiles are 4-outlined boxes with 2-line icons.
+- **The sculpture ([`lab/js/sculpt.js`](../../lab/js/sculpt.js)):** the template site from slides 6–7 hands over from the DOM to an iso object that matches it to the pixel at the handover.
+  - Its face pivots about its vertical axis toward the folder, ending in true iso.
+  - The page itself is **unshaded**: ground with outlines, since it's the surface things come out of, not an object. Its regions stand off it as 2-line boxes.
+  - Its three cards extrude out of the face as hatched boxes, then spin-swap (180° about the vertical) into low-poly solids: an icosahedron, a (2,3) torus knot and a twisted prism. They stand off the face, sit one column left of where they emerge, and bob.
+  - **Each solid drags to turn on its own** once the build has finished, with the iso scenes' drag spring (it returns to its pose on release).
+  - A straight link with an arrow runs from the folder's middle to column 6's right edge.
+- **Shading:** only the solids and boxes are hatched, by the global light.
+
 ## Open
 - **Motion session (separate):** easing curves for tweens and idle motion, the idle-motion vocabulary, and the 400/800 durations. Easing matters more than defining each motion's meaning.
 - **Not built yet:**
