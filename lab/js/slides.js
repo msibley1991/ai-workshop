@@ -18,7 +18,7 @@
 // accordion moves, then the new ones rise in. Rapid presses skip to the end
 // state; motion off cuts.
 import { play, genieT, lineCount, totalFor, settings as genieSettings } from "./genie-warp.js";
-import { setGraphicState, copyGraphicState, graphicStates, graphicSpan, setGraphicAlign, graphicAlign, graphicFramed, setGraphicOpen } from "./graphic.js";
+import { setGraphicState, copyGraphicState, graphicStates, graphicSpan, setGraphicAlign, graphicAlign, graphicFramed, graphicBoxed, setGraphicOpen } from "./graphic.js";
 import { viewer } from "./viewer.js";
 import { setTyped, typeTo, typeBlocks } from "./artefact.js";
 
@@ -27,6 +27,7 @@ const VISUAL_MS = 400;   // visuals phase: move, rise, fall (default duration, e
 const FRAME_MS = 400;    // a framed visual: its frame grows, then its content wipes in (each; first tuned at 200)
 const TYPE_MS = 800;     // a text artefact typing in (or erasing) in all (first tuned at 400)
 const PANEL_MS = 400;    // accordion jump between tabs (motion.md chrome)
+const SLIDE_PAUSE_MS = 400; // (first tried at 200) between slides: after the old visuals leave, before anything new moves in (not between beats)
 const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const frames = (n) => new Promise((r) => { const f = () => (--n <= 0 ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); });
@@ -686,10 +687,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
         moves.push({ start: () => setGraphicState(g, target, true), apply: at });
       } else {
         setGraphicState(g, target, false);
-        if (framed(g)) { enters.push(frameItem(g, 1)); continue; }
-        const dy = belowPanel(to, g);
-        g.style.transform = tr(g, dy); // waits below the panel, out of sight
-        enters.push(rise(g, dy));
+        enters.push(enterItem(to, g)); // drawn closed or wiped out until it runs
       }
     }
     for (const og of outs) exits.push(leaveItem(from, og));
@@ -732,6 +730,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
       wait(outMs),
       links && tween([{ apply: (k) => setLinks(links, 1, k) }], my, Math.max(outMs, 1)),
       eraseArtefacts(from, my, outMs),
+      wipeBoxed(from, my),
     ]);
     if (my !== epoch) return;
 
@@ -747,14 +746,19 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
       const steps = visualSteps(from, to, beat);
       holdLinks(to);
       relayout();
-      // 2. Visuals: exits, then moves, then entrances.
-      if (!(await runSteps(steps, my))) return;
+      // 2. Visuals: exits, a pause, then moves, then entrances.
+      if (!(await runSteps(steps.slice(0, 1), my))) return;
+      await wait(SLIDE_PAUSE_MS);
+      if (my !== epoch) return;
+      if (!(await runSteps(steps.slice(1), my))) return;
       if (!from.implicit) from.root.hidden = true;
       from.visuals.forEach(cleanVisual);
       setTitle(to);
     } else {
       // 2a. The old tab's visuals fall out before the accordion moves.
       if (!(await runSteps([from.visuals.filter((og) => !og.hidden).map((og) => leaveItem(from, og))], my))) return;
+      await wait(SLIDE_PAUSE_MS); // then a pause
+      if (my !== epoch) return;
       setTemplate(to, beat);
       show(to);
       to.visuals.forEach(cleanVisual);
@@ -766,10 +770,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
       const enters = to.visuals.filter((g) => !g.hidden).map((g) => {
         if (isArtefact(g)) emptyArtefact(to, g, beat);
         setState(to, g, beat, false);
-        if (framed(g)) return frameItem(g, 1);
-        const dy = belowPanel(to, g);
-        g.style.transform = tr(g, dy);
-        return rise(g, dy);
+        return enterItem(to, g);
       });
       relayout();
       await goPanel(to.pi, PANEL_MS);
@@ -911,27 +912,53 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
   const captionsOf = (g) => [...g.querySelectorAll(".site-caption, .chat-speaker")];
   // A crop hides the speaker label itself (setCropZoom), so it stays hidden.
   const showCaptions = (g, on) => captionsOf(g).forEach((c) => (c.style.visibility = on && !cropped(g) ? "" : "hidden"));
+  // A scene in its picture box (graphicBoxed) closes like a framed one; its
+  // drawing wipes up first, with the text out (wipeBoxed).
+  const closes = (g) => framed(g) || graphicBoxed(g);
   function setFrame(g, o, w) {
-    if (graphicFramed(g)) return setGraphicOpen(g, o, w);
+    if (g.dataset.graphic) return setGraphicOpen(g, o, w);
     for (const f of frameEls(g)) { f.style.setProperty("--open", o); f.style.setProperty("--wipe", w); }
   }
   function clearFrame(g) {
-    if (graphicFramed(g)) setGraphicOpen(g, 1, 1);
+    if (g.dataset.graphic) setGraphicOpen(g, 1, 1);
     for (const f of [...g.querySelectorAll("[data-frame]"), ...cropAreas(g)]) { f.style.removeProperty("--open"); f.style.removeProperty("--wipe"); }
     showCaptions(g, true);
   }
   function frameItem(g, to) {
-    const text = isArtefact(g) && typeBlocks(g).length > 0;
+    // A boxed scene leaving has wiped up already (wipeBoxed), like an erase.
+    const text = (isArtefact(g) && typeBlocks(g).length > 0) || (graphicBoxed(g) && !to);
     // p: 0 closed .. 1 open, on the entrance's own clock; each half eased.
     const at = (p) => {
-      setFrame(g, ease(Math.min(1, text ? p : p * 2)), text ? (p >= 1 ? 1 : 0) : ease(Math.max(0, p * 2 - 1)));
+      // (Leaving, a text artefact's or boxed scene's content is already gone.)
+      setFrame(g, ease(Math.min(1, text ? p : p * 2)), text ? (p >= 1 && to ? 1 : 0) : ease(Math.max(0, p * 2 - 1)));
       showCaptions(g, p >= 1);
     };
     at(to ? 0 : 1);
     return { ms: text ? FRAME_MS : 2 * FRAME_MS, apply: (k, t) => at(to ? t : 1 - t), clear: () => clearFrame(g) };
   }
   // How a visual leaves on a slide change: framed ones close, the rest fall.
-  const leaveItem = (stop, g) => (framed(g) ? frameItem(g, 0) : fall(g, belowPanel(stop, g)));
+  // Every other 3D scene wipes its drawing in downward and out upward
+  // (2 × FRAME_MS, like a framed visual's whole entrance), labels cut in after.
+  function wipeItem(g, to) {
+    const at = (p) => setGraphicOpen(g, 1, ease(p));
+    at(to ? 0 : 1);
+    return { ms: 2 * FRAME_MS, apply: (k, t) => at(to ? t : 1 - t), clear: () => setGraphicOpen(g, 1, 1) };
+  }
+  // How a visual enters and leaves: framed ones open and close, scenes wipe,
+  // anything else rises and falls.
+  const leaveItem = (stop, g) => (closes(g) ? frameItem(g, 0) : g.dataset.graphic ? wipeItem(g, 0) : fall(g, belowPanel(stop, g)));
+  function enterItem(stop, g) {
+    if (closes(g)) return frameItem(g, 1);
+    if (g.dataset.graphic) return wipeItem(g, 1);
+    const dy = belowPanel(stop, g);
+    g.style.transform = tr(g, dy);
+    return rise(g, dy);
+  }
+  // A boxed scene's drawing wipes up (TYPE_MS, so it ends with the artefacts' erase).
+  const wipeBoxed = (stop, my) => {
+    const gs = stop.visuals.filter((g) => !g.hidden && graphicBoxed(g));
+    return tween(gs.map((g) => ({ ms: TYPE_MS, apply: (k, t) => setGraphicOpen(g, 1, 1 - ease(t)) })), my);
+  };
 
   // A split chat's areas: their text erased by c (0..1, back to front), each
   // box held at its full height meanwhile so nothing moves; marks follow the text.
@@ -980,10 +1007,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
       arts([g]).forEach((b) => setTyped(b, 1));
       placeSolo(stop, g, beat);
       arts([g]).forEach((b) => setTyped(b, 0));
-      if (framed(g)) return frameItem(g, 1);
-      const dy = belowPanel(stop, g);
-      g.style.transform = tr(g, dy);
-      return rise(g, dy);
+      return enterItem(stop, g);
     });
     relayout();
     if (!(await runSteps([items], my))) return;

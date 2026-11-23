@@ -10,7 +10,7 @@ Status: **exploration**, from the motion grilling session (2026-11-21). These ar
 ## Kinds of motion
 | Kind | When it runs | Motions |
 |---|---|---|
-| Enter / exit | once, when an element appears or leaves | rise, fall, grow, shrink, cut, genie (text only) |
+| Enter / exit | once, when an element appears or leaves | open / close (framed visuals), wipe (3D scenes), rise, fall, grow, shrink, cut, genie (text only) |
 | Change | from one state to the next, on a step | move, explode, focus, rotate to |
 | Loop | repeats while a step holds | bob, sway, spin, pulse, blink, flow |
 
@@ -27,7 +27,7 @@ For enter/exit and change. Loops have their own shapes (below).
 ## Named values
 | Value | Words |
 |---|---|
-| Duration | quick 250 (interface only), default 400, slow 800 |
+| Duration | quick 250 (interface only), default 400, slow 800. Framed visuals: grow 400, wipe 400 (first tried at 200 each); typing 800 (first 400); 3D wipe 800 |
 | Loop period | fast 1 s, default 2 s, lazy 4 s |
 | Size | small 8, default 16, large 32 units |
 | Sway angle | 4° (default) or 8° |
@@ -55,6 +55,17 @@ All are sine waves unless noted. The size is the travel from rest to the peak, o
 - **Dragging** pauses the graphic's loops. They restart from rest after the spring-back.
 
 ## Enter and exit
+Added 2026-11-23: every visual on a slide now enters and leaves by **open / close** or **wipe**. Rise and fall are left only for the footer's section title.
+
+- **Open / close (framed visuals):** a visual with a frame (a chat or prompt box, a site's browser or phone frame, a flat scene's outer frame such as page-layout) enters in two steps, then its caption:
+  1. **Grow:** the frame grows from its **top-left corner** to full size, right and down together (400, ease).
+  2. **Wipe:** its content is revealed by an edge moving **downward**, top to bottom (400, ease).
+  3. **Cut:** its caption cuts in.
+  - It leaves the reverse way: the caption cuts out, the content wipes up, then the frame closes onto its top-left corner.
+  - **Text artefacts** (chats, prompt fields): their content step is **typing** (800 in all) instead of the wipe, with the speaker label or "Prompt:" cutting in as typing starts. Leaving, they erase (800), then the frame closes. On a slide change they erase during the text out.
+  - **Split boxes** (slide 1): each box is its own frame. Leaving, the boxes' text and marks erase with the links during the text out, each box keeping its height, then each box closes onto its own top-left corner.
+  - **A perspective scene in its picture box** (slide 2's second beat) counts as framed, its box as the frame. Leaving, its drawing wipes up during the text out, alongside the prompt's erase, then both frames close together.
+- **Wipe (3D scenes):** iso and perspective scenes that have no frame (the hero stack, the still life, the layer cube) wipe in downward from the top of the drawing (800, ease) and wipe out upward. Captions and leader lines cut in after the wipe and cut out before it.
 - **rise / fall:** the element travels in from beyond its container's edge, clipped to the container. Rise comes up from below, and fall comes down from above (use drop to land on something). A part's container is its graphic span; a text block's or graphic's container is its panel.
 - **grow / shrink:** scale from 0, about the element's base centre.
 - **cut:** instant.

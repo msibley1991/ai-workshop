@@ -69,20 +69,21 @@ Status: **exploration**, from the slide-templates grilling session (2026-11-21).
 
 ## Changing slides
 Each step starts only when the one before has finished, so nothing new appears until the old slide has gone:
-1. **Text out:** the statement funnels into the sink, bottom line first (200 ms per line, follow −0.5; see [motion.md](motion.md)).
-2. **Exits:** the old visuals that aren't carried leave, and the old section title with them if the section changes. Exits reverse their entrance, so a risen visual falls out.
+1. **Text out:** the statement funnels into the sink, bottom line first (200 ms per line, follow −0.5; see [motion.md](motion.md)). Text artefacts erase alongside it, and a boxed scene's drawing wipes up.
+2. **Exits:** the old visuals that aren't carried leave, and the old section title with them if the section changes. Exits reverse their entrance: framed visuals close onto their top-left corners and 3D scenes wipe out upward (motion.md, Enter and exit).
+   - **Pause:** 400 ms with nothing moving, between the old slide leaving and anything new arriving (added 2026-11-23; first tried at 200). Between beats there's no pause.
 3. **Moves:** each **carried visual**, the same scene on both slides (for example the project folder), moves to its new box on ease and steps to its new state on the way. It's matched by its scene name, in order.
-4. **Entrances:** the new visuals arrive, and the new section title rises into the strip. The default entrance is **rise**, and a slide can name another motion from motion.md (grow, fall, cut).
+4. **Entrances:** the new visuals arrive, and the new section title rises into the strip. Framed visuals open from their top-left corners and 3D scenes wipe in downward; text artefacts type in once their frames are open.
 5. **Text in:** the new statement's first sentence pours out of the sink.
 
-- Steps 2–4 are 400 ms each on ease, and an empty step is skipped.
+- Steps 2–4 are 400 ms each on ease, longer when a step holds an open (800) or a wipe (800), and an empty step is skipped.
 - **Back:** the same steps, to the previous slide's final state.
 - **Rapid presses** skip to the end state. **Motion off** cuts everything.
 - A 2-line slide change with exits, one move and entrances takes about 300 + 400 + 400 + 400 + 300 = 1.8 s. With only a move, it's about 1 s.
 
 ## Between sections and tabs
 - **Within a tab,** a new section is an ordinary slide change. The footer title changes during the visuals phase.
-- **→ on a tab's last beat** runs text out, then the old visuals fall out, then the accordion jumps to the next tab (400 on ease), and its first slide comes in: visuals, then text. Nothing is carried between tabs.
+- **→ on a tab's last beat** runs text out, then the old visuals leave, then the pause, then the accordion jumps to the next tab (400 on ease), and its first slide comes in: visuals, then text. Nothing is carried between tabs.
 - **← on a tab's first beat** reverses this, back to the previous tab's last slide in its final state.
 - **Jumping to a tab directly** (a click, the URL hash or a scroll snap) lands on that tab's first slide. **Jumping to a section** from the left nav lands on that section's first slide ([components.md](components.md)).
 - **The hero is slide zero:** → from it opens tab 1.
@@ -113,12 +114,12 @@ As built on the lab layout page:
 - `data-fit="box"` fits the graphic to its region; `data-align` is `top` for Split, Wide and Row, and `bottom` for Visual.
 - A carried visual is the same scene on consecutive slides in one tab, matched in order.
 - `data-templates="text,row,row"` gives the slide's template at each beat (the last one holds for later beats), with `data-template` set to the first. On a change, the statement morphs first, then visuals enter. Stepping back reverses it: visuals leave first, then the statement morphs back.
-- `data-enter` on a graphic or text artefact is the beat it enters on (default 0). Before that beat it's hidden. On its beat it rises in, and stepping back past it sends it out the way it came. A slide has at least enter + 1 beats.
+- `data-enter` on a graphic or text artefact is the beat it enters on (default 0). Before that beat it's hidden. On its beat it opens or wipes in (motion.md), and stepping back past it sends it out the way it came. A slide has at least enter + 1 beats.
 - `data-enter` on a statement sentence holds it in the sink until that beat, so a statement can come after the visuals (slide 1: the two chats, then the statement on beat 3).
 - `data-statement="large"` on a Wide or Row slide: the statement at 64/72 across all open columns, on the base line.
 - `data-solo="0"` on a text artefact shows it alone at those beats: centred on both axes over the slide's visual area, with its type at 32/40. On the next beat it moves to its own box and shrinks to 24/32 together (400, ease), before that beat's visuals enter.
 - `data-exit` on a statement sentence or a visual is the beat it leaves on. A statement can change within a slide: on that beat the leaving sentences genie out first, then the entering ones pour in (slide 1, beat 4).
-- `data-leave="shrink"` on a text artefact: on leaving it erases its text, then its box shrinks to nothing onto its top-right corner instead of falling.
+- `data-frame` marks a visual's frame (`.chat-turn`, `.prompt-field`, `.site-frame`); a flat scene's frame is its `container: true` shape. Framed visuals open and close (motion.md). It replaced `data-open` and `data-leave="shrink"` (2026-11-23).
 - `.slide-statement[data-place="stack"]` is a second statement on 6 columns, hung from row 1 and moved so its `[data-link-target]` line is centred in the frame (slide 1: "Specific instructions / =" then "creative decisions").
 - **Within a beat** the phases run in order: leaving and erasing artefacts (together), then a split, then the statement change, then marks, then links. A split on the same beat as a statement change runs with the old sentences' genie out, before the new ones pour in (slide 1, beat 5).
 

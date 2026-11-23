@@ -53,6 +53,13 @@ export function graphicStates(el) { return SCENES[el?.dataset.graphic]?.states?.
 // it enters by the container growing from its top-left corner, then the rest
 // wiping in downward (js/slides.js frameItem), through setGraphicOpen.
 export const graphicFramed = (el) => !!SCENES[el?.dataset.graphic]?.shapes?.some((sh) => sh.container);
+// A perspective scene in its picture box (a state with frame > 0, slide 2's
+// second beat) enters and leaves the same way, its box as the container.
+// Other 3D scenes just wipe their drawing in and out (o stays 1).
+export function graphicBoxed(el) {
+  const m = mounts.get(el);
+  return !!m && m.scene.kind === "persp" && valuesOf(stateAt(m, m.index)).frame > 0;
+}
 // o: the container's size (0..1, from its top-left); w: how far down the rest
 // is drawn (0..1 of the container's height). 1, 1 is fully open. While it isn't,
 // labels are hidden.
@@ -566,6 +573,22 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
     for (let i = 0; i + 1 < pts.length; i++) r.line(pts[i], pts[i + 1], id, LINE);
     own(r.fill(square(d), 1), l.for);
   }
+
+  // A 3D scene (iso, or perspective outside its picture box) entering or
+  // leaving: only the top w of what's drawn shows, so it wipes in downward and
+  // out upward (js/slides.js wipeItem). Framed scenes cut their own content.
+  const framedScene = scene.kind === "flat" && scene.shapes?.some((sh) => sh.container);
+  if (m.open && !framedScene && !m.geom.frameBox) {
+    let top = -1, bottom = -1;
+    for (let y = 0; y < r.h; y++) {
+      const row = y * r.w;
+      for (let x = 0; x < r.w; x++) if (r.tone[row + x] >= 0 || r.edge[row + x] > 0) { if (top < 0) top = y; bottom = y; break; }
+    }
+    if (top >= 0) {
+      const cut = top + Math.round((bottom + 1 - top) * m.open.w);
+      r.tone.fill(-1, cut * r.w); r.fid.fill(-1, cut * r.w); r.edge.fill(0, cut * r.w);
+    }
+  }
 }
 
 // Rotations for iso parts and rings (degrees; world y up).
@@ -696,6 +719,10 @@ function paintPersp(m, r, st, { P, own, visible, anchors, scale, f }) {
     });
     if (st.guides) {
       const id = own(r.count++, "construction");
+      // Inside the grid (the design box) only: as the group turns, a vanishing
+      // point runs off the drawing and its lines would cross the captions.
+      const [gx0, gy0] = P(0, 0), [gx1, gy1] = P(W, H);
+      r.clip = [Math.max(0, Math.floor(gx0)), Math.max(0, Math.floor(gy0)), Math.min(r.w, Math.ceil(gx1)), Math.min(r.h, Math.ceil(gy1))];
       for (const fc of partFaces(vpart, yaw)) {
         if (Math.abs(fc.n[1]) < 0.5) continue; // the top and bottom faces hold every horizontal edge
         for (let i = 0; i < fc.v.length; i++) {
@@ -710,6 +737,7 @@ function paintPersp(m, r, st, { P, own, visible, anchors, scale, f }) {
           if (seg) r.line(seg[0], seg[1], id, GUIDE, { dash: DASH });
         }
       }
+      r.clip = null;
     }
   }
 
@@ -737,10 +765,14 @@ function paintPersp(m, r, st, { P, own, visible, anchors, scale, f }) {
   // the element's edge by half its line so it all draws.
   const fbox = m.geom.frameBox;
   if (fbox) {
-    const h = INNER / 2 / f, [x0, y0, x1, y1] = [fbox[0] + h, fbox[1] + h, fbox[2] - h, fbox[3] - h];
-    // Nothing draws outside the box.
+    const h = INNER / 2 / f, [x0, y0] = [fbox[0] + h, fbox[1] + h];
+    // Opening or closing (m.open): the box at o of its size from its top-left,
+    // the drawing down to w of its height.
+    const o = m.open?.o ?? 1, w = Math.min(o, m.open?.w ?? 1);
+    const x1 = x0 + (fbox[2] - h - x0) * o, y1 = y0 + (fbox[3] - h - y0) * o, yc = y0 + (fbox[3] - h - y0) * w;
+    // Nothing draws outside the box (or below the wipe).
     const cx0 = Math.max(0, Math.floor(x0 * f)), cy0 = Math.max(0, Math.floor(y0 * f));
-    const cx1 = Math.min(r.w, Math.ceil(x1 * f)), cy1 = Math.min(r.h, Math.ceil(y1 * f));
+    const cx1 = Math.min(r.w, Math.ceil(x1 * f)), cy1 = Math.min(r.h, Math.ceil(yc * f));
     for (let y = 0; y < r.h; y++) {
       const row = y * r.w, inY = y >= cy0 && y < cy1;
       for (let x = 0; x < r.w; x++) {
@@ -748,9 +780,11 @@ function paintPersp(m, r, st, { P, own, visible, anchors, scale, f }) {
         r.tone[row + x] = -1; r.fid[row + x] = -1; r.edge[row + x] = 0;
       }
     }
-    const pts = rounded([[x0 * f, y0 * f], [x1 * f, y0 * f], [x1 * f, y1 * f], [x0 * f, y1 * f]], RADIUS, true);
-    const id = own(r.count++, "frame");
-    for (let i = 0; i < pts.length; i++) r.line(pts[i], pts[(i + 1) % pts.length], id, INNER);
+    if ((x1 - x0) * f >= 1 && (y1 - y0) * f >= 1) {
+      const pts = rounded([[x0 * f, y0 * f], [x1 * f, y0 * f], [x1 * f, y1 * f], [x0 * f, y1 * f]], Math.min(RADIUS, ((x1 - x0) * f) / 2, ((y1 - y0) * f) / 2), true);
+      const id = own(r.count++, "frame");
+      for (let i = 0; i < pts.length; i++) r.line(pts[i], pts[(i + 1) % pts.length], id, INNER);
+    }
   }
 
   // Leader anchors: a vanishing point (only while it's in the drawing), or a
