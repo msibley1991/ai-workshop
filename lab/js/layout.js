@@ -224,8 +224,26 @@ const gridToggle = site.querySelector(".site-grid-toggle");
 const gridOverlay = site.querySelector(".site-grid-overlay");
 const GRID_KEY = "lab-layout-grid";
 
+// The 6 row fields of the slides, outlined in each panel's .slides (so they
+// move with the accordion), shown with the columns.
+const gridRows = [...site.querySelectorAll(".slides")].map((slides) => {
+  const rows = document.createElement("div");
+  rows.className = "slide-rows";
+  rows.setAttribute("aria-hidden", "true");
+  rows.hidden = true;
+  // A band per row field across the columns, and a darker cell where it
+  // crosses each column (translucent fills don't stack in the raster).
+  for (let r = 1; r <= 6; r++) {
+    rows.insertAdjacentHTML("beforeend", `<div data-fill style="grid-area: ${r} / 1 / ${r + 1} / -1"></div>`);
+    for (let c = 1; c <= 12; c++) rows.insertAdjacentHTML("beforeend", `<div class="slide-cell" data-fill style="grid-area: ${r} / ${c}"></div>`);
+  }
+  slides.append(rows);
+  return rows;
+});
+
 function showGrid(on) {
   gridOverlay.hidden = !on;
+  for (const rows of gridRows) rows.hidden = !on;
   gridToggle.setAttribute("aria-pressed", String(on));
   try { localStorage.setItem(GRID_KEY, on ? "1" : "0"); } catch {}
   relayout();

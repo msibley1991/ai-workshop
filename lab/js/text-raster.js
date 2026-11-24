@@ -194,7 +194,9 @@ export function measure(root, ctx) {
       };
     })
     .filter((f) => f.w > 0 && f.h > 0 && f.alpha > 0)
-    .sort((a, b) => (b.alpha < 1) - (a.alpha < 1)); // translucent first, under solid fills
+    // Translucent first, under solid fills, and fainter under stronger (the
+    // grid's row x column cells over its columns).
+    .sort((a, b) => (b.alpha < 1) - (a.alpha < 1) || (a.alpha < 1 && b.alpha < 1 ? a.alpha - b.alpha : 0));
 
   // [data-tab]: notched tab outline (see tabPath) sized to the element, so it grows
   // with whatever the element holds. CSS --line sets the stroke, --tab-header the
@@ -223,7 +225,8 @@ export function measure(root, ctx) {
     })
     .filter((g) => g.w > 0 && g.h > 0);
 
-  const bullets = [...root.querySelectorAll("li")].map((li) => {
+  // A bullet per list item, unless its list is styled without one (slide 10's tree).
+  const bullets = [...root.querySelectorAll("li")].filter((li) => getComputedStyle(li).listStyleType !== "none").map((li) => {
     const r = toDoc(li.getBoundingClientRect());
     const style = getComputedStyle(li);
     const font = fontOf(style);

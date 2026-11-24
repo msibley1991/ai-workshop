@@ -49,6 +49,7 @@ Status: **exploration**, from the slide-templates grilling session (2026-11-21).
 | **Row** | 48/56, columns 1–6, on the base line | 2 (6 columns each) or 3 (4 each), placed like Wide, each with its captions inside its own box |
 | **Visual** | none | one, columns 1–12 × rows 1–6 |
 
+- **Pure Text slides** (no visual) hang their statement from **row 2**, one row field down (2026-11-23). `data-row` on the statement picks another row (slide 9: row 1).
 - **Split's proportions:** text on 4 columns when the visual is the main event and the statement is short, and on 6 when the statement leads. The visual takes the rest (8 or 6 columns on the full grid).
 - **Spans:** a scene's declared minimum span still holds when panels cover columns. Its declared maximum doesn't cap a visual in a template, because the box fit already limits the size.
 - **How visuals sit in their box:** in Split, Wide and Row, a visual hangs from the top of its box (row 1). In Visual it stands on the base line.
@@ -127,10 +128,16 @@ As built on the lab layout page:
 - `data-handover` on a carried template hands it to a scene that owns it (slide 8: the knot scene hides it once its sculpture takes over).
 - Graphic boxes: `data-inset` pads the fit, `data-fit-rows="4"` fits the drawing to the first rows of a taller box (so a carried knot keeps its scale), and `data-knot-col` / `data-node-col` place the knot and folder by column.
 - `.slide-statement[data-place="stack"]` is a second statement on 6 columns, hung from row 1 and moved so its `[data-link-target]` line is centred in the frame (slide 1: "Specific instructions / =" then "creative decisions").
+- **Line breaks within a sentence:** wrap each line in `<span class="st-line">`. Each line starts on its own, a blank line (1lh) below the one before (slides 9 and 11; slide 1's stacked statement keeps its plain `<br>`).
+- `data-bottom` on a sentence hangs it from the top of the lowest row field(s) it fits in (slide 9's spoiler).
+- `data-delay="<ms>"` on a visual starts its entrance that many ms into the step (slide 12's figures 100 apart, slide 13's docs 200 apart). `data-step="1"` makes a visual enter after the beat's step-0 entrances and their wires (slide 10's docs).
+- `data-exit-fade` on a visual fades its fills out (400) instead of its usual exit (slide 12's figures).
+- `data-grid-at="<beat>"` on a `.posters` artefact runs slide 12's poster grid on that beat (motion.md, One-beat sequences).
+- Wires, span states, `data-type-at` and document captions are in [text-artefacts.md](text-artefacts.md), Authoring.
 - **Within a beat** the phases run in order: leaving and erasing artefacts (together), then a split, then the statement change, then marks, then links. A split on the same beat as a statement change runs with the old sentences' genie out, before the new ones pour in (slide 1, beat 5).
 
 ## In the lab
-- **`lab/layout.html`, tab 2:** Max's Section from the script, 26 slides in its eight sections, one per bullet. Each statement is the bullet's Text line. For now they're all on the Text template, one beat each, and bullets with no Text line show a `[Placeholder]` statement. Templates, visuals and beats get worked out slide by slide.
+- **`lab/layout.html`, tab 2:** Max's Section from the script, one slide per bullet. Each statement is the bullet's Text line. Slides 1–13 are built; the rest are on the Text template, one beat each, and bullets with no Text line show a `[Placeholder]` statement. A bullet's **TODO** line (an example link or graphic) belongs to that bullet's slide, never a slide of its own (2026-11-23).
 - **Hero and tab 1** are on templates too: the hero is Split 6 (see Templates), and tab 1 (the placeholder for Nora's part) has one Split 4 slide with the page layout, in a placeholder section.
 - **Tab names** are temporarily "Nora's Section" and "Max's Section", for a layout recording. The hashes are still `#foundations` and `#advanced-topics`.
 - **Keys:** ← and →, and PageUp and PageDown from clickers, step beats and flow on across slides, sections and tabs. Clicking a tab or a scroll snap lands on that tab's first slide.
@@ -139,7 +146,7 @@ As built on the lab layout page:
 - **Code:** `lab/js/slides.js` (stops, beats, the phases, template placement); box fitting, `setGraphicState()` and `copyGraphicState()` in `lab/js/graphic.js`; the slide grid and footer strip in `lab/css/layout.css`.
 
 ## Not built yet
-- Real slides from the script: slides 1–8 of tab 2 are built; the rest are still text only (see "In the lab").
+- Real slides from the script: slides 1–13 of tab 2 are built; the rest are still text only (see "In the lab").
 - The left nav, and the axis moving to column 3 with it (the code reads `--nav-cols`).
 - Reader mode.
 

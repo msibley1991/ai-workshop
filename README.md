@@ -1,6 +1,6 @@
 # AI Workshop
 
-A website built with LLM-assisted coding.
+A website that holds our workshop talk on designing with coding agents, and doubles as the worked example of what the talk teaches.
 
 ## Get the code
 

@@ -58,7 +58,7 @@
 
 - **Spoken:** But, the benefit of the previous model is you knew exactly what each program was meant to be used for. If you get rid of them, what do you do now? More importantly, how do you keep control of your creative decisions and not just make slop?
 
-  **Text:** But old tools had a *purpose*. Old tools were a bridge between traditional design techniques and digital capabilities. How can I design by just chatting to a robot? (Spoiler: Chat becomes just 10% of the process)
+  **Text:** But old tools had a *purpose*. Old tools bridged traditional skills and digital ability. How can I design by just chatting to a robot? (Spoiler: Chat becomes just 10% of the process)
 
   **Visual:** *needed*
 
@@ -72,31 +72,30 @@
 
 - **Spoken:** It is also common for the project to have an overview document that tells the LLM what the purpose of the project is and how to navigate it. If you're using Claude Code this will be called a CLAUDE.md; other coding agents call it something different. md stands for Markdown, and it's best to just think of it as somewhere between plain text and HTML, so it's easy to read but also easy to organize. I highly recommend getting a free application called Obsidian, which makes Markdown super easy to read and write. Honestly, it's best to just tell the LLM what you are trying to do and imagine how you want it organised and have it write its own overview.
 
-  **Text:** Overview (CLAUDE.md or AGENTS.md): Tells the coding agent what we're doing and where to look. Contains a table of contents and overview of the project. Uses Markdown: legible but organised.
+  **Text:** 
+  Overview File (CLAUDE.md or AGENTS.md): 
+  Tells the coding agent what we're doing and where to look. 
+  Uses Markdown: legible but organised.
 
   **Visual:** *Project folder focuses on CLAUDE.md, connector line shows this project's overview page.*
-
-- **TODO:** *example link (new tab): CLAUDE.md page*
+  
+  **TODO:** *example link (new tab): CLAUDE.md page*
 
 ## 4. Design Systems
 
-- **Spoken:** So you know you should have a project in a folder, but what goes into that folder? How can you control the output of this thing? Luckily, we've more or less solved this way before the invention of LLMs.
-
-  **Text:** What else goes in the folder?
-
-  **Visual:** *focus out to project folder, all but CLAUDE.md blurred or hidden, with question marks over the area*
-
 - **Spoken:** Say you make a poster. As designers, you spend quite a bit of time on the exact layout, typography, color scheme, graphics, maybe even texture. If you do that for one poster, great, you settle on each choice and call it a day. But what if you and your friends have to make 50 posters for the same company? What if, instead of making a poster, you are making a website with multiple pages? Obviously not every poster or webpage should look the *exact* same. What elements are you keeping the same for all of them? What elements have wiggle room, and maybe you could even define what that "wiggle room" is? And most importantly, how do you tell others all this?
+  
+  Before everyone had computers, this would be called a brand system. Literal rules for what typeface to use, how big to make certain elements, illustration style, colors to use. Again, before computers, these were written for people and it was hoped the people would follow the rules or at least interpret them to the best of their ability. Nowadays, we call those rules a design system, and we can encode them such that these rules are always followed.
 
-  **Text:** One poster is easy. What about 50 posters? What about collaborators?
+  **Text:** 
+  Can you make 1 poster? 
+  What about 20 posters? 
+  How do you handle collaborators?
 
-  **Visual:** *needed*
-
-- **Spoken:** Before everyone had computers, this would be called a brand system. Literal rules for what typeface to use, how big to make certain elements, illustration style, colors to use. Again, before computers, these were written for people and it was hoped the people would follow the rules or at least interpret them to the best of their ability. Nowadays, we call those rules a design system, and we can encode them such that these rules are always followed.
-
-  **Text:** Brand systems defined what stays consistent. People follow them as best as they can.
-
-  **Visual:** *needed. must illustrate evolution of pre-computer brand system to modern design system*
+  **Visual:** 
+  Beat 1: 1 large (max-height) poster (swiss modern style)
+  Beat 2: Poster shrinks (to top right) -> duplicates itself by 5 to the right -> those 5 duplicate themselves downward to create 4 rows.
+  Beat 3: alternating (ink &  accent) human figures emerge beside each row.
 
 - **Spoken:** This is really just an extension of the idea that the more specific instructions you give an LLM, the more specific your result. Like everything I've been talking about, you can get as general or specific in both instructions and organisation as you want. This is where you want to consider how broad a "creative decision" can be; it applies even to the organisation of such decisions. On a technical level, you will most likely define "sections" of a design system, say "Typography" or "Color Scheme", and define them to the best of your ability in individual documents.
 
@@ -104,7 +103,7 @@
 
   **Visual:** *project folder comes back with focus on a design folder with connector lines to specific pages.*
 
-- **TODO:** *example link (new tab): design system page*
+  **TODO:** *example link (new tab): design system page*
 
 ## 5. Skills
 
@@ -116,13 +115,16 @@
 
 - **Spoken:** You might be curious about the difference between skills and these design documents as at the end of the day they both are instructions for the LLM to follow. I'd argue skills are more focused on specific commands and these reference documents are closer to guidelines, but the point is you can absolutely build your own workflow and organisation to whatever gets you what you want. In fact, I would say if you have the time and a subscription, you should research and play around with using different skills and documentation setups. You also need to consider the specificity and cohesion of all these sets of rules because they can absolutely have second-order effects. For instance, if a skill says all display text should be one weight and your design system says another, it's a genuine gamble over what the LLM will actually produce.
 
-- **TODO:** *example link (new tab): formatted /grill-me session*
+  **TODO:** *example link (new tab): formatted /grill-me session*
 
 ## 6. MCPs
 
 - **Spoken:** So far, I have mostly talked about making rules for what the LLM should do, but none of that is really designing anything yourself. For most of us it's a hell of a lot easier to just make something in some software and figure out the details later. But how do you get an LLM to work with something made somewhere else? Theoretically you can save an image of whatever you designed and tell the coding agent to make something out of that, but 1. LLMs are actually worse with images than you might think. 2. For a lot of software, it's now pretty easy for the LLM to directly interact with it. This is achieved through MCPs. This stands for Model Context Protocol and it's basically a set of skills and tools that tell the LLM how to interact with a given piece of software. As designers, this is the most direct way to use an LLM with what you already know how to use. In a lot of cases this use can go both ways. For instance, for this site I built a design system in a project file, then I made a wireframe in Figma, connected it with an MCP, told the coding agent to apply the design system to this wireframe, make it both live in code and editable in Figma, and went back and forth in adjusting each. One major issue with this setup is each task is complex for the LLM to implement, which both costs tokens and fills chat context. Also, all of these software companies recognise they are in direct competition with LLMs, for reasons I'll explain soon, and would rather you use their native *and often worse* AI tools; because of that, they have no incentive to make it easier for the tools to communicate.
-
-- **TODO:** *custom graphic: Figma ↔ Agent ↔ live code back-and-forth (no screenshots)*
+  
+  Text: 
+  MCP (Model Context Protocol): 
+  
+  **TODO:** *custom graphic: Figma ↔ Agent ↔ live code back-and-forth (no screenshots)*
 
 ## 7. Make Your Own Tools
 
@@ -136,7 +138,7 @@
 
   **Visual:** *needed*
 
-- **TODO:** *example link (new tab): graphics playground*
+  **TODO:** *example link (new tab): graphics playground*
 
 ## 8. Conclusion
 

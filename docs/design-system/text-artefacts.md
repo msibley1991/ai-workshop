@@ -1,6 +1,6 @@
 # Text artefacts
 
-Status: **exploration**. Decided in the prompt-blocks grilling session (2026-11-22). **Partly built** in the lab: the chat kind with your turn only, plain spans, and typing in, for slide 1 of Max's Section (`lab/layout.html`, `lab/js/artefact.js`). Nothing else is built yet. The script's opening sections need these first ([`docs/max-pres-draft/max-pres-v3.md`](../max-pres-draft/max-pres-v3.md) §1, §3–6).
+Status: **exploration**. Decided in the prompt-blocks grilling session (2026-11-22). **Partly built** in the lab (`lab/layout.html`, `lab/js/artefact.js`, `lab/js/slides.js`): the chat kind with your turn only and typing in (slide 1), the prompt (slide 2), documents (slides 10, 11 and 13), file trees (slides 10–13), and the focus and marked span states (slides 11 and 13). The script's opening sections need these first ([`docs/max-pres-draft/max-pres-v3.md`](../max-pres-draft/max-pres-v3.md) §1, §3–6).
 
 ## What they are
 - A text artefact is a **graphic made of legible text**: prompts, chats, files and folders shown on a slide.
@@ -13,8 +13,8 @@ Status: **exploration**. Decided in the prompt-blocks grilling session (2026-11-
 |---|---|---|
 | Prompt | an input field: a box with the text inside and a small send mark bottom right | Chakra Petch 400 |
 | Chat exchange | a run of prompt turns: yours boxed on the right (about ⅔ of the width), the agent's unboxed on the left at full width | yours: Chakra Petch 400; the agent's: JetBrains Mono 400 |
-| Document | an editor pane: the filename on a tab-shaped header, the raw Markdown body, no line numbers | JetBrains Mono 400 |
-| File tree | a sidebar list: ▸/▾ disclosure marks, indentation, folders ending in `/`, no file icons | JetBrains Mono 400 |
+| Document | an editor pane: the filename on an inverted header strip (an ink fill, the name knocked out), the raw Markdown body, no line numbers | JetBrains Mono 400 |
+| File tree | a framed pane with the root folder as its inverted header; under it, the tree drawn like the left nav ([components.md](components.md)): a trunk under each folder name's first letter, 16 ticks to each row's centre line, the last turning the corner, 2 thick, 24 per level; no ▸/▾ marks; folders end in `/`, closed ones with no `…`; no file icons | JetBrains Mono 400 |
 
 - **Chat speaker labels** ("You", "Claude") are bold: Label size, weight 700, just above each turn on that turn's side. There are no avatars, timestamps or "typing…" indicators.
 - **Documents show raw Markdown source,** so the `#` and `-` that do the organising are visible. They are never rendered.
@@ -118,11 +118,16 @@ A span is any run of words in an artefact. Each slide sets every span's state at
 - A `[data-type]` block types in after its artefact has risen, with a block cursor in ink. Stepping back erases it, then it falls. The box starts one line tall and grows a line at a time as the text reaches it, like a real input. The word being typed takes its full room from its first letter, so words never jump to the next line partway through.
 - **Crop and split (built, slide 1):** `data-crop="3"` on a chat, with `[data-crop-area]` on the focus lines (one `.chat-line` per line of the prompt), erases every other line on that beat (400). The lines shorten as they erase, so the box closes up around the focus lines. `data-split="4"` then splits the turn's outline into one box per area (400; it defaults to the crop beat, right after the erase), spaced so the middle one is centred in the frame and the outer ones sit half a link run above and below, for clean 45° bends. The box doesn't grow.
 - **Marked and cross-links (built, slide 1):** `data-mark="5"` wipes an ink bar in behind each line of each area, left to right (400), knocking the text out. Then a line draws from each box's left edge, at its centre, bending 45° at the midpoint with 8-radius bends, all converging on one point 32 past the end of the `[data-link-target]` phrase, where an open chevron (32 tall) rides each tip as it draws (`svg.slide-links`, weight 4).
-- Spans with ids, the agent's turn, and the other kinds are still to build.
+- **Documents (built, slides 10, 11, 13):** a framed pane (`.doc-pane`, `.md-pane`, `.spec-pane`) with an inverted `.doc-head`. Slide 10's are at the wireframe level (one ink bar per line). Slide 11's is at full detail: on beat 2 it shows no symbols, and on beat 3 `#`, `##` and `-` type in, in accent, hanging in a gutter left of the headings and in the items' indent, so the text never moves (`data-type-at="2"` holds a `[data-type]` block until that beat). Slide 13's are compact raw Markdown (16/24), each filling its height.
+- **File trees (built, slides 10–13):** `.tree-pane` with `ul.tree` lists; each row is `li` > `.tree-trunk`, `.tree-tick` (fills) and `.tree-name`. The raster draws no bullet for a list styled `list-style: none`.
+- **Span states (built):** `.hl` > `.hl-bar` (a fill 8 past the text each end, the line height tall) and `.hl-text`, with `data-span-states="focus,focus,mark"` giving the state per beat (the last holds). Focus is the accent bar, marked the ink bar, the text knocked out in ground either way. The state cuts at the beat's start.
+- **Captions on a document (built, slide 11):** `.doc-cap[data-cap-to]` sits level with the `[data-cap-id]` heading: a 6 square dot 16 past the heading's text, a 2 leader on to 8 short of the caption (Label, 500). They're re-placed on every layout change, and cut in once the doc has opened.
+- **Wires between artefacts (built, slides 10 and 13):** a 45° connector with a chevron from a `[data-wire-to]` element's right edge to the `[data-wire-id]` it names, 16 clear of both, in `svg.slide-wires` (`data-ink` colours it). `data-wire-edge` starts or ends it at the element's frame instead, level with the element, and `data-wire-level` on the end makes it arrive level with the start. A wire draws once both ends are in; on a slide change it erases with the text out.
+- Spans with ids, the agent's turn, carried spans and the camera are still to build.
 
 ## Open
 - **Marked vs selected:** the marked state (ink bar, text knocked out) looks the same as selected text ([palettes.md](palettes.md)). Test whether that confuses, and if it does, change one of them.
 - The retype rate and how the cursor blinks.
-- The send mark's shape, and ▸/▾ as glyphs or drawn marks (this touches the glyph-set gap).
+- The send mark's shape. (File trees settled on drawn lines and no ▸/▾ marks, 2026-11-23.)
 - How carried spans sit with graphics' "a shape's pixels stay inside its recorded box" rule once they're drawn into the raster.
 - Whether compact text at 16/24 survives the projector, for the projector test ([display.md](display.md)).

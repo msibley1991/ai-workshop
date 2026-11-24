@@ -312,35 +312,205 @@
               </div>
             </section>
             <section class="slide" data-slide data-template="text">
-              <div class="slide-statement"><p data-genie>But old tools had a <em>purpose</em>. Old tools were a bridge between traditional design techniques and digital capabilities. How can I design by just chatting to a robot? (Spoiler: Chat becomes just 10% of the process)</p></div>
+              <!-- Slide 9: statement only, from row 1 (data-row="1" overrides the pure Text slide's row 2), a line per sentence.
+                 Beat 2, the spoiler, hangs from the lowest row field it fits in (data-bottom). -->
+              <div class="slide-statement" data-row="1"><p data-genie><span class="st-line">But old tools had a <em>purpose</em>.</span><span class="st-line">Old tools bridged traditional skills and digital ability.</span><span class="st-line">How can I design by just chatting to a robot?</span></p><p data-genie data-bottom>(Spoiler: Chat becomes just 10% of the process)</p></div>
             </section>
           </div>
           <div data-section="Coding agents">
-            <section class="slide" data-slide data-template="text">
-              <div class="slide-statement"><p data-genie>A single chat is limited context. Using an LLM in a project folder allows context to exist in multiple documents.</p></div>
+            <!-- Slide 10, Row: beat 1, slide 1's three split instruction boxes
+                 (plain) on the left, typing in; beat 2, the project folder (a
+                 framed tree with the nav's trunks and ticks) opens and the boxes
+                 wire to their docs in design-system/ (at the box edge,
+                 data-wire-edge), then the
+                 docs open (wireframe detail) and the file names wire to them
+                 (data-step="1": after step 0's entrances and wires). Wires join
+                 [data-wire-to] to [data-wire-id] (svg.slide-wires) and draw
+                 once both ends are in. -->
+            <section class="slide" data-slide data-template="row">
+              <div class="slide-statement"><p data-genie>A single chat is limited context.</p><p data-genie>Using an LLM in a project folder allows context to exist in multiple documents.</p></div>
+              <div class="slide-visual" data-cols="2" data-at="1">
+                <div class="artefact instr-boxes" data-artefact="instructions">
+                  <div class="instr-box" data-box data-clip data-frame data-wire-to="file-colours"><p data-type>Colours: background #F4EFE6, text #2B211A, primary #C8553D.</p></div>
+                  <div class="instr-box" data-box data-clip data-frame data-wire-to="file-typography"><p data-type>Type: Fraunces 600 for headings, Inter 400 at 18/28 for body.</p></div>
+                  <div class="instr-box" data-box data-clip data-frame data-wire-to="file-layout"><p data-type>Layout: 12-column grid, 1280 max width, 24 gutters.</p></div>
+                </div>
+              </div>
+              <div class="slide-visual" data-cols="2" data-at="6">
+                <div class="artefact file-tree" data-artefact="tree" data-enter="1" data-carry="project-folder">
+                  <div class="tree-pane" data-box data-clip data-frame>
+                    <div class="doc-head"><span class="doc-head-fill" data-fill></span><p class="doc-name" data-ink="ground">project/</p></div>
+                    <ul class="tree">
+                      <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name">CLAUDE.md</span></li>
+                      <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name">design-system/</span>
+                        <ul>
+                          <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name" data-wire-id="file-colours" data-wire-edge data-wire-to="doc-colours">colours.md</span></li>
+                          <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name" data-wire-id="file-typography" data-wire-edge data-wire-to="doc-typography">typography.md</span></li>
+                          <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name" data-wire-id="file-layout" data-wire-edge data-wire-to="doc-layout">layout.md</span></li>
+                        </ul>
+                      </li>
+                      <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name">references/</span></li>
+                      <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name">skills/</span></li>
+                      <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name">tools/</span></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="slide-visual" data-cols="3" data-at="10">
+                <div class="artefact doc-stack" data-artefact="docs" data-enter="1" data-step="1">
+                  <div class="doc-pane" data-box data-clip data-frame data-wire-id="doc-colours">
+                    <div class="doc-head"><span class="doc-head-fill" data-fill></span><p class="doc-name" data-ink="ground">colours.md</p></div>
+                    <span class="doc-bar" data-fill style="width: 36%"></span><span class="doc-bar doc-item" data-fill style="width: 64%"></span><span class="doc-bar doc-item" data-fill style="width: 52%"></span>
+                  </div>
+                  <div class="doc-pane" data-box data-clip data-frame data-wire-id="doc-typography">
+                    <div class="doc-head"><span class="doc-head-fill" data-fill></span><p class="doc-name" data-ink="ground">typography.md</p></div>
+                    <span class="doc-bar" data-fill style="width: 44%"></span><span class="doc-bar doc-item" data-fill style="width: 72%"></span><span class="doc-bar doc-item" data-fill style="width: 60%"></span>
+                  </div>
+                  <div class="doc-pane" data-box data-clip data-frame data-wire-id="doc-layout">
+                    <div class="doc-head"><span class="doc-head-fill" data-fill></span><p class="doc-name" data-ink="ground">layout.md</p></div>
+                    <span class="doc-bar" data-fill style="width: 32%"></span><span class="doc-bar doc-item" data-fill style="width: 56%"></span><span class="doc-bar doc-item" data-fill style="width: 68%"></span>
+                  </div>
+                </div>
+              </div>
+              <svg class="slide-wires" data-draw data-weight="4" aria-hidden="true"></svg>
             </section>
-            <section class="slide" data-slide data-template="text">
-              <div class="slide-statement"><p data-genie>Overview (CLAUDE.md or AGENTS.md): Tells the coding agent what we&rsquo;re doing and where to look. Contains a table of contents and overview of the project. Uses Markdown: legible but organised.</p></div>
-            </section>
-            <section class="slide" data-slide data-template="text">
-              <div class="slide-statement"><p data-genie>[Placeholder] Example link: CLAUDE.md page.</p></div>
+            <!-- Slide 11, Split 4, one sentence per beat: beat 1, the project
+                 folder carries over from slide 10 (data-carry) with CLAUDE.md in
+                 focus (an accent bar, data-span-states); beat 2, the CLAUDE.md doc
+                 opens on the right, organised but with no Markdown symbols, its
+                 captions cut in and a wire draws from the file to it; beat 3,
+                 the symbols type in, in accent (data-type-at="2"), and
+                 CLAUDE.md steps down to a plain mark. -->
+            <section class="slide" data-slide data-template="split" data-split="4">
+              <div class="slide-statement"><p data-genie>Overview File (CLAUDE.md or AGENTS.md):</p><p data-genie data-gap="1">Tells the coding agent what we&rsquo;re doing and where to look.</p><p data-genie data-gap="1">Uses Markdown: legible but organised.</p></div>
+              <div class="slide-visual">
+                <div class="claude-layout">
+                  <div class="claude-folder">
+                    <div class="artefact file-tree" data-artefact="tree" data-carry="project-folder">
+                      <div class="tree-pane" data-box data-clip data-frame>
+                        <div class="doc-head"><span class="doc-head-fill" data-fill></span><p class="doc-name" data-ink="ground">project/</p></div>
+                        <ul class="tree">
+                          <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name" data-wire-edge data-wire-to="doc-claude"><span class="hl" data-span-states="focus,focus,mark"><span class="hl-bar" data-fill></span><span class="hl-text">CLAUDE.md</span></span></span></li>
+                          <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name">design-system/</span>
+                            <ul>
+                              <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name">colours.md</span></li>
+                              <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name">typography.md</span></li>
+                              <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name">layout.md</span></li>
+                            </ul>
+                          </li>
+                          <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name">references/</span></li>
+                          <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name">skills/</span></li>
+                          <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name">tools/</span></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="claude-docwrap">
+                    <div class="artefact claude-doc" data-artefact="claude-doc" data-enter="1">
+                      <div class="md-pane" data-box data-clip data-frame data-wire-id="doc-claude">
+                        <div class="doc-head"><span class="doc-head-fill" data-fill></span><p class="doc-name" data-ink="ground">CLAUDE.md</p></div>
+                        <p class="md md-h"><span class="md-sym" data-type data-type-at="2">#</span><span class="md-t" data-cap-id="goal">Coffee roastery shop</span></p>
+                        <p class="md">A one-page shop for my roastery: beans, origin, roast and price.</p>
+                        <p class="md md-h md-gap"><span class="md-sym" data-type data-type-at="2">##</span><span class="md-t" data-cap-id="contents">Where to look</span></p>
+                        <p class="md md-li"><span class="md-sym" data-type data-type-at="2">-</span>design-system/colours.md</p>
+                        <p class="md md-li"><span class="md-sym" data-type data-type-at="2">-</span>design-system/typography.md</p>
+                        <p class="md md-li"><span class="md-sym" data-type data-type-at="2">-</span>design-system/layout.md</p>
+                        <p class="md md-h md-gap"><span class="md-sym" data-type data-type-at="2">##</span><span class="md-t" data-cap-id="rules">Always</span></p>
+                        <p class="md md-li"><span class="md-sym" data-type data-type-at="2">-</span>Use the design-system values, never new ones.</p>
+                        <p class="md md-li"><span class="md-sym" data-type data-type-at="2">-</span>Ask before adding a library.</p>
+                      </div>
+                      <div class="doc-cap" data-cap-to="goal"><span class="cap-dot" data-fill></span><span class="cap-leader" data-fill></span><p class="site-caption">Goal</p></div>
+                      <div class="doc-cap" data-cap-to="contents"><span class="cap-dot" data-fill></span><span class="cap-leader" data-fill></span><p class="site-caption">Table of contents</p></div>
+                      <div class="doc-cap" data-cap-to="rules"><span class="cap-dot" data-fill></span><span class="cap-leader" data-fill></span><p class="site-caption">Rules</p></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <svg class="slide-wires" data-draw data-weight="4" aria-hidden="true"></svg>
             </section>
           </div>
           <div data-section="Design systems">
-            <section class="slide" data-slide data-template="text">
-              <div class="slide-statement"><p data-genie>What else goes in the folder?</p></div>
+            <!-- Slide 12, Split 4, one line per beat: beat 1, a Swiss-modern poster
+                 for the coffee roastery at full height and full detail; beat 2,
+                 one sequence (data-grid-at): it cuts to its wireframe level and
+                 shrinks into the grid's top-left cell (400), four copies fan out
+                 across (400), then three copies of the row fan out down (400): 20
+                 posters; beat 3, a new hire beside each row, rising top first
+                 (data-delay), ink and accent in turn. js/slides.js places it all
+                 (placePosters). -->
+            <section class="slide" data-slide data-template="split" data-split="4">
+              <div class="slide-statement"><p data-genie>Can you make 1 poster?</p><p data-genie data-gap="1">What about 20 posters?</p><p data-genie data-gap="1">How do you handle collaborators?</p></div>
+              <div class="slide-visual">
+                <div class="artefact posters" data-artefact="posters" data-grid-at="1">
+                  <div class="poster" data-box data-clip data-frame>
+                    <span class="poster-grid poster-col-1" data-fill></span><span class="poster-grid poster-col-2" data-fill></span><span class="poster-grid poster-col-3" data-fill></span>
+                    <span class="poster-cup poster-handle" data-fill></span><span class="poster-cup poster-rim" data-fill></span><span class="poster-cup poster-well" data-fill data-ink="ground"></span><span class="poster-cup poster-coffee-l" data-fill data-ink="accent"></span><span class="poster-cup poster-coffee-r" data-fill data-hatch="2"></span>
+                    <p class="poster-num poster-full">01</p><span class="poster-bar poster-wire" data-fill style="left: 6%; top: 4%; width: 8%; height: 2.5%"></span>
+                    <p class="poster-head poster-full">roast<br>day</p><span class="poster-bar poster-wire" data-fill style="left: 6%; top: 55%; width: 62%; height: 9%"></span><span class="poster-bar poster-wire" data-fill style="left: 6%; top: 70%; width: 42%; height: 9%"></span>
+                    <span class="poster-rule" data-fill></span>
+                    <div class="poster-info poster-full"><p>sat 14 dec</p><p>the roastery</p><p>8&ndash;12 am</p></div><span class="poster-bar poster-wire" data-fill style="left: 6%; top: 90%; width: 22%; height: 2.5%"></span><span class="poster-bar poster-wire" data-fill style="left: 33.28%; top: 90%; width: 26%; height: 2.5%"></span><span class="poster-bar poster-wire" data-fill style="left: 61.44%; top: 90%; width: 18%; height: 2.5%"></span>
+                  </div>
+                </div>
+                <div class="artefact poster-figure" data-artefact="figure" data-exit-fade data-enter="2" data-delay="0" data-fig-row="0"><span class="fig-head" data-fill></span><span class="fig-arm fig-arm-l" data-fill></span><span class="fig-body" data-fill></span><span class="fig-arm fig-arm-r" data-fill></span><span class="fig-leg fig-leg-l" data-fill></span><span class="fig-leg fig-leg-r" data-fill></span></div>
+                <div class="artefact poster-figure" data-artefact="figure" data-exit-fade data-enter="2" data-delay="100" data-fig-row="1" data-accent><span class="fig-head" data-fill></span><span class="fig-arm fig-arm-l" data-fill></span><span class="fig-body" data-fill></span><span class="fig-arm fig-arm-r" data-fill></span><span class="fig-leg fig-leg-l" data-fill></span><span class="fig-leg fig-leg-r" data-fill></span></div>
+                <div class="artefact poster-figure" data-artefact="figure" data-exit-fade data-enter="2" data-delay="200" data-fig-row="2"><span class="fig-head" data-fill></span><span class="fig-arm fig-arm-l" data-fill></span><span class="fig-body" data-fill></span><span class="fig-arm fig-arm-r" data-fill></span><span class="fig-leg fig-leg-l" data-fill></span><span class="fig-leg fig-leg-r" data-fill></span></div>
+                <div class="artefact poster-figure" data-artefact="figure" data-exit-fade data-enter="2" data-delay="300" data-fig-row="3" data-accent><span class="fig-head" data-fill></span><span class="fig-arm fig-arm-l" data-fill></span><span class="fig-body" data-fill></span><span class="fig-arm fig-arm-r" data-fill></span><span class="fig-leg fig-leg-l" data-fill></span><span class="fig-leg fig-leg-r" data-fill></span></div>
+              </div>
             </section>
-            <section class="slide" data-slide data-template="text">
-              <div class="slide-statement"><p data-genie>One poster is easy. What about 50 posters? What about collaborators?</p></div>
-            </section>
-            <section class="slide" data-slide data-template="text">
-              <div class="slide-statement"><p data-genie>Brand systems defined what stays consistent. People follow them as best as they can.</p></div>
-            </section>
-            <section class="slide" data-slide data-template="text">
+            <!-- Slide 13, Row, one beat: the project folder opens on columns 1-2
+                 with design-system/ in focus and its three docs marked; the three
+                 docs open on columns 4-6, 7-9 and 10-12, 200 apart (data-delay),
+                 as compact (16/24) raw Markdown, more detailed than slide 1's
+                 instructions, 16 inside an accent rectangle on columns 4-12; an
+                 accent wire runs from design-system/ to the rectangle, level with
+                 its row (data-wire-level). The files don't wire to their docs: the
+                 order and the names carry the link. -->
+            <section class="slide" data-slide data-template="row">
               <div class="slide-statement"><p data-genie>Design system = concrete elaboration of creative decisions, organised in discrete sections</p></div>
-            </section>
-            <section class="slide" data-slide data-template="text">
-              <div class="slide-statement"><p data-genie>[Placeholder] Example link: design system page.</p></div>
+              <div class="slide-visual" data-cols="2" data-at="1">
+                <div class="artefact file-tree" data-artefact="tree">
+                  <div class="tree-pane" data-box data-clip data-frame>
+                    <div class="doc-head"><span class="doc-head-fill" data-fill></span><p class="doc-name" data-ink="ground">project/</p></div>
+                    <ul class="tree">
+                      <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name">CLAUDE.md</span></li>
+                      <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name" data-wire-edge data-wire-to="ds-docs"><span class="hl" data-span-states="focus"><span class="hl-bar" data-fill></span><span class="hl-text">design-system/</span></span></span>
+                        <ul>
+                          <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name"><span class="hl" data-span-states="mark"><span class="hl-bar" data-fill></span><span class="hl-text">colours.md</span></span></span></li>
+                          <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name"><span class="hl" data-span-states="mark"><span class="hl-bar" data-fill></span><span class="hl-text">typography.md</span></span></span></li>
+                          <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name"><span class="hl" data-span-states="mark"><span class="hl-bar" data-fill></span><span class="hl-text">layout.md</span></span></span></li>
+                        </ul>
+                      </li>
+                      <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name">references/</span></li>
+                      <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name">skills/</span></li>
+                      <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name">tools/</span></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="slide-visual" data-cols="9" data-at="4">
+                <div class="artefact spec-enclose" data-artefact="enclose"><div class="spec-frame" data-box data-clip data-frame data-wire-id="ds-docs" data-wire-level></div></div>
+                <div class="spec-row">
+                  <div class="artefact spec-doc" data-artefact="spec" data-delay="0">
+                    <div class="spec-pane" data-box data-clip data-frame>
+                      <div class="doc-head"><span class="doc-head-fill" data-fill></span><p class="doc-name" data-ink="ground">colours.md</p></div>
+                      <div class="spec-body"><p class="spec-l spec-h"># Colours</p><p class="spec-l">Three colours, by role.</p><p class="spec-l spec-h">## Palette</p><p class="spec-l spec-li">- Background #F4EFE6</p><p class="spec-l spec-li">- Text #2B211A</p><p class="spec-l spec-li">- Primary #C8553D</p><p class="spec-l spec-h">## Use</p><p class="spec-l spec-li">- Primary: buy buttons only</p><p class="spec-l spec-li">- Text on background only</p><p class="spec-l spec-li">- No tints or gradients</p></div>
+                    </div>
+                  </div>
+                  <div class="artefact spec-doc" data-artefact="spec" data-delay="200">
+                    <div class="spec-pane" data-box data-clip data-frame>
+                      <div class="doc-head"><span class="doc-head-fill" data-fill></span><p class="doc-name" data-ink="ground">typography.md</p></div>
+                      <div class="spec-body"><p class="spec-l spec-h"># Typography</p><p class="spec-l spec-h">## Faces</p><p class="spec-l spec-li">- Headings: Fraunces 600</p><p class="spec-l spec-li">- Body: Inter 400</p><p class="spec-l spec-h">## Scale</p><p class="spec-l spec-li">- H1 56/64</p><p class="spec-l spec-li">- H2 36/44</p><p class="spec-l spec-li">- Body 18/28</p><p class="spec-l spec-li">- Small 14/20</p><p class="spec-l spec-h">## Rules</p><p class="spec-l spec-li">- One face per role</p><p class="spec-l spec-li">- Body never below 16</p><p class="spec-l spec-li">- Sentence-case headings</p></div>
+                    </div>
+                  </div>
+                  <div class="artefact spec-doc" data-artefact="spec" data-delay="400">
+                    <div class="spec-pane" data-box data-clip data-frame>
+                      <div class="doc-head"><span class="doc-head-fill" data-fill></span><p class="doc-name" data-ink="ground">layout.md</p></div>
+                      <div class="spec-body"><p class="spec-l spec-h"># Layout</p><p class="spec-l spec-h">## Grid</p><p class="spec-l spec-li">- 12 columns, 1280 max</p><p class="spec-l spec-li">- 24 gutters, 32 margins</p><p class="spec-l spec-h">## Spacing</p><p class="spec-l spec-li">- Steps of 8: 8–64</p><p class="spec-l spec-h">## Sections</p><p class="spec-l spec-li">- Hero: full width</p><p class="spec-l spec-li">- Products: 3-up cards</p><p class="spec-l spec-li">- Footer: 4 columns</p><p class="spec-l spec-h">## Breakpoints</p><p class="spec-l spec-li">- 640: 4 columns</p><p class="spec-l spec-li">- 1024: 8 columns</p></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <svg class="slide-wires" data-draw data-ink="accent" data-weight="4" aria-hidden="true"></svg>
             </section>
           </div>
           <div data-section="Skills">
@@ -350,24 +520,15 @@
             <section class="slide" data-slide data-template="text">
               <div class="slide-statement"><p data-genie>[Placeholder] Text needed: skills vs design documents.</p></div>
             </section>
-            <section class="slide" data-slide data-template="text">
-              <div class="slide-statement"><p data-genie>[Placeholder] Example link: formatted /grill-me session.</p></div>
-            </section>
           </div>
           <div data-section="MCPs">
             <section class="slide" data-slide data-template="text">
               <div class="slide-statement"><p data-genie>[Placeholder] Text needed: MCPs.</p></div>
             </section>
-            <section class="slide" data-slide data-template="text">
-              <div class="slide-statement"><p data-genie>[Placeholder] Graphic: Figma, agent and live code back and forth.</p></div>
-            </section>
           </div>
           <div data-section="Make your own tools">
             <section class="slide" data-slide data-template="text">
               <div class="slide-statement"><p data-genie>[Placeholder] Text needed: make your own tools.</p></div>
-            </section>
-            <section class="slide" data-slide data-template="text">
-              <div class="slide-statement"><p data-genie>[Placeholder] Example link: graphics playground.</p></div>
             </section>
           </div>
           <div data-section="Conclusion">

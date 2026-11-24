@@ -71,6 +71,8 @@ Added 2026-11-23: every visual on a slide now enters and leaves by **open / clos
 - **cut:** instant.
 - **Exits reverse their entrance.**
 
+- **Fade (slide 12's figures):** `data-exit-fade` fades a visual's fills out (400) on its exit, within a slide and on a slide change. It's the one exception to "exits reverse their entrance"; the figures still rise in.
+
 - **Stack (slide 6):** copies of a template slide onto the one that stays (800, ease) while their content wipes out upward over the first half, so their empty outlines land on its boxes. Then they're **cut** away. A close animation there read as the remaining outline glitching. Back reverses it.
 
 ## One-beat sequences (exploration)
@@ -79,9 +81,11 @@ Added 2026-11-23. A graphic may run a longer, ordered sequence in one beat, on o
 2. **Make (3300):** the template's content wipes out (400), its face pivots to iso (400–1200), the link draws (1200–1500), the cards extrude (1500–1900), then swap into solids 300 ms apart (1900–3300).
 3. **Bob:** the solids bob as a loop, and the connectors carry flow packets.
 
+Slide 12's **poster grid** (beat 2, after the line pours in) is three steps of 400: the poster cuts to its wireframe level and shrinks into the grid's top-left cell; four copies cut in on it and fan out across together; then three copies of the row fan out down together (5 × 4). Back plays it in reverse, and the poster cuts back to full detail at the end.
+
 ## Timing within a step
 - Everything in a step starts together.
-- A step can opt into a **stagger**: elements start 100 ms apart in reading order (top to bottom, then left to right). The whole step stays at or under 800.
+- A step can opt into a **stagger**: elements start 100 ms apart in reading order (top to bottom, then left to right). The whole step stays at or under 800. Built as `data-delay` (slide 12's figures 100 apart; slide 13's docs 200 apart, a deliberate deal-out).
 - Rapid presses skip everything to the end state.
 
 ## Genie (text)
