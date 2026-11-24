@@ -252,7 +252,7 @@ function syncLabels(m) {
   for (const l of m.scene.labels ?? []) {
     const span = m.labels.get(l.id), hide = !on.has(l.id);
     if (span.hidden !== hide) { span.hidden = hide; changed = true; }
-    const ink = st.focus && l.for === st.focus ? "accent" : "phosphor";
+    const ink = "accent"; // leader labels are accent (legibility test; was accent only on focus)
     if (span.dataset.ink !== ink) { span.dataset.ink = ink; changed = true; }
   }
   if (changed) window.dispatchEvent(new Event("lab:layout"));
@@ -472,7 +472,8 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
   r.clear();
   m.owners = []; m.accent = []; m.flows = [];
   const focus = blinkOn ? st.focus ?? null : null;
-  const own = (id, part) => { m.owners[id] = { part }; m.accent[id] = focus != null && part === focus; return id; };
+  // Connectors and leaders (line = true) are always accent; other marks only while their part is in focus.
+  const own = (id, part, line = false) => { m.owners[id] = { part }; m.accent[id] = line || (focus != null && part === focus); return id; };
   const P = (x, y) => [(ox + x * scale) * f, (oy + y * scale) * f]; // design units -> buffer px
   const show = st.show ? new Set(st.show) : null;
   const visible = (id) => !show || show.has(id);
@@ -580,7 +581,7 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
     let pts = c.pts.map(resolve);
     if (c.end === "arrow") pts = pullBack(pts, ARROW_GAP);
     pts = rounded(pts, RADIUS, false);
-    const id = own(r.count++, c.part ?? c.id);
+    const id = own(r.count++, c.part ?? c.id, true);
     for (let i = 0; i + 1 < pts.length; i++) r.line(pts[i], pts[i + 1], id, CONNECTOR, { dash: c.dashed ? DASH : null });
     if (c.end === "arrow") chevron(r, pts[pts.length - 2], pts[pts.length - 1], id);
     if (st.flow?.includes(c.id)) m.flows.push({ pts, id }); // packets: drawn over the look (drawGraphic)
@@ -598,9 +599,9 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
     const square = (half) => { const lo = -half, hi = half - 1e-3; return [[a[0] + lo, a[1] + lo], [a[0] + hi, a[1] + lo], [a[0] + hi, a[1] + hi], [a[0] + lo, a[1] + hi]]; };
     const d = DOT / 2;
     own(r.fill(square(d + CASING), 0), null); // the dot is cased too
-    const id = own(r.count++, l.for);
+    const id = own(r.count++, l.for, true);
     for (let i = 0; i + 1 < pts.length; i++) r.line(pts[i], pts[i + 1], id, LINE);
-    own(r.fill(square(d), 1), l.for);
+    own(r.fill(square(d), 1), l.for, true);
   }
 
   // A 3D scene (iso, or perspective outside its picture box) entering or

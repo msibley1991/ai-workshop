@@ -53,7 +53,7 @@ Status: **exploration**, from the slide-templates grilling session (2026-11-21).
 - **Split's proportions:** text on 4 columns when the visual is the main event and the statement is short, and on 6 when the statement leads. The visual takes the rest (8 or 6 columns on the full grid).
 - **Spans:** a scene's declared minimum span still holds when panels cover columns. Its declared maximum doesn't cap a visual in a template, because the box fit already limits the size.
 - **How visuals sit in their box:** in Split, Wide and Row, a visual hangs from the top of its box (row 1). In Visual it stands on the base line.
-- **Rows for the statement (Wide and Row):** the statement's height is measured at its full length, every sentence included, from the slide's first beat. It takes as many bottom row fields as that needs, set on the base line, and the visuals take the rows above it.
+- **Rows for the statement (Wide and Row):** the statement's height is measured at its full length, every sentence included, from the slide's first beat. It takes as many bottom row fields as that needs, set on the base line, and the visuals take the rows above it. A sentence placed with `data-at` is out of the flow and doesn't count.
 - **Why text goes below in Wide and Row** (changed 2026-11-22): with the sink bottom left, a statement above full-width visuals funnels down across them. Below them, it drops straight into the sink.
 - **Hero:** slide zero, on the Split 6 template (changed 2026-11-22). The statement is one block: the Display title and the sub. The visual is to the right. It has no section, so there's no footer title, but its sink is bottom left like every slide's. At 128 on 6 columns, the title takes about four lines on a 1440 canvas.
 - **New templates** are added only when a slide doesn't fit these five, the same "named, not free" rule as motion's values. Left out for now: a mirrored Split (it breaks the text axis) and an unequal Row.
@@ -64,7 +64,7 @@ Status: **exploration**, from the slide-templates grilling session (2026-11-21).
 - If the left nav covers columns 1–2, the text axis moves to column 3, and 3–10 still holds the Text template's 8 columns. The axis moves only when a viewer opens a panel, never between slides.
 
 ## Building a statement
-- **Earlier sentences stay.** Each beat adds the next sentence below the last, in ink, with no dimming. The accent stays inside graphics.
+- **Earlier sentences stay.** Each beat adds the next sentence below the last, in ink, with no dimming. The accent stays inside graphics, except a sentence that's a warning or a turn can be set in accent (slide 14's warning, `data-ink="accent"`, 2026-11-24).
 - **New text pours out of the sink,** the reverse of the genie exit, into its place. Stepping back sends the newest sentence back in. The sink is where all text comes from and goes to.
 - The statement's region is sized for its full text from the first beat, so sentences never push each other around.
 
@@ -73,7 +73,8 @@ Each step starts only when the one before has finished, so nothing new appears u
 1. **Text out:** the statement funnels into the sink, bottom line first (200 ms per line, follow −0.5; see [motion.md](motion.md)). Text artefacts erase alongside it, and a boxed scene's drawing wipes up.
 2. **Exits:** the old visuals that aren't carried leave, and the old section title with them if the section changes. Exits reverse their entrance: framed visuals close onto their top-left corners and 3D scenes wipe out upward (motion.md, Enter and exit).
    - **Pause:** 400 ms with nothing moving, between the old slide leaving and anything new arriving (added 2026-11-23; first tried at 200). Between beats there's no pause.
-3. **Moves:** each **carried visual**, the same scene on both slides (for example the project folder), moves to its new box on ease and steps to its new state on the way. It's matched by its scene name, in order.
+3. **Moves:** each **carried visual**, the same scene on both slides (for example the project folder), moves to its new box on ease and steps to its new state on the way. It's matched by its scene name, in order. A carry into the same box has nothing to move, so the step is skipped.
+   - **Folder swap:** a carried file tree whose open folders change (slide 13 → 14) closes the old folders, then opens the new ones (200 + 200, [text-artefacts.md](text-artefacts.md)).
 4. **Entrances:** the new visuals arrive, and the new section title rises into the strip. Framed visuals open from their top-left corners and 3D scenes wipe in downward; text artefacts type in once their frames are open.
 5. **Text in:** the new statement's first sentence pours out of the sink.
 
@@ -129,7 +130,8 @@ As built on the lab layout page:
 - Graphic boxes: `data-inset` pads the fit, `data-fit-rows="4"` fits the drawing to the first rows of a taller box (so a carried knot keeps its scale), and `data-knot-col` / `data-node-col` place the knot and folder by column.
 - `.slide-statement[data-place="stack"]` is a second statement on 6 columns, hung from row 1 and moved so its `[data-link-target]` line is centred in the frame (slide 1: "Specific instructions / =" then "creative decisions").
 - **Line breaks within a sentence:** wrap each line in `<span class="st-line">`. Each line starts on its own, a blank line (1lh) below the one before (slides 9 and 11; slide 1's stacked statement keeps its plain `<br>`).
-- `data-bottom` on a sentence hangs it from the top of the lowest row field(s) it fits in (slide 9's spoiler).
+- `data-bottom` on a sentence sets its bottom edge on the bottom of the last row field (slide 9's spoiler, 2026-11-24).
+- `data-at="<column>"` on a sentence takes it out of the statement's flow and sets it on the base line, from that open column to the last (slide 14's warning, column 8, on beat 2).
 - `data-delay="<ms>"` on a visual starts its entrance that many ms into the step (slide 12's figures 100 apart, slide 13's docs 200 apart). `data-step="1"` makes a visual enter after the beat's step-0 entrances and their wires (slide 10's docs).
 - `data-exit-fade` on a visual fades its fills out (400) instead of its usual exit (slide 12's figures).
 - `data-grid-at="<beat>"` on a `.posters` artefact runs slide 12's poster grid on that beat (motion.md, One-beat sequences).
@@ -137,7 +139,7 @@ As built on the lab layout page:
 - **Within a beat** the phases run in order: leaving and erasing artefacts (together), then a split, then the statement change, then marks, then links. A split on the same beat as a statement change runs with the old sentences' genie out, before the new ones pour in (slide 1, beat 5).
 
 ## In the lab
-- **`lab/layout.html`, tab 2:** Max's Section from the script, one slide per bullet. Each statement is the bullet's Text line. Slides 1–13 are built; the rest are on the Text template, one beat each, and bullets with no Text line show a `[Placeholder]` statement. A bullet's **TODO** line (an example link or graphic) belongs to that bullet's slide, never a slide of its own (2026-11-23).
+- **`lab/layout.html`, tab 2:** Max's Section from the script, one slide per bullet by default. Each statement is the bullet's Text line. A spoken-only bullet may fold into the slide before it instead, decided case by case (the skills-vs-design-docs bullet did, 2026-11-24); otherwise a bullet with no Text yet shows a `[Placeholder]` statement. Slides 1–14 are built; the rest are on the Text template, one beat each. A bullet's **TODO** line (an example link or graphic) belongs to that bullet's slide, never a slide of its own (2026-11-23).
 - **Hero and tab 1** are on templates too: the hero is Split 6 (see Templates), and tab 1 (the placeholder for Nora's part) has one Split 4 slide with the page layout, in a placeholder section.
 - **Tab names** are temporarily "Nora's Section" and "Max's Section", for a layout recording. The hashes are still `#foundations` and `#advanced-topics`.
 - **Keys:** ← and →, and PageUp and PageDown from clickers, step beats and flow on across slides, sections and tabs. Clicking a tab or a scroll snap lands on that tab's first slide.

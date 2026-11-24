@@ -679,6 +679,14 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
       const row = Number(st.dataset.row) || (t === "text" && !vis.length ? 2 : 0);
       st.style.gridRow = row ? `${row} / ${ROWS + 1}` : "";
       st.style.alignSelf = "";
+      // data-at on a sentence (slide 14's warning): out of the statement's
+      // flow, on its base line from that open column to the last, so the
+      // statement's rows count only the sentences in flow.
+      for (const p of st.querySelectorAll(":scope > [data-at]")) {
+        const at = Number(p.dataset.at) - 1;
+        p.style.setProperty("--at", at);
+        p.style.setProperty("--at-span", Math.max(1, avail - at));
+      }
       placeRows(st);
     }
     if (t === "wide" || t === "row" || t === "visual") {
@@ -720,20 +728,17 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
       const now = r.top - st.getBoundingClientRect().top;
       p.style.marginTop = `${Math.max(m0, m0 + want - now)}px`;
     }
-    // data-bottom on a sentence: it hangs from the top of the lowest row
-    // field(s) it fits in (slide 9's spoiler), unless the text above reaches
+    // data-bottom on a sentence: its bottom edge sits on the bottom edge of
+    // the last row field (slide 9's spoiler), unless the text above reaches
     // past that.
     const slide = st.closest(".slide");
     for (const p of st.querySelectorAll(":scope > [data-bottom]")) {
       p.style.marginTop = "";
       const m0 = parseFloat(getComputedStyle(p).marginTop) || 0;
       const r = p.getBoundingClientRect(), u = unit();
-      const h = r.height / u;
-      let n = 1;
-      while (n < ROWS && n * FIELD + (n - 1) * FIELD_GAP < h) n++;
-      const top = slide.getBoundingClientRect().top + parseFloat(getComputedStyle(slide).paddingTop)
-        + (ROWS - n) * (FIELD + FIELD_GAP) * u;
-      p.style.marginTop = `${Math.max(m0, m0 + top - r.top)}px`;
+      const bottom = slide.getBoundingClientRect().top + parseFloat(getComputedStyle(slide).paddingTop)
+        + (ROWS * FIELD + (ROWS - 1) * FIELD_GAP) * u;
+      p.style.marginTop = `${Math.max(m0, m0 + bottom - r.bottom)}px`;
     }
   }
 
@@ -755,6 +760,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
   // ---- Cuts -----------------------------------------------------------------
   function cleanVisual(g) {
     clearFrame(g);
+    g.querySelectorAll?.(".tree-pane ul").forEach((ul) => (ul.style.height = "")); // a cut-off folder swap
     g.style.removeProperty("--fill-alpha"); // a faded-out visual
     if (g.dataset.graphic) setGraphicAlign(g, null);
     g.style.transform = g.style.left = g.style.top = g.style.width = g.style.height = "";
@@ -866,13 +872,46 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
   const rise = (el, dy) => ({ apply: (k) => (el.style.transform = tr(el, (1 - k) * dy)) });
   const fall = (el, dy) => ({ apply: (k) => (el.style.transform = tr(el, k * dy)) });
 
-  // The visuals phase within one tab, in three steps that never overlap:
+  // Folder swap on a carried file tree (slide 13 -> 14): the new tree starts
+  // with the old one's folders open and its spans, so the hand-over draws the
+  // same thing; then, in two halves of VISUAL_MS, the folders that close
+  // shrink to nothing, and the ones that open grow in with the new spans.
+  // Folders and spans are matched by their names; it runs the same way back.
+  function treeSwap(og, g) {
+    if (!g.querySelector(".tree-pane")) return [];
+    const folders = (t) => new Map([...t.querySelectorAll(".tree-pane li > ul")]
+      .map((ul) => [ul.parentElement.querySelector(":scope > .tree-name")?.textContent.trim(), ul]));
+    const was = folders(og), closing = [], opening = [];
+    for (const [name, ul] of folders(g)) {
+      const before = was.has(name) && !was.get(name).hasAttribute("data-closed"), after = !ul.hasAttribute("data-closed");
+      if (before && !after) closing.push(ul);
+      if (!before && after) opening.push(ul);
+    }
+    if (!closing.length && !opening.length) return [];
+    const spans = new Map([...og.querySelectorAll(".hl")].map((h) => [h.textContent.trim(), h.dataset.span]));
+    const target = [...g.querySelectorAll(".hl")].map((h) => [h, h.dataset.span]);
+    for (const [h] of target) h.dataset.span = spans.get(h.textContent.trim()) ?? "none";
+    const full = new Map([...closing, ...opening].map((ul) => [ul, ul.scrollHeight]));
+    closing.forEach((ul) => (ul.style.height = `${full.get(ul)}px`));
+    opening.forEach((ul) => (ul.style.height = "0px"));
+    const half = VISUAL_MS / 2, items = [];
+    let spun = false;
+    if (closing.length) items.push({ ms: half, apply: (k, t) => closing.forEach((ul) => (ul.style.height = t >= 1 ? "" : `${full.get(ul) * (1 - k)}px`)) });
+    items.push({ delay: closing.length ? half : 0, ms: half, apply: (k, t) => {
+      if (t > 0 && !spun) { spun = true; for (const [h, v] of target) h.dataset.span = v; }
+      opening.forEach((ul) => (ul.style.height = t >= 1 ? "" : `${full.get(ul) * k}px`));
+    } });
+    return items;
+  }
+
+  // The visuals phase within one tab, in steps that never overlap:
   // exits (old visuals that aren't carried fall out, and the old section title
   // with them), then moves (carried scenes go to their new boxes and states),
-  // then entrances (new visuals rise in, and the new title). Each step is one
+  // then folder swaps on carried trees (treeSwap), then entrances (new visuals
+  // rise in, and the new title). Each step is one
   // VISUAL_MS tween; an empty step is skipped.
   function visualSteps(from, to, beat) {
-    const exits = [], moves = [], enters = [], outs = from.visuals.filter((g) => !g.hidden);
+    const exits = [], moves = [], swaps = [], enters = [], outs = from.visuals.filter((g) => !g.hidden);
     placeVisuals(to, beat);
     for (const g of to.visuals) {
       if (g.hidden) continue;
@@ -896,7 +935,10 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
           g.style.height = `${box0.h + (box1.h - box0.h) * k}px`;
         };
         at(0);
-        moves.push({ apply: at });
+        // A carry to the same box (slide 13 -> 14's folder) has nothing to move.
+        const still = ["x", "y", "w", "h"].every((q) => Math.abs(box0[q] - box1[q]) < 0.5);
+        if (!still) moves.push({ apply: at });
+        swaps.push(...treeSwap(og, g));
         continue;
       }
       if (isArtefact(g)) {
@@ -947,7 +989,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
       exits.push(fall(old, dy));
       enters.push(rise(next, dy));
     }
-    return [exits, moves, enters];
+    return [exits, moves, swaps, enters];
   }
 
   async function runSteps(steps, my) {

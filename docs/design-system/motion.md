@@ -73,6 +73,8 @@ Added 2026-11-23: every visual on a slide now enters and leaves by **open / clos
 
 - **Fade (slide 12's figures):** `data-exit-fade` fades a visual's fills out (400) on its exit, within a slide and on a slide change. It's the one exception to "exits reverse their entrance"; the figures still rise in.
 
+- **Folder swap (slide 13 → 14):** a carried file tree closes the folders that close (their rows shrink to nothing, 200, ease), then opens the new ones (they grow, 200, ease), and its spans cut to the new slide's as the opening starts. It runs between the carried moves and the entrances; back runs it the other way.
+
 - **Stack (slide 6):** copies of a template slide onto the one that stays (800, ease) while their content wipes out upward over the first half, so their empty outlines land on its boxes. Then they're **cut** away. A close animation there read as the remaining outline glitching. Back reverses it.
 
 ## One-beat sequences (exploration)

@@ -230,7 +230,7 @@ export function paintSculpt(m, r, ctx) {
     const nc = Number(m.el.dataset.nodeCol) || 0, tipX = cols?.[nc]?.[1] ?? node.right + 64;
     const a = [node.right * f, node.y * f], b = [(tipX + 32 / f) * f, node.y * f];
     const pts = pullBack([a, b], 32); // the tip is pulled back 32 from the end
-    const id = own(r.count++, "link");
+    const id = own(r.count++, "link", true);
     drawPart(r, pts, linkP, id);
     if (linkP >= 1) { chevron(r, pts[pts.length - 2], pts[pts.length - 1], id); m.flows.push({ pts, id }); }
   }

@@ -447,6 +447,15 @@
   font-weight: 500;
 }
 .site .slide-statement > p { margin: 0; font-weight: inherit; } /* over text-layer.css's p 400 */
+/* data-at on a sentence (slide 14): on the statement's base line from that
+   open column (--at, --at-span set by layoutSlide()), out of its flow. */
+.site .slide-statement:has(> [data-at]) { position: relative; }
+.site .slide-statement > [data-at] {
+  position: absolute;
+  bottom: 0;
+  left: calc(var(--at) * (var(--col) + var(--grid-gutter)));
+  width: calc(var(--at-span) * var(--col) + (var(--at-span) - 1) * var(--grid-gutter));
+}
 /* data-gap="1" / "2" on a sentence: that many blank lines of the statement above it. */
 .site .slide-statement > [data-gap="1"] { margin-top: 1lh; }
 .site .slide-statement > [data-gap="2"] { margin-top: 2lh; }
@@ -559,6 +568,10 @@
 .tree-trunk { top: 0; bottom: 0; width: calc(2 * var(--u)); }
 .tree-pane li:last-child > .tree-trunk { bottom: auto; height: calc(var(--space-16) + 1 * var(--u)); }
 .tree-tick { top: calc(var(--space-16) - 1 * var(--u)); width: var(--space-16); height: calc(2 * var(--u)); }
+/* A closed folder's list takes no room; slides.js tweens its height when a
+   carried tree swaps which folder is open (slide 13 -> 14). */
+.tree-pane li > ul { overflow: hidden; }
+.tree-pane ul[data-closed] { height: 0; }
 /* A document at the wireframe detail level: the filename (Label, 24, mono)
    over a rule, then one ink bar per Markdown line (heading, then list items
    indented after "- "). */
@@ -596,13 +609,13 @@
 .md-h > .md-sym { position: absolute; top: 0; right: calc(100% + 1ch); }
 .md-li > .md-sym { position: absolute; top: 0; left: 0; }
 .md-sym { --ink: accent; }
-/* Span states (text-artefacts.md): focus, an accent bar behind the span;
-   mark, an ink bar; either way the text knocked out in ground. 8 past the
+/* Span states (text-artefacts.md): focus and mark both put an accent bar
+   behind the span (highlights are accent); the text knocked out in ground. 8 past the
    text at each end, the line height tall. */
 .hl { position: relative; display: inline-block; }
 .hl-bar { position: absolute; inset: 0 calc(-1 * var(--space-8)); display: none; }
 .hl[data-span="focus"] > .hl-bar, .hl[data-span="mark"] > .hl-bar { display: block; }
-.hl[data-span="focus"] > .hl-bar { --ink: accent; }
+.hl > .hl-bar { --ink: accent; }
 .hl[data-span="focus"] > .hl-text, .hl[data-span="mark"] > .hl-text { --ink: ground; }
 /* Slide 13: design-system docs as compact raw Markdown (16/24 mono,
    text-artefacts.md's compact level), each filling its visual's height (the
@@ -919,3 +932,8 @@
 .site .era-site .site-frame .tpl-headline { position: relative; font-size: var(--space-24); line-height: var(--space-32); font-weight: 700; }
 .tpl-site .tpl-button { position: relative; flex: none; padding: 0 var(--space-16); border-radius: var(--space-24); font-size: var(--space-16); line-height: var(--space-32); font-weight: 500; white-space: nowrap; }
 .tpl-nav .tpl-button { line-height: var(--space-24); }
+
+/* Connector lines, leader lines and highlights are accent (graphics.md). */
+.slide-links, .slide-wires, .cap-dot, .cap-leader, .chat-mark { --ink: accent; }
+/* Leader labels too (legibility test, not in the docs yet). */
+.doc-cap .site-caption { --ink: accent; }

@@ -368,7 +368,7 @@ function paintMerge(m, r, k, ctx) {
     const ty = (rowsH * (i + 0.5)) / tiles.length;
     let pts = [B(startX, node.y), B(trunk, node.y), B(trunk, ty), B(labelEnd, ty)];
     pts = rounded(pullBack(pts, 32), RADIUS, false);
-    const id = own(r.count++, "out-" + t.id);
+    const id = own(r.count++, "out-" + t.id, true);
     const done = drawPart(r, pts, p, id);
     if (p >= 1) {
       chevron(r, pts[pts.length - 2], pts[pts.length - 1], id);

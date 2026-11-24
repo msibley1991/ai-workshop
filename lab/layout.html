@@ -313,7 +313,7 @@
             </section>
             <section class="slide" data-slide data-template="text">
               <!-- Slide 9: statement only, from row 1 (data-row="1" overrides the pure Text slide's row 2), a line per sentence.
-                 Beat 2, the spoiler, hangs from the lowest row field it fits in (data-bottom). -->
+                 Beat 2, the spoiler, sits with its bottom edge on the last row's (data-bottom). -->
               <div class="slide-statement" data-row="1"><p data-genie><span class="st-line">But old tools had a <em>purpose</em>.</span><span class="st-line">Old tools bridged traditional skills and digital ability.</span><span class="st-line">How can I design by just chatting to a robot?</span></p><p data-genie data-bottom>(Spoiler: Chat becomes just 10% of the process)</p></div>
             </section>
           </div>
@@ -464,24 +464,31 @@
                  instructions, 16 inside an accent rectangle on columns 4-12; an
                  accent wire runs from design-system/ to the rectangle, level with
                  its row (data-wire-level). The files don't wire to their docs: the
-                 order and the names carry the link. -->
+                 order and the names carry the link. The folder carries to slide 14
+                 (data-carry), so it holds skills/'s files too, closed (data-closed). -->
             <section class="slide" data-slide data-template="row">
               <div class="slide-statement"><p data-genie>Design system = concrete elaboration of creative decisions, organised in discrete sections</p></div>
               <div class="slide-visual" data-cols="2" data-at="1">
-                <div class="artefact file-tree" data-artefact="tree">
+                <div class="artefact file-tree" data-artefact="tree" data-carry="project-folder-2">
                   <div class="tree-pane" data-box data-clip data-frame>
                     <div class="doc-head"><span class="doc-head-fill" data-fill></span><p class="doc-name" data-ink="ground">project/</p></div>
                     <ul class="tree">
                       <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name">CLAUDE.md</span></li>
                       <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name" data-wire-edge data-wire-to="ds-docs"><span class="hl" data-span-states="focus"><span class="hl-bar" data-fill></span><span class="hl-text">design-system/</span></span></span>
-                        <ul>
+                        <ul data-clip>
                           <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name"><span class="hl" data-span-states="mark"><span class="hl-bar" data-fill></span><span class="hl-text">colours.md</span></span></span></li>
                           <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name"><span class="hl" data-span-states="mark"><span class="hl-bar" data-fill></span><span class="hl-text">typography.md</span></span></span></li>
                           <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name"><span class="hl" data-span-states="mark"><span class="hl-bar" data-fill></span><span class="hl-text">layout.md</span></span></span></li>
                         </ul>
                       </li>
                       <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name">references/</span></li>
-                      <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name">skills/</span></li>
+                      <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name"><span class="hl" data-span-states="none"><span class="hl-bar" data-fill></span><span class="hl-text">skills/</span></span></span>
+                        <ul data-clip data-closed>
+                          <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name"><span class="hl" data-span-states="none"><span class="hl-bar" data-fill></span><span class="hl-text">build-component.md</span></span></span></li>
+                          <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name"><span class="hl" data-span-states="none"><span class="hl-bar" data-fill></span><span class="hl-text">no-slop.md</span></span></span></li>
+                          <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name"><span class="hl" data-span-states="none"><span class="hl-bar" data-fill></span><span class="hl-text">grill-me.md</span></span></span></li>
+                        </ul>
+                      </li>
                       <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name">tools/</span></li>
                     </ul>
                   </div>
@@ -510,15 +517,70 @@
                   </div>
                 </div>
               </div>
-              <svg class="slide-wires" data-draw data-ink="accent" data-weight="4" aria-hidden="true"></svg>
+              <svg class="slide-wires" data-draw data-weight="4" aria-hidden="true"></svg>
             </section>
           </div>
           <div data-section="Skills">
-            <section class="slide" data-slide data-template="text">
-              <div class="slide-statement"><p data-genie>Skills: keywords for directions for an LLM to follow. Can be as broad or specific as you want. If written by others, can make decisions for you. Warning: sometimes skills can be malicious.</p></div>
-            </section>
-            <section class="slide" data-slide data-template="text">
-              <div class="slide-statement"><p data-genie>[Placeholder] Text needed: skills vs design documents.</p></div>
+            <!-- Slide 14, Row, two beats: slide 13's layout with skills/ open.
+                 The folder carries over from slide 13 (data-carry); in place,
+                 design-system/ closes, then skills/ opens with its three files
+                 marked and skills/ in focus (the carry's folder swap). The three
+                 skill docs (a technical workflow, an anti-slop skill, grill-me)
+                 open 200 apart inside the accent rectangle, and an accent wire
+                 runs level from skills/ to it. Beat 2: the warning pours in, in
+                 accent, on the base line from column 8 (data-at). -->
+            <section class="slide" data-slide data-template="row">
+              <div class="slide-statement"><p data-genie>Skills: keywords for directions for an LLM to follow. Can be as broad or specific as you want. If written by others, can make decisions for you.</p><p data-genie data-at="8" data-ink="accent">Warning: sometimes skills can be malicious.</p></div>
+              <div class="slide-visual" data-cols="2" data-at="1">
+                <div class="artefact file-tree" data-artefact="tree" data-carry="project-folder-2">
+                  <div class="tree-pane" data-box data-clip data-frame>
+                    <div class="doc-head"><span class="doc-head-fill" data-fill></span><p class="doc-name" data-ink="ground">project/</p></div>
+                    <ul class="tree">
+                      <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name">CLAUDE.md</span></li>
+                      <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name"><span class="hl" data-span-states="none"><span class="hl-bar" data-fill></span><span class="hl-text">design-system/</span></span></span>
+                        <ul data-clip data-closed>
+                          <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name"><span class="hl" data-span-states="none"><span class="hl-bar" data-fill></span><span class="hl-text">colours.md</span></span></span></li>
+                          <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name"><span class="hl" data-span-states="none"><span class="hl-bar" data-fill></span><span class="hl-text">typography.md</span></span></span></li>
+                          <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name"><span class="hl" data-span-states="none"><span class="hl-bar" data-fill></span><span class="hl-text">layout.md</span></span></span></li>
+                        </ul>
+                      </li>
+                      <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name">references/</span></li>
+                      <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name" data-wire-edge data-wire-to="skill-docs"><span class="hl" data-span-states="focus"><span class="hl-bar" data-fill></span><span class="hl-text">skills/</span></span></span>
+                        <ul data-clip>
+                          <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name"><span class="hl" data-span-states="mark"><span class="hl-bar" data-fill></span><span class="hl-text">build-component.md</span></span></span></li>
+                          <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name"><span class="hl" data-span-states="mark"><span class="hl-bar" data-fill></span><span class="hl-text">no-slop.md</span></span></span></li>
+                          <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name"><span class="hl" data-span-states="mark"><span class="hl-bar" data-fill></span><span class="hl-text">grill-me.md</span></span></span></li>
+                        </ul>
+                      </li>
+                      <li><span class="tree-trunk" data-fill></span><span class="tree-tick" data-fill></span><span class="tree-name">tools/</span></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="slide-visual" data-cols="9" data-at="4">
+                <div class="artefact spec-enclose" data-artefact="enclose"><div class="spec-frame" data-box data-clip data-frame data-wire-id="skill-docs" data-wire-level></div></div>
+                <div class="spec-row">
+                  <div class="artefact spec-doc" data-artefact="spec" data-delay="0">
+                    <div class="spec-pane" data-box data-clip data-frame>
+                      <div class="doc-head"><span class="doc-head-fill" data-fill></span><p class="doc-name" data-ink="ground">build-component.md</p></div>
+                      <div class="spec-body"><p class="spec-l spec-h"># Build a component</p><p class="spec-l">Use when: adding a page section.</p><p class="spec-l spec-h">## Steps</p><p class="spec-l spec-li">1. Read design-system/</p><p class="spec-l spec-li">2. Write the markup first</p><p class="spec-l spec-li">3. Use tokens, never raw values</p><p class="spec-l spec-li">4. Check each breakpoint</p><p class="spec-l spec-li">5. Compare with references/</p><p class="spec-l spec-h">## Done when</p><p class="spec-l spec-li">- It sits on the layout grid</p><p class="spec-l spec-li">- No new colours or faces</p></div>
+                    </div>
+                  </div>
+                  <div class="artefact spec-doc" data-artefact="spec" data-delay="200">
+                    <div class="spec-pane" data-box data-clip data-frame>
+                      <div class="doc-head"><span class="doc-head-fill" data-fill></span><p class="doc-name" data-ink="ground">no-slop.md</p></div>
+                      <div class="spec-body"><p class="spec-l spec-h"># No slop</p><p class="spec-l">Use when: writing copy or UI.</p><p class="spec-l spec-h">## Don't</p><p class="spec-l spec-li">- Gradients and glows</p><p class="spec-l spec-li">- Emoji in headings</p><p class="spec-l spec-li">- "Elevate your coffee ritual"</p><p class="spec-l spec-li">- Stock-photo placeholders</p><p class="spec-l spec-li">- Every section a card</p><p class="spec-l spec-h">## Do</p><p class="spec-l spec-li">- Plain, specific words</p><p class="spec-l spec-li">- Say what the roastery sells</p></div>
+                    </div>
+                  </div>
+                  <div class="artefact spec-doc" data-artefact="spec" data-delay="400">
+                    <div class="spec-pane" data-box data-clip data-frame>
+                      <div class="doc-head"><span class="doc-head-fill" data-fill></span><p class="doc-name" data-ink="ground">grill-me.md</p></div>
+                      <div class="spec-body"><p class="spec-l spec-h"># Grill me</p><p class="spec-l">Use when: starting anything new.</p><p class="spec-l spec-h">## Before building</p><p class="spec-l spec-li">- Ask one question at a time</p><p class="spec-l spec-li">- Give your recommended answer</p><p class="spec-l spec-li">- Follow each branch to the end</p><p class="spec-l spec-li">- Read the folder, don't ask</p><p class="spec-l spec-h">## Stop when</p><p class="spec-l spec-li">- Every decision is agreed</p><p class="spec-l spec-li">- Then sum up the plan</p></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <svg class="slide-wires" data-draw data-weight="4" aria-hidden="true"></svg>
             </section>
           </div>
           <div data-section="MCPs">

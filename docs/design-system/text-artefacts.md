@@ -51,16 +51,16 @@ A span is any run of words in an artefact. Each slide sets every span's state at
 | State | Look |
 |---|---|
 | Plain | as set |
-| Marked | a solid ink bar behind the span, its text knocked out in the ground colour; many spans can be marked at once |
-| Focus | the same bar in the accent; one per graphic, following [graphics.md](graphics.md)'s focus rule |
+| Marked | a solid accent bar behind the span, its text knocked out in the ground colour; many spans can be marked at once |
+| Focus | the same accent bar, so it looks the same as marked (2026-11-24); one per graphic, following [graphics.md](graphics.md)'s focus rule |
 | Blurred | pixelated blur (below) |
 
 - **The bar** runs the line-height, with 8 of padding at its ends. A wrapped span gets one bar per line, with no join.
-- **Accent is for focus only.** The cursor, the send mark, ▸/▾ and speaker labels are ink.
+- **Accent is for highlights and lines:** focus and marked bars, cross-links, wires, caption leaders and captions, and Markdown symbols (2026-11-24). The cursor, the send mark and speaker labels are ink.
 
 ## Cross-links
 - A line can run from a span to a word or phrase in the slide's statement.
-- **Route:** horizontal, 45°, horizontal. It leaves level with the span's line and arrives level with the target word, ending 8 short of it.
+- **Route:** horizontal, 45°, horizontal. It leaves level with the span's line and arrives level with the target word, ending 8 short of it. In accent.
 - **Anchor:** a small square dot on the span's bar, at the end nearer the text. The line is cased in ground where it leaves the artefact's box.
 - **Target:** the phrase is set in 700, the existing emphasis. It takes the accent while its span has focus.
 - Several spans may link to one phrase. Each line is drawn on its own.
@@ -111,22 +111,23 @@ A span is any run of words in an artefact. Each slide sets every span's state at
 </div>
 ```
 
-- `data-artefact` makes it a visual for the slides: it rises and falls like a graphic, but has no states and isn't carried yet.
+- `data-artefact` makes it a visual for the slides: it rises and falls like a graphic, but has no states. `data-carry` carries it to the next slide ([slide-templates.md](slide-templates.md)).
 - `data-enter` is the beat it enters on, and `data-solo` the beats it's shown alone, centred and at 32/40 ([slide-templates.md](slide-templates.md)).
 - **Line breaks in a turn** are kept, so a long prompt can put each area (colours, type, layout…) on its own line, as people do in real prompts.
 - **Scale:** the whole chat scales together (type, padding, width, gaps), so its line breaks hold when it grows or shrinks. Line heights step with the type (24/32 to 32/40).
 - A `[data-type]` block types in after its artefact has risen, with a block cursor in ink. Stepping back erases it, then it falls. The box starts one line tall and grows a line at a time as the text reaches it, like a real input. The word being typed takes its full room from its first letter, so words never jump to the next line partway through.
 - **Crop and split (built, slide 1):** `data-crop="3"` on a chat, with `[data-crop-area]` on the focus lines (one `.chat-line` per line of the prompt), erases every other line on that beat (400). The lines shorten as they erase, so the box closes up around the focus lines. `data-split="4"` then splits the turn's outline into one box per area (400; it defaults to the crop beat, right after the erase), spaced so the middle one is centred in the frame and the outer ones sit half a link run above and below, for clean 45° bends. The box doesn't grow.
-- **Marked and cross-links (built, slide 1):** `data-mark="5"` wipes an ink bar in behind each line of each area, left to right (400), knocking the text out. Then a line draws from each box's left edge, at its centre, bending 45° at the midpoint with 8-radius bends, all converging on one point 32 past the end of the `[data-link-target]` phrase, where an open chevron (32 tall) rides each tip as it draws (`svg.slide-links`, weight 4).
-- **Documents (built, slides 10, 11, 13):** a framed pane (`.doc-pane`, `.md-pane`, `.spec-pane`) with an inverted `.doc-head`. Slide 10's are at the wireframe level (one ink bar per line). Slide 11's is at full detail: on beat 2 it shows no symbols, and on beat 3 `#`, `##` and `-` type in, in accent, hanging in a gutter left of the headings and in the items' indent, so the text never moves (`data-type-at="2"` holds a `[data-type]` block until that beat). Slide 13's are compact raw Markdown (16/24), each filling its height.
-- **File trees (built, slides 10–13):** `.tree-pane` with `ul.tree` lists; each row is `li` > `.tree-trunk`, `.tree-tick` (fills) and `.tree-name`. The raster draws no bullet for a list styled `list-style: none`.
-- **Span states (built):** `.hl` > `.hl-bar` (a fill 8 past the text each end, the line height tall) and `.hl-text`, with `data-span-states="focus,focus,mark"` giving the state per beat (the last holds). Focus is the accent bar, marked the ink bar, the text knocked out in ground either way. The state cuts at the beat's start.
-- **Captions on a document (built, slide 11):** `.doc-cap[data-cap-to]` sits level with the `[data-cap-id]` heading: a 6 square dot 16 past the heading's text, a 2 leader on to 8 short of the caption (Label, 500). They're re-placed on every layout change, and cut in once the doc has opened.
-- **Wires between artefacts (built, slides 10 and 13):** a 45° connector with a chevron from a `[data-wire-to]` element's right edge to the `[data-wire-id]` it names, 16 clear of both, in `svg.slide-wires` (`data-ink` colours it). `data-wire-edge` starts or ends it at the element's frame instead, level with the element, and `data-wire-level` on the end makes it arrive level with the start. A wire draws once both ends are in; on a slide change it erases with the text out.
+- **Marked and cross-links (built, slide 1):** `data-mark="5"` wipes an accent bar in behind each line of each area, left to right (400), knocking the text out. Then a line draws from each box's left edge, at its centre, bending 45° at the midpoint with 8-radius bends, all converging on one point 32 past the end of the `[data-link-target]` phrase, where an open chevron (32 tall) rides each tip as it draws (`svg.slide-links`, weight 4, accent).
+- **Documents (built, slides 10, 11, 13, 14):** a framed pane (`.doc-pane`, `.md-pane`, `.spec-pane`) with an inverted `.doc-head`. Slide 10's are at the wireframe level (one ink bar per line). Slide 11's is at full detail: on beat 2 it shows no symbols, and on beat 3 `#`, `##` and `-` type in, in accent, hanging in a gutter left of the headings and in the items' indent, so the text never moves (`data-type-at="2"` holds a `[data-type]` block until that beat). Slide 13's design-system docs and slide 14's three skill docs (`build-component.md`, `no-slop.md`, `grill-me.md`) are compact raw Markdown (16/24), each filling its height.
+- **File trees (built, slides 10–14):** `.tree-pane` with `ul.tree` lists; each row is `li` > `.tree-trunk`, `.tree-tick` (fills) and `.tree-name`. The raster draws no bullet for a list styled `list-style: none`.
+- **Folder swap (built, slides 13 → 14):** `data-closed` on a folder's nested `ul` closes it (no height). When a tree carries to one with other folders open, the new tree starts in the old one's state and spans, the closing folders shrink (200), then the opening ones grow (200) as the spans cut to the new ones. Folders and spans are matched by name, so it runs the same way back.
+- **Span states (built):** `.hl` > `.hl-bar` (a fill 8 past the text each end, the line height tall) and `.hl-text`, with `data-span-states="focus,focus,mark"` giving the state per beat (the last holds). Focus and marked are both the accent bar, the text knocked out in ground. The state cuts at the beat's start.
+- **Captions on a document (built, slide 11):** `.doc-cap[data-cap-to]` sits level with the `[data-cap-id]` heading: a 6 square dot 16 past the heading's text, a 2 leader on to 8 short of the caption (Label, 500), all in accent. They're re-placed on every layout change, and cut in once the doc has opened.
+- **Wires between artefacts (built, slides 10, 11, 13 and 14):** a 45° connector with a chevron from a `[data-wire-to]` element's right edge to the `[data-wire-id]` it names, 16 clear of both, in `svg.slide-wires`, in accent. `data-wire-edge` starts or ends it at the element's frame instead, level with the element, and `data-wire-level` on the end makes it arrive level with the start. A wire draws once both ends are in; on a slide change it erases with the text out.
 - Spans with ids, the agent's turn, carried spans and the camera are still to build.
 
 ## Open
-- **Marked vs selected:** the marked state (ink bar, text knocked out) looks the same as selected text ([palettes.md](palettes.md)). Test whether that confuses, and if it does, change one of them.
+- ~~**Marked vs selected:** the marked state looks the same as selected text~~: no longer, since marks are accent bars and selection is ink (2026-11-24).
 - The retype rate and how the cursor blinks.
 - The send mark's shape. (File trees settled on drawn lines and no ▸/▾ marks, 2026-11-23.)
 - How carried spans sit with graphics' "a shape's pixels stay inside its recorded box" rule once they're drawn into the raster.

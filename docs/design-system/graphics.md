@@ -5,7 +5,7 @@ Status: **exploration**, from the graphics grilling session (2026-11-21). Built 
 ## Two styles
 - **Flat diagrams:** Swiss-modernist and diagrammatic.
 - **Isometric 3D objects:** explanatory objects, such as exploded views.
-- Both are made with code and drawn in the page's palette. Every pixel is ground or ink, plus the accent for focus. There are no tints.
+- Both are made with code and drawn in the page's palette. Every pixel is ground or ink, plus the accent for focus, connectors, leader lines and labels. There are no tints.
 
 ## Choosing a style
 - **Guideline:** iso is for **things**, anything with physical or structural parts (machines, stacks, layers, anatomy, exploded views). Flat is for **relations** (processes, flows, sequences, comparisons, hierarchies, data, timelines).
@@ -94,17 +94,18 @@ All in emulated pixels:
 ## Labels
 - **Never on hatching.** A label sits on bare ground, or on a solid (T4) fill where it's knocked out in the ground colour.
 - **Over hatched areas,** the label moves outside the graphic and connects with a leader line.
-- **Accent:** a label is accented only when its element has focus.
+- **Accent:** labels are always accent, like their leader lines (2026-11-24).
 - **Hover labels:** pointing at a part may reveal its label (with a leader line), following the label rules.
-  - Hover never takes the accent; focus stays with the step.
+  - Hover only reveals the label; it never moves the focus, which stays with the step.
   - Apart from dragging iso objects, this is the only cursor interaction inside a graphic.
 - **Glossary links:** a caption label may link to its term's entry in a glossary, where one is relevant. Labels are already real DOM text, so this needs no new mechanism. They use the palette's link style ([palettes.md](palettes.md)). The glossary is built later.
 - **Text artefacts** (prompts, chats, documents, file trees) are graphics of legible text, with their own rules for spans, cross-links and pixelated blur: [text-artefacts.md](text-artefacts.md).
 
-## Accent: focus
+## Accent: focus, lines and labels
 - The accent marks the **one element the graphic is about right now**, such as the part being explained or the active step.
 - That element's outline, hatching and fill switch from ink to accent.
-- Only one element per graphic is accented at a time, and the accent can move from step to step.
+- Only one element per graphic is in focus at a time, and the focus can move from step to step.
+- **Lines and labels are always accent** (2026-11-24): connectors (with their arrows and flow packets), leader lines (with their dots) and labels, whatever has focus. The same goes for highlights in text artefacts and the wires between them ([text-artefacts.md](text-artefacts.md)).
 
 ## Presentation steps
 The named curves, durations, loops and enter/exit motions are in [motion.md](motion.md).
@@ -117,7 +118,7 @@ The named curves, durations, loops and enter/exit motions are in [motion.md](mot
 - **Loops:** a state can carry an optional loop, such as an idle turn or a pulse on the focused part. It pauses while the viewer drags.
 - **Motion off:** every transition becomes an instant cut.
 - **Loops**, all optional per state:
-  - **Focus blink:** the focused element switches between accent and ink with a hard cut, about once a second.
+  - **Focus blink:** the focused element switches between accent and ink with a hard cut, about once a second. Connectors and leaders stay accent.
   - **Flow packet:** a short solid segment travels along a connector at one constant speed, site-wide. It isn't marching dashes, because dashes mean hypothetical.
   - **Idle motion:** an element may bob, sway or similar. What each motion means isn't defined yet.
   - With motion off, all loops stop. Focus shows as plain accent, and flow shows with arrowheads only.
