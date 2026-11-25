@@ -21,10 +21,10 @@ export function genie(to) {
   if (!el) return;
   if (to === "toggle") to = genieT(el) < 0.5 ? 1 : 0;
   const motion = viewer.get().motion;
-  const dur = settings.duration;
-  if (!motion) settings.duration = 0;
+  const dur = settings.lineTime;
+  if (!motion) settings.lineTime = 0;
   play(el, to);
-  settings.duration = dur;
+  settings.lineTime = dur;
   clearTimeout(timers.get(el));
   if (to === 0) el.style.visibility = "";
   else timers.set(el, setTimeout(() => { if (genieT(el) >= 1) el.style.visibility = "hidden"; }, motion ? totalFor(el) : 0));

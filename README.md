@@ -91,7 +91,7 @@ Pages:
 
 Saving needs `serve.py`, and only works from your own machine.
 
-- The **Render** menu loads `lab/presets/render.json` on every page load. **Save render settings** writes that file and **Revert to saved** reloads it. Unsaved tweaks are lost on reload.
+- The **Display** menu loads `lab/presets/display.json` on every page load. **Save display settings** writes that file and **Revert to saved** reloads it. Unsaved tweaks are lost on reload.
 - The **Palette** panel edits the active palette. **Save palette** writes it into `lab/presets/palettes.json`.
 
 Commit and push those files to share a look. Both of you can save to these files, so if you each save different values, the merge will conflict. Sync your branch first (see [Working together](#working-together)).
@@ -100,7 +100,7 @@ Commit and push those files to share a look. Both of you can save to these files
 
 These are stored in your browser and never saved to the repo:
 
-- the viewer controls (`[c]` on `layout.html`: palette choice, motion, blur, scanlines)
+- the viewer controls (`[c]` on `layout.html`: palette choice, motion, blur, lines)
 - the Grid toggle
 - the genie and shading dials
 - the specimen page's sliders

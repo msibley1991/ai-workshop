@@ -20,7 +20,7 @@
 .site .glossary-index p { margin: 0; }
 /* Index entries are links in li's: not the running-text link look. One line
    each (24), so the 6 folders and 24 terms fit the box. */
-.site .glossary-index a { --ink: phosphor; text-decoration: none; }
+.site .glossary-index a { --ink: ink; text-decoration: none; }
 .glossary-index.site-nav-tree .site-bar-button { padding-block: 0; }
 .glossary-index .site-bar-button[aria-current="true"] { --fill-alpha: 1; }
 .glossary-index .site-bar-button[aria-current="true"] span { --ink: ground; }

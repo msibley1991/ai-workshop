@@ -27,7 +27,7 @@ import SCENES from "./graphics/index.js";
 import { paintKnot, wireKnotDrag, releaseKnot, syncTemplate } from "./knot.js";
 import { paintSculpt } from "./sculpt.js";
 
-const INNER = ISO_STYLE.inner;    // 4, iso edges and outermost flat shapes
+const INNER = ISO_STYLE.innerEdges;    // 4, iso edges and outermost flat shapes
 const NESTED = 2;                 // flat shapes inside another shape
 const LINE = 2;                   // leader lines
 const CONNECTOR = 4;              // connectors
@@ -474,7 +474,7 @@ export function drawGraphic(ctx, item, ps, u, colors) {
   const flowing = motion && (st.flow?.length ?? 0) > 0;
   // A knot moves every frame (its sim and tumble), so it always repaints.
   const key = [m.scene.kind === "knot" ? now : "", bw, bh, ox, oy, f, s, m.index, vals.explode, vals.frame, m.viewYaw, m.twistT, m.bobT, m.spin.pitch, m.hover, blinkOn, m.open?.o, m.open?.w,
-    colors.phosphor, colors.accent, colors.ground].join("|");
+    colors.ink, colors.accent, colors.ground].join("|");
   let look = m.looks.find((l) => l.key === key);
   if (!look) {
     look = m.looks.length < 2 ? { canvas: document.createElement("canvas") } : m.looks.shift();
@@ -482,7 +482,7 @@ export function drawGraphic(ctx, item, ps, u, colors) {
     look.canvas.width = bw; look.canvas.height = bh;
     m.canvas = look.canvas;
     paint(m, vals, st, { f, s, ox, oy, now, blinkOn });
-    compose(m, rgb(colors.phosphor), rgb(colors.accent), rgb(colors.ground));
+    compose(m, rgb(colors.ink), rgb(colors.accent), rgb(colors.ground));
     look.accent = m.accent;
     look.flows = m.flows;
     m.looks.push(look);
@@ -491,7 +491,7 @@ export function drawGraphic(ctx, item, ps, u, colors) {
   ctx.drawImage(look.canvas, item.x, item.y, bw * ps, bh * ps);
   if (flowing) {
     for (const fl of look.flows) {
-      ctx.fillStyle = look.accent[fl.id] ? colors.accent : colors.phosphor;
+      ctx.fillStyle = look.accent[fl.id] ? colors.accent : colors.ink;
       packet(fl.pts, now, (x, y, w, h) => ctx.fillRect(item.x + x * ps, item.y + y * ps, w * ps, h * ps), bw, bh);
     }
   }

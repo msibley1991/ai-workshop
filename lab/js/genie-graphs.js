@@ -1,5 +1,5 @@
 // genie.html only: the curvature graph editor. Two bezier graphs over a line's
-// run (a row's time, 0..1): "Arc" (-1..1, the spine's swing level) and
+// run (a row's time, 0..1): "Swing" (-1..1, the spine's swing level) and
 // "Narrowing" (0..1.2, how far the funnel's sides have pulled in). Graphs live
 // in settings.graphs (js/genie-warp.js) and are saved in localStorage.
 //
@@ -11,7 +11,7 @@ import { settings, defaultGraph, graphPoints, sampleGraph, evalGraph } from "./g
 const STORE = "lab-genie-graphs";
 const W = 256, H = 128, PAD = 10;
 const GRAPHS = [
-  { key: "arc", title: "Arc over a line", min: -1, max: 1, guides: [0] },
+  { key: "swing", title: "Swing over a line", min: -1, max: 1, guides: [0] },
   { key: "narrow", title: "Narrowing over a line", min: 0, max: 1.2, guides: [0, 1] },
 ];
 const NS = "http://www.w3.org/2000/svg";
@@ -21,7 +21,9 @@ const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 function load() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORE));
-    if (saved?.arc?.length >= 2 && saved?.narrow?.length >= 2) settings.graphs = saved;
+    // The swing graph was called arc until 2026-11-25.
+    if (saved && !saved.swing && saved.arc) { saved.swing = saved.arc; delete saved.arc; }
+    if (saved?.swing?.length >= 2 && saved?.narrow?.length >= 2) settings.graphs = saved;
   } catch {}
 }
 function save() {

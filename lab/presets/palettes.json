@@ -5,9 +5,9 @@
     "ink": "#00010F",
     "accent": "#F38020",
     "link": "#0050FF",
-    "ghost1": "#00010F",
-    "ghost2": "#00010F",
-    "ghost3": "#00010F"
+    "trail1": "#00010F",
+    "trail2": "#00010F",
+    "trail3": "#00010F"
   },
   "blueprint": {
     "name": "Blueprint",
@@ -15,9 +15,9 @@
     "ink": "#0050FF",
     "accent": "#F38020",
     "link": "#B8860B",
-    "ghost1": "#0050FF",
-    "ghost2": "#2f00eb",
-    "ghost3": "#5d00b6"
+    "trail1": "#0050FF",
+    "trail2": "#2f00eb",
+    "trail3": "#5d00b6"
   },
   "plasma": {
     "name": "Plasma",
@@ -25,9 +25,9 @@
     "ink": "#FF8A1F",
     "accent": "#3D7BFF",
     "link": "#1F94FF",
-    "ghost1": "#FF8A1F",
-    "ghost2": "#eb4400",
-    "ghost3": "#b7033c"
+    "trail1": "#FF8A1F",
+    "trail2": "#eb4400",
+    "trail3": "#b7033c"
   },
   "vector": {
     "name": "Vector",
@@ -35,8 +35,8 @@
     "ink": "#3DFF7A",
     "accent": "#F38020",
     "link": "#FF3DC2",
-    "ghost1": "#34ff83",
-    "ghost2": "#1fb5c0",
-    "ghost3": "#005ea0"
+    "trail1": "#34ff83",
+    "trail2": "#1fb5c0",
+    "trail3": "#005ea0"
   }
 }

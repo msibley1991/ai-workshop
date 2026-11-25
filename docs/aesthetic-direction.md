@@ -12,7 +12,7 @@ Elena Burger, ["Toward a working definition of paperclip-punk"](https://www.virt
 ## Our additions
 - **Shader layer.** The interface should feel like an advanced *pre-window* UI with experimental display features: contemporary design and interaction, not literal ASCII boxes.
   1. Lower-resolution emulation with nearest-neighbor upscaling.
-  2. Subtle glow, plus ghosting on scroll.
+  2. Subtle glow, plus trails on scroll.
   3. Scanline or pixel-grid pattern; scrolling jumps one grid line at a time.
 - **Low-poly 3D as explanatory objects:** exploded-view diagrams that show how something works, never decoration.
 - **Mood:** uncanny and speculative. It comes from the display layer, not from imagery.

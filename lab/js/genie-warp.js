@@ -5,30 +5,30 @@
 // text-raster.js draws a genie block's words into an offscreen canvas at the
 // same low-res scale, then warpBlock() copies it into the frame row by row.
 // The block goes line by line, bottom line out first (so stepping back brings
-// the top line in first): each line starts (1 + follow) x duration after the
+// the top line in first): each line starts (1 + lineGap) x lineTime after the
 // one below it (-1 = all together, 0 = one right after another, 1 = a pause of
-// one duration between lines). Within a line:
-//   - slit-scan: each source row runs at its own time, ahead toward the
-//     line's bottom (tRow = t * (1 + slit) - slit * (1 - v), v = 0 at the
+// one line's time between lines). Within a line:
+//   - smear (slit-scan): each source row runs at its own time, ahead toward the
+//     line's bottom (tRow = t * (1 + smear) - smear * (1 - v), v = 0 at the
 //     line's top row, 1 at its bottom row). Rows pull apart as they travel,
 //     and each one stretches to fill the gap below it: the smear.
 //   - narrowing: the narrow graph (over tRow) sets how far the funnel's sides
 //     have pulled in toward the sink square's width, shaped down the funnel by the
-//     edge profile through (0, 0), (0.25, p25), (0.5, p50), (0.75, p75), (1, 1)
-//   - arc: the arc graph (over tRow) sets how far the funnel's spine swings
-//     sideways, up to `arc` units, in `bends` S-bends down the funnel (0 at
-//     both ends), from a rounded sine (severity 0) to a kinked triangle (1)
+//     shape through (0, 0), (0.25, narrowAt25), (0.5, narrowAt50), (0.75, narrowAt75), (1, 1)
+//   - swing: the swing graph (over tRow) sets how far the funnel's spine swings
+//     sideways, up to `swing` units, in `bends` S-bends down the funnel (0 at
+//     both ends), from a rounded sine (sharpness 0) to a kinked triangle (1)
 //   - slide: from slideStart on, the row travels down the funnel into the
 //     sink; rows past the square's top edge are hidden
-// Rows are emulated pixels; rowBand groups them so the funnel's sides step.
+// Rows are emulated pixels; rowHeight groups them so the funnel's sides step.
 
 // A graph: anchors sorted by x (0..1, a row's time), y the level. Segments are
 // cubic beziers from each anchor's out-handle to the next one's in-handle.
 // The defaults are the user's tuned graphs:
-//   arc: eases up to full swing by 0.75 of a row's time, then holds
+//   swing: eases up to full swing by 0.75 of a row's time, then holds
 //   narrow: stays wide until about 0.16, then pulls in gradually to full at the end
 const DEFAULT_GRAPHS = {
-  arc: [
+  swing: [
     { x: 0, y: 0, hin: [0, 0], hout: [0.1, 0] },
     { x: 0.752, y: 1, hin: [-0.1, 0], hout: [0.248, 0] },
     { x: 1, y: 1, hin: [-0.248, 0], hout: [0, 0] },
@@ -41,23 +41,24 @@ const DEFAULT_GRAPHS = {
 };
 export const defaultGraph = (key) => structuredClone(DEFAULT_GRAPHS[key]);
 
+// The keys are the Genie panel's names (js/genie.js, motion.md).
 export const settings = {
-  duration: 200,     // ms per line
-  follow: -0.5,      // -1 all lines together .. 0 one after another .. 1 a duration's pause between
-  curve: "ease",     // ease (in-out cubic) | out (decelerating), for each row's slide
+  lineTime: 200,     // ms per line
+  lineGap: -0.5,     // -1 all lines together .. 0 one after another .. 1 a line's time of pause between
+  easing: "ease",    // ease (in-out cubic) | out (decelerating), for each row's slide
   slideStart: 0.67,  // when, in a row's time, the slide down the funnel begins
-  p25: 0.8,          // edge profile: how far the sides have narrowed a quarter of the way down
-  p50: 0.79,         //   ... halfway
-  p75: 0.77,         //   ... three quarters
-  slit: 1,           // slit-scan spread: how far ahead rows lower in a line run
-  rowBand: 1,        // emulated pixel rows per step of the funnel's sides
-  arc: -48,          // maximum spine swing, units (scaled by the arc graph)
-  bends: 3,          // S-bends along the spine
-  severity: 0,       // 0 rounded .. 1 kinked
-  trailBoost: 0,     // extra ghost decay while a genie runs (phosphor trail)
-  hold: false,       // freeze every block at `scrub` (a fraction of the whole run)
+  narrowAt25: 0.8,   // the funnel's shape: how far the sides have narrowed a quarter of the way down
+  narrowAt50: 0.79,  //   ... halfway
+  narrowAt75: 0.77,  //   ... three quarters
+  smear: 1,          // slit-scan spread: how far ahead rows lower in a line run
+  rowHeight: 1,      // emulated pixel rows per step of the funnel's sides
+  swing: -48,        // maximum sideways swing of the funnel, units (scaled by the swing graph)
+  bends: 3,          // S-bends down the funnel
+  sharpness: 0,      // 0 rounded .. 1 kinked bends
+  trailBoost: 0,     // extra trail length while a genie runs
+  freeze: false,     // freeze every block at `scrub` (a fraction of the whole run)
   scrub: 0,
-  graphs: { arc: defaultGraph("arc"), narrow: defaultGraph("narrow") },
+  graphs: { swing: defaultGraph("swing"), narrow: defaultGraph("narrow") },
   graphsRev: 0,      // bump after editing graphs, so their lookups are rebuilt
 };
 
@@ -107,7 +108,7 @@ export function evalGraph(lookup, x) {
 let lookups = null, lookupsRev = -1;
 function graphLookups() {
   if (lookupsRev !== settings.graphsRev || !lookups) {
-    lookups = { arc: sampleGraph(settings.graphs.arc), narrow: sampleGraph(settings.graphs.narrow) };
+    lookups = { swing: sampleGraph(settings.graphs.swing), narrow: sampleGraph(settings.graphs.narrow) };
     lookupsRev = settings.graphsRev;
   }
   return lookups;
@@ -120,10 +121,10 @@ const lineCounts = new Map(); // el -> number of lines (from text-raster's measu
 export const setLines = (el, n) => lineCounts.set(el, Math.max(1, n));
 export const lineCount = (el) => lineCounts.get(el) ?? 1;
 
-// The whole run for el, ms: one duration per line, each line offset from the last.
+// The whole run for el, ms: one lineTime per line, each line offset from the last.
 export function totalFor(el) {
-  const n = lineCounts.get(el) ?? 1, d = settings.duration;
-  return d * (1 + (n - 1) * (1 + settings.follow));
+  const n = lineCounts.get(el) ?? 1, d = settings.lineTime;
+  return d * (1 + (n - 1) * (1 + settings.lineGap));
 }
 
 // Starts el moving to `to` (1 = in the sink, 0 = in place) from wherever it is.
@@ -135,7 +136,7 @@ export function play(el, to, now = performance.now()) {
 
 // Fraction 0..1 of el's whole run.
 function rawT(el, now) {
-  if (settings.hold) return settings.scrub;
+  if (settings.freeze) return settings.scrub;
   const b = blocks.get(el);
   if (!b) return 0;
   if (b.dur <= 0) return b.to;
@@ -148,24 +149,24 @@ function rawT(el, now) {
 export const genieT = (el, now = performance.now()) => clamp01(rawT(el, now));
 
 export function running(now = performance.now()) {
-  if (settings.hold) return settings.scrub > 0 && settings.scrub < 1;
+  if (settings.freeze) return settings.scrub > 0 && settings.scrub < 1;
   for (const b of blocks.values()) if (b.dur > 0 && now - b.t0 < b.dur) return true;
   return false;
 }
 
-export const ghostBoost = (now) => (running(now) ? settings.trailBoost : 0);
+export const trailBoost = (now) => (running(now) ? settings.trailBoost : 0);
 
 // The own progress 0..1 of the line that goes i-th, at block progress t, for n lines.
 export function lineT(t, i, n) {
-  const d = settings.duration, total = d * (1 + (n - 1) * (1 + settings.follow));
-  return clamp01((t * total - i * (1 + settings.follow) * d) / d);
+  const d = settings.lineTime, total = d * (1 + (n - 1) * (1 + settings.lineGap));
+  return clamp01((t * total - i * (1 + settings.lineGap) * d) / d);
 }
 
 // ---------- shape ----------
 
 // Edge profile: Catmull-Rom through the five profile points, v in 0..1.
 function profile(v) {
-  const P = [0, settings.p25, settings.p50, settings.p75, 1];
+  const P = [0, settings.narrowAt25, settings.narrowAt50, settings.narrowAt75, 1];
   const at = (i) => (i < 0 ? 2 * P[0] - P[1] : i > 4 ? 2 * P[4] - P[3] : P[i]);
   const x = clamp01(v) * 4, i = Math.min(3, Math.floor(x)), u = x - i;
   const p0 = at(i - 1), p1 = at(i), p2 = at(i + 1), p3 = at(i + 2);
@@ -176,7 +177,7 @@ function profile(v) {
 function spine(v) {
   const x = Math.PI * Math.round(settings.bends) * clamp01(v), sine = Math.sin(x);
   const tri = (2 / Math.PI) * Math.asin(sine);
-  return sine + (tri - sine) * settings.severity;
+  return sine + (tri - sine) * settings.sharpness;
 }
 
 // Copies the warped block from `src` (an offscreen canvas the size of dst's
@@ -191,9 +192,9 @@ function spine(v) {
 export function warpBlock(dst, src, B, T, t, arcPx = 0, E = null) {
   if (t <= 0) return dst.drawImage(src, 0, 0);
   if (t >= 1) return;
-  const { slideStart, slit } = settings, ease = CURVES[settings.curve];
+  const { slideStart, smear } = settings, ease = CURVES[settings.easing];
   const G = graphLookups();
-  const band = Math.max(1, Math.round(settings.rowBand));
+  const band = Math.max(1, Math.round(settings.rowHeight));
   const bw = B.x1 - B.x0;
   const amp = Math.abs(arcPx);
   const fitL = E && amp ? clamp01((Math.min(B.x0, T.x0) - E.x0 - 1) / amp) : 1; // swing to the left
@@ -217,9 +218,9 @@ export function warpBlock(dst, src, B, T, t, arcPx = 0, E = null) {
     const rows = [];
     for (let r = top; r <= bottom; r++) {
       const v = (r - top) / H;
-      const tRow = clamp01(lt * (1 + slit) - slit * (1 - v));
+      const tRow = clamp01(lt * (1 + smear) - smear * (1 - v));
       const s = ease(clamp01((tRow - slideStart) / (1 - slideStart)));
-      rows.push({ r, narrow: evalGraph(G.narrow, tRow), swing: evalGraph(G.arc, tRow), y: r + s * D });
+      rows.push({ r, narrow: evalGraph(G.narrow, tRow), swing: evalGraph(G.swing, tRow), y: r + s * D });
     }
     for (let i = 0; i < H; i++) {
       const { r, narrow, swing, y } = rows[i];

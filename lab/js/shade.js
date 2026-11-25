@@ -10,14 +10,14 @@
 
 export const ISO_STYLE = {
   technique: "hatch",
-  hatch: { mode: "density", angle: 45, spacing: 8, width: 4, steps: 5, lightest: 0, darkest: 1, solidTop: true },
-  anchor: "object",   // pattern sticks to each face
+  hatch: { mode: "density", angle: 45, spacing: 8, lineWidth: 4, steps: 5, lightest: 0, darkest: 1, solidDarkest: true },
+  patternAnchor: "object", // pattern sticks to each face
   edges: true,        // draw the face edges
-  inner: 4,           // every face edge, outer and inner, emulated pixels, centred on the edge
+  innerEdges: 4,      // every face edge, outer and inner, emulated pixels, centred on the edge
                       // (the 8 silhouette grown outward was dropped: it cost 5–28% of a repaint)
-  inkMeans: "shadow", // ink marks shadow, on light and dark grounds alike
-  lightAz: -60,       // degrees, view space; negative = from the left
-  lightEl: 48,
+  inkShows: "shadow", // ink marks shadow, on light and dark grounds alike
+  lightAngle: -60,    // degrees, view space; negative = from the left
+  lightHeight: 48,    // degrees above the horizon
 };
 
 // ---------- patterns ----------
@@ -139,7 +139,7 @@ const HATCH_ANGLES = [0, 90, 45, 135]; // cross mode adds layers in this order
 // Hatching at pattern coords (U, V). Spacing and width are in emulated pixels.
 export function hatchInk(h, t, U, V) {
   if (t <= 0) return false;
-  if (h.solidTop && t >= h.darkest - 1e-6) return true;
+  if (h.solidDarkest && t >= h.darkest - 1e-6) return true;
   const base = (h.angle * Math.PI) / 180;
   // Distance is measured in whole pixels along the dominant axis (at 45° that's
   // U + V), so lines repeat on exact pixel periods and coverage is exactly w / pitch.
@@ -148,24 +148,24 @@ export function hatchInk(h, t, U, V) {
     return mod(Math.floor((U * c + V * s) / n + 1e-6) + offset, pitch) < w;
   };
   // coverage: ink coverage equals the tone (25% steps at 5 steps). Lines stay at
-  // `width` while width / t is a whole pitch, else they thicken at `spacing`.
+  // `lineWidth` while lineWidth / t is a whole pitch, else they thicken at `spacing`.
   if (h.mode === "coverage") {
     if (t >= 1) return true;
-    const pitch = h.width / t;
-    if (Math.abs(pitch - Math.round(pitch)) < 1e-6 && Math.round(pitch) > h.width) return line(base, Math.round(pitch), h.width);
+    const pitch = h.lineWidth / t;
+    if (Math.abs(pitch - Math.round(pitch)) < 1e-6 && Math.round(pitch) > h.lineWidth) return line(base, Math.round(pitch), h.lineWidth);
     return line(base, h.spacing, Math.max(1, Math.round(t * h.spacing)));
   }
   // density: the densest line step sits at `spacing` (the step below solid when
-  // solidTop is on); lighter steps spread out, rounded to whole pixels.
+  // solidDarkest is on); lighter steps spread out, rounded to whole pixels.
   if (h.mode === "density") {
-    const top = h.solidTop && h.steps > 2 ? stepTone(h, h.steps - 2) : h.darkest;
-    return line(base, Math.max(h.width + 1, Math.round((h.spacing * top) / t)), h.width);
+    const top = h.solidDarkest && h.steps > 2 ? stepTone(h, h.steps - 2) : h.darkest;
+    return line(base, Math.max(h.lineWidth + 1, Math.round((h.spacing * top) / t)), h.lineWidth);
   }
   if (h.mode === "weight") return line(base, h.spacing, Math.max(1, t * h.spacing));
   const layers = Math.round(t * (h.steps - 1)); // cross: one more layer per step
   for (let i = 0; i < layers; i++) {
     const a = base + (HATCH_ANGLES[i % 4] * Math.PI) / 180;
-    if (line(a, h.spacing, h.width, i >= 4 ? h.spacing / 2 : 0)) return true;
+    if (line(a, h.spacing, h.lineWidth, i >= 4 ? h.spacing / 2 : 0)) return true;
   }
   return false;
 }
@@ -312,9 +312,9 @@ export function rotator(yawDeg, pitchDeg) {
   };
 }
 
-// Light direction (view space) from style.lightAz / lightEl in degrees.
+// Light direction (view space) from style.lightAngle / lightHeight in degrees.
 export function lightVector(style) {
-  const az = (style.lightAz * Math.PI) / 180, el = (style.lightEl * Math.PI) / 180;
+  const az = (style.lightAngle * Math.PI) / 180, el = (style.lightHeight * Math.PI) / 180;
   return [Math.cos(el) * Math.sin(az), Math.sin(el), Math.cos(el) * Math.cos(az)];
 }
 
@@ -322,10 +322,10 @@ export function lightVector(style) {
 // face (world verts, for face-anchored pattern lengths); k: px per world unit.
 export function fillFace(r, f, n, pts, { k, spec, style, L }) {
   const lit = Math.max(0, n[0] * L[0] + n[1] * L[1] + n[2] * L[2]);
-  const t = quantize(spec, style.inkMeans === "shadow" ? 1 - lit : lit);
+  const t = quantize(spec, style.inkShows === "shadow" ? 1 - lit : lit);
   const p2 = pts.map(([x, y]) => [x, y]);
   let basis = null;
-  if (style.anchor === "object") {
+  if (style.patternAnchor === "object") {
     const ax = p2[1][0] - p2[0][0], ay = p2[1][1] - p2[0][1];
     const bx = p2[3][0] - p2[0][0], by = p2[3][1] - p2[0][1];
     const det = ax * by - bx * ay;
@@ -334,12 +334,12 @@ export function fillFace(r, f, n, pts, { k, spec, style, L }) {
       basis = { ox: p2[0][0], oy: p2[0][1], inv: [by / det, -bx / det, -ay / det, ax / det], la: len(f.v[0], f.v[1]), lb: len(f.v[0], f.v[3]) };
     }
   }
-  return r.fill(p2, t, { edges: style.edges, edgeWidth: style.inner ?? 1, basis });
+  return r.fill(p2, t, { edges: style.edges, edgeWidth: style.innerEdges ?? 1, basis });
 }
 
 // Fills the iso object's visible faces into raster r, back to front.
 // cx, cy: centre in buffer px; k: buffer px per world unit; spec: the technique's
-// steps; style: anchor, edges, inkMeans, lightAz, lightEl. Returns the shape ids.
+// steps; style: patternAnchor, edges, innerEdges, inkShows, lightAngle, lightHeight. Returns the shape ids.
 export function fillIso(r, { spin, cx, cy, k, spec, style }) {
   const R = rotator(ISO_YAW + spin.yaw, ISO_PITCH + spin.pitch), L = lightVector(style);
   const proj = (p) => { const q = R(p); return [cx + q[0] * k, cy - (q[1] - 0.25) * k, q[2]]; };

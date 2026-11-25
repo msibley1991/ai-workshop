@@ -11,29 +11,29 @@ import { mountGraphs } from "./genie-graphs.js";
 const S = settings;
 const config = {
   timing: {
-    duration: [S.duration, 100, 4000, 50],   // ms per line
-    follow: [S.follow, -1, 1, 0.05],         // -1 together, 0 one after another, 1 pause of a duration
-    curve: { type: "select", options: ["ease", "out"], default: S.curve },
-    slideStart: [S.slideStart, 0, 0.9, 0.01],   // when, in a row's time, the slide begins
+    lineTime: [S.lineTime, 100, 4000, 50],     // ms per line
+    lineGap: [S.lineGap, -1, 1, 0.05],         // -1 together, 0 one after another, 1 a line's time of pause
+    easing: { type: "select", options: ["ease", "out"], default: S.easing },
+    slideStart: [S.slideStart, 0, 0.9, 0.01],  // when, in a row's time, the slide begins
   },
-  funnel: {
-    p25: [S.p25, 0, 1.2, 0.01],              // edge profile: sides narrowed at 25 / 50 / 75% of the way down
-    p50: [S.p50, 0, 1.2, 0.01],
-    p75: [S.p75, 0, 1.2, 0.01],
-    slit: [S.slit, 0, 1, 0.01],
-    rowBand: [S.rowBand, 1, 8, 1],
+  shape: {
+    narrowAt25: [S.narrowAt25, 0, 1.2, 0.01],  // how far the sides have narrowed 25 / 50 / 75% of the way down
+    narrowAt50: [S.narrowAt50, 0, 1.2, 0.01],
+    narrowAt75: [S.narrowAt75, 0, 1.2, 0.01],
+    smear: [S.smear, 0, 1, 0.01],              // slit-scan: how far ahead lower rows run
+    rowHeight: [S.rowHeight, 1, 8, 1],         // emulated pixel rows per step of the sides
   },
-  spine: {
-    arc: [S.arc, -240, 240, 4],              // maximum swing, units (scaled by the arc graph)
+  swing: {
+    swing: [S.swing, -240, 240, 4],            // maximum swing, units (scaled by the swing graph)
     bends: [S.bends, 1, 4, 1],
-    severity: [S.severity, 0, 1, 0.01],      // 0 rounded .. 1 kinked
+    sharpness: [S.sharpness, 0, 1, 0.01],      // 0 rounded .. 1 kinked
   },
   trail: {
-    trailBoost: [S.trailBoost, 0, 0.4, 0.01],
+    trailBoost: [S.trailBoost, 0, 0.4, 0.01],  // extra trail length while a genie runs
   },
   inspect: {
-    hold: false,
-    scrub: [0, 0, 1, 0.01],                  // fraction of the whole run
+    freeze: false,
+    scrub: [0, 0, 1, 0.01],                    // fraction of the whole run
   },
   actions: {
     out: { type: "action", label: "Genie out (→ or l)" },
@@ -45,18 +45,18 @@ const config = {
 
 const site = document.getElementById("content");
 
-const KEYS = ["duration", "follow", "curve", "slideStart", "p25", "p50", "p75", "slit", "rowBand", "arc", "bends", "severity", "trailBoost"];
-const flat = (v) => ({ ...v.timing, ...v.funnel, ...v.spine, ...v.trail, ...v.inspect });
+const KEYS = ["lineTime", "lineGap", "easing", "slideStart", "narrowAt25", "narrowAt50", "narrowAt75", "smear", "rowHeight", "swing", "bends", "sharpness", "trailBoost"];
+const flat = (v) => ({ ...v.timing, ...v.shape, ...v.swing, ...v.trail, ...v.inspect });
 const valuesText = (v) => { const f = flat(v); return JSON.stringify({ ...Object.fromEntries(KEYS.map((k) => [k, f[k]])), graphs: S.graphs }); };
 
 // The graph editor's playhead: the time of the first line that's moving (or
-// held), so you can see where along the graphs a frame is.
+// frozen), so you can see where along the graphs a frame is.
 const graphs = mountGraphs({
   playhead() {
     const el = openBlock();
     if (!el) return null;
     const t = genieT(el), n = lineCount(el);
-    if (S.hold) return lineT(t, 0, n);
+    if (S.freeze) return lineT(t, 0, n);
     for (let i = 0; i < n; i++) { const lt = lineT(t, i, n); if (lt > 0 && lt < 1) return lt; }
     return null;
   },
@@ -77,7 +77,7 @@ const kit = createDialKit("Genie", config, {
 
 kit.subscribe((v) => {
   const f = flat(v);
-  for (const k of [...KEYS, "hold", "scrub"]) S[k] = f[k];
+  for (const k of [...KEYS, "freeze", "scrub"]) S[k] = f[k];
 });
 
 // ← → and l step the genie, g toggles the graphs. Capture phase, so layout.js
@@ -93,10 +93,10 @@ document.addEventListener("keydown", (e) => {
   else genie(to);
 }, { capture: true });
 
-// Only the Genie panel starts open: collapse the Effects Lab and Palette panels
+// Only the Genie panel starts open: collapse the Display and Palette panels
 // (created by main.js, which runs first).
 setTimeout(() => {
-  for (const id of ["lab-render", "lab-palette"]) DialStore.setPanelOpen(id, false);
+  for (const id of ["lab-display", "lab-palette"]) DialStore.setPanelOpen(id, false);
 });
 
 // Opens on the first section, where the body text is longest.

@@ -7,9 +7,9 @@ import { ISO_STYLE, hatchInk, stepTone } from "./shade.js";
 import { genieT, warpBlock, setLines, settings as genieSettings } from "./genie-warp.js";
 
 // Ink comes from the CSS custom property --ink (so states like :hover can set it),
-// else the nearest data-ink attribute, else phosphor.
+// else the nearest data-ink attribute, else ink.
 const inkOf = (el, style = getComputedStyle(el)) =>
-  style.getPropertyValue("--ink").trim() || el.closest?.("[data-ink]")?.dataset.ink || "phosphor";
+  style.getPropertyValue("--ink").trim() || el.closest?.("[data-ink]")?.dataset.ink || "ink";
 const ascentCache = new Map();
 
 // Canvas only takes font-stretch as a keyword, so a computed percentage maps to
@@ -401,9 +401,9 @@ export function selectionRects() {
 }
 
 // Draws one frame. ctx is the low-res canvas; colors are display-space CSS colors.
-export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
+export function draw(ctx, layout, selection, { pixelSize, renderY, colors }) {
   const { width, height } = ctx.canvas;
-  const ps = pixelScale;
+  const ps = pixelSize;
   const top = renderY;
   const bottom = renderY + height * ps;
   const visible = (y, h = 0) => y + h >= top && y <= bottom;
@@ -418,7 +418,7 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
     const rect = [snap(f.x), snap(f.y), snap(f.w), snap(f.h)];
     clipped(ctx, f, () => {
       // Translucent fills are drawn opaque, pre-blended over the ground, so the
-      // hardText threshold (which drops coverage under 50%) keeps them.
+      // sharpText threshold (which drops coverage under 50%) keeps them.
       if (f.alpha < 1) {
         ctx.fillStyle = colors.ground;
         ctx.fillRect(...rect);
@@ -524,7 +524,7 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
     const side = S.x + S.w / 2 < g.x + g.w / 2 ? -1 : 1;
     warpBlock(ctx, off.canvas,
       { x0: toPx(g.x), x1: toPx(g.x + g.w), y0: toPy(g.y), y1: toPy(g.y + g.h), lines: g.lines.map((l) => ({ y0: toPy(l.y0), y1: toPy(l.y1) })) },
-      { x0: toPx(S.x), x1: toPx(S.x + S.w), y: Math.round(toPy(S.y)) }, t, (side * genieSettings.arc * layout.u) / ps,
+      { x0: toPx(S.x), x1: toPx(S.x + S.w), y: Math.round(toPy(S.y)) }, t, (side * genieSettings.swing * layout.u) / ps,
       g.bounds && { x0: Math.ceil(toPx(g.bounds.x0)), x1: Math.floor(toPx(g.bounds.x1)) });
   });
 
@@ -545,7 +545,7 @@ export function draw(ctx, layout, selection, { pixelScale, renderY, colors }) {
     ctx.beginPath();
     for (const r of sel) ctx.rect(r.x, r.y, r.w, r.h);
     ctx.clip();
-    ctx.fillStyle = colors.phosphor;
+    ctx.fillStyle = colors.ink;
     for (const r of sel) ctx.fillRect(r.x, r.y, r.w, r.h);
     drawWords(() => colors.ground);
     ctx.restore();

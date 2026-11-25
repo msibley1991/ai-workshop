@@ -22,11 +22,11 @@
      "Genie" dial panel and the curvature graphs (g) tune the warp (js/genie.js).
      Layout from Figma frames "ref1" (intro, node 313:125) and "ref2" (open
      section, node 313:148), rendered through the effects pipeline. The tabs are
-     an accordion driven by scroll (js/layout.js). data-render uses the shared Render
-     menu (presets/render.json) with colours from the palette. data-canvas scales the emulated pixel and lines with the
+     an accordion driven by scroll (js/layout.js). data-display uses the shared Display
+     menu (presets/display.json) with colours from the palette. data-canvas scales the emulated pixel and lines with the
      canvas unit (js/main.js). data-viewer turns on the viewer controls panel
-     (palette, motion, blur, scanlines; js/viewer.js), opened with [c]. -->
-<body data-render data-canvas data-viewer>
+     (palette, motion, blur, lines; js/viewer.js), opened with [c]. -->
+<body data-display data-canvas data-viewer>
   <canvas id="screen" aria-hidden="true"></canvas>
 
   <main id="content" class="site">
@@ -126,11 +126,11 @@
             <span>/</span>
             <button class="site-bar-button" type="button" data-setting="blur" data-value="off" aria-pressed="false" data-fill><span>off</span></button>
           </div>
-          <div class="site-controls-setting" role="group" aria-label="Scanlines">
-            <span>Scanlines</span>
-            <button class="site-bar-button" type="button" data-setting="scanlines" data-value="on" aria-pressed="true" data-fill><span>on</span></button>
+          <div class="site-controls-setting" role="group" aria-label="Lines">
+            <span>Lines</span>
+            <button class="site-bar-button" type="button" data-setting="lines" data-value="on" aria-pressed="true" data-fill><span>on</span></button>
             <span>/</span>
-            <button class="site-bar-button" type="button" data-setting="scanlines" data-value="off" aria-pressed="false" data-fill><span>off</span></button>
+            <button class="site-bar-button" type="button" data-setting="lines" data-value="off" aria-pressed="false" data-fill><span>off</span></button>
           </div>
         </div>
         <p class="site-controls-hint">[c] [Esc] Close</p>

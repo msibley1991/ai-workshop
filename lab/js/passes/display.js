@@ -8,11 +8,11 @@ export const display = /* glsl */ `
   uniform sampler2D tGlow;      // linear
   uniform vec2 uBufferSize;     // emulated pixels
   uniform vec2 uScreenSize;     // CSS px
-  uniform float uPixelScale;
+  uniform float uPixelSize;
   uniform float uDpr;
   uniform float uGlow;
   uniform float uTint;
-  uniform vec3 uPhosphorInk;
+  uniform vec3 uInk;
   uniform vec3 uGroundInk;
   uniform float uJitter;
   uniform float uFlicker;
@@ -53,7 +53,7 @@ export const display = /* glsl */ `
   void main() {
     // CSS px from the top-left, mapped into the buffer (which may overhang the screen).
     vec2 css = vec2(gl_FragCoord.x, uScreenSize.y * uDpr - gl_FragCoord.y) / uDpr;
-    vec2 px = css / uPixelScale;
+    vec2 px = css / uPixelSize;
     float row = floor(px.y);
     px.x += warpOffset(px.y / uBufferSize.y, row);
     px.x += (hash(row + floor(uTime * 24.0)) - 0.5) * uJitter;
@@ -61,13 +61,13 @@ export const display = /* glsl */ `
 
     vec3 ink = texture2D(tImage, uv).rgb;
     vec3 glow = max(texture2D(tGlow, uv).rgb - uGroundInk, 0.0);
-    glow = mix(glow, uPhosphorInk * luma(glow), uTint);
+    glow = mix(glow, uInk * luma(glow), uTint);
     ink += glow * uGlow;
     ink *= 1.0 - uFlicker * hash(floor(uTime * 60.0));
 
     vec3 color = mix(ink, 1.0 - ink, uLight);
 
-    float cell = uGridPitch * uPixelScale * uDpr; // device px per grid cell
+    float cell = uGridPitch * uPixelSize * uDpr; // device px per grid cell
     vec2 dev = vec2(gl_FragCoord.x, uScreenSize.y * uDpr - gl_FragCoord.y);
     float thickness = max(1.0, cell * 0.3);
     float line = 0.0;

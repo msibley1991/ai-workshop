@@ -1,14 +1,14 @@
 import * as THREE from "three";
 import { vertex } from "./passes/common.js";
 import { content } from "./passes/content.js";
-import { ghost } from "./passes/ghost.js";
+import { trails } from "./passes/trails.js";
 import { blur } from "./passes/blur.js";
 import { display } from "./passes/display.js";
 
 // Colors pass through untouched: the shaders do their own color math.
 THREE.ColorManagement.enabled = false;
 
-const GRID_MODES = { scanlines: 0, "pixel grid": 1, off: 2 };
+const LINE_TYPES = { scanlines: 0, "pixel grid": 1, off: 2 };
 
 function hexToVec(hex) {
   const c = new THREE.Color(hex);
@@ -34,8 +34,8 @@ export function createRenderer(canvas, contentCanvas) {
   let contentTex = makeContentTex();
 
   const sceneRT = makeTarget(THREE.NearestFilter);
-  let ghostRead = makeTarget(THREE.NearestFilter, THREE.HalfFloatType);
-  let ghostWrite = makeTarget(THREE.NearestFilter, THREE.HalfFloatType);
+  let trailRead = makeTarget(THREE.NearestFilter, THREE.HalfFloatType);
+  let trailWrite = makeTarget(THREE.NearestFilter, THREE.HalfFloatType);
   const blurA = makeTarget(THREE.LinearFilter, THREE.HalfFloatType);
   const blurB = makeTarget(THREE.LinearFilter, THREE.HalfFloatType);
 
@@ -49,15 +49,15 @@ export function createRenderer(canvas, contentCanvas) {
 
   const shared = { uLight: { value: 0 } };
   const contentMat = pass(content, { ...shared, tContent: { value: contentTex }, uGround: { value: new THREE.Vector3() }, uHard: { value: 0 } });
-  const ghostMat = pass(ghost, {
+  const trailMat = pass(trails, {
     ...shared,
     tCurrent: { value: sceneRT.texture },
     tPrevious: { value: null },
     uDecay: { value: 0 },
     uShift: { value: 0 },
-    uPersistInk: { value: new THREE.Vector3() },
-    uPersistInk2: { value: new THREE.Vector3() },
-    uPersistInk3: { value: new THREE.Vector3() },
+    uTrailInk: { value: new THREE.Vector3() },
+    uTrailInk2: { value: new THREE.Vector3() },
+    uTrailInk3: { value: new THREE.Vector3() },
     uLayers: { value: 1 },
     uLayerStep: { value: 1 },
     uBands: { value: 0 },
@@ -72,11 +72,11 @@ export function createRenderer(canvas, contentCanvas) {
     tGlow: { value: blurB.texture },
     uBufferSize: { value: new THREE.Vector2() },
     uScreenSize: { value: new THREE.Vector2() },
-    uPixelScale: { value: 1 },
+    uPixelSize: { value: 1 },
     uDpr: { value: 1 },
     uGlow: { value: 0 },
     uTint: { value: 0 },
-    uPhosphorInk: { value: new THREE.Vector3() },
+    uInk: { value: new THREE.Vector3() },
     uGroundInk: { value: new THREE.Vector3() },
     uJitter: { value: 0 },
     uFlicker: { value: 0 },
@@ -111,17 +111,17 @@ export function createRenderer(canvas, contentCanvas) {
 
   return {
     // Resizes all buffers; returns the emulated buffer size the content canvas must match.
-    resize(pixelScale) {
+    resize(pixelSize) {
       const w = window.innerWidth;
       const h = window.innerHeight;
       const dpr = window.devicePixelRatio || 1;
-      const bw = Math.ceil(w / pixelScale);
-      const bh = Math.ceil(h / pixelScale);
-      if (w === size.w && h === size.h && dpr === size.dpr && pixelScale === size.ps) return size;
-      size = { w, h, bw, bh, ps: pixelScale, dpr };
+      const bw = Math.ceil(w / pixelSize);
+      const bh = Math.ceil(h / pixelSize);
+      if (w === size.w && h === size.h && dpr === size.dpr && pixelSize === size.ps) return size;
+      size = { w, h, bw, bh, ps: pixelSize, dpr };
       renderer.setPixelRatio(dpr);
       renderer.setSize(w, h, false);
-      for (const rt of [sceneRT, ghostRead, ghostWrite, blurA, blurB]) rt.setSize(bw, bh);
+      for (const rt of [sceneRT, trailRead, trailWrite, blurA, blurB]) rt.setSize(bw, bh);
       contentCanvas.width = bw;
       contentCanvas.height = bh;
       contentTex.dispose();
@@ -143,7 +143,7 @@ export function createRenderer(canvas, contentCanvas) {
       // 1. Content canvas → ink-space buffer.
       contentTex.needsUpdate = true;
       contentMat.uniforms.uGround.value = hexToVec(theme.ground);
-      contentMat.uniforms.uHard.value = params.resolution.hardText;
+      contentMat.uniforms.uHard.value = params.pixels.sharpText;
       run(contentMat, sceneRT);
 
       // 2. 3D object into its slot in the same buffer.
@@ -154,8 +154,8 @@ export function createRenderer(canvas, contentCanvas) {
         const w = Math.round(viewport.w / ps);
         const h = Math.round(viewport.h / ps);
         if (y + h > 0 && y < size.bh) {
-          const phosphorInk = toInk(theme.phosphor);
-          edges.material.color.setRGB(phosphorInk.x, phosphorInk.y, phosphorInk.z);
+          const ink = toInk(theme.ink);
+          edges.material.color.setRGB(ink.x, ink.y, ink.z);
           faces.material.color.setRGB(groundInk.x, groundInk.y, groundInk.z);
           faces.visible = params.object.style === "edges + faces";
           obj.rotation.y = time * params.object.spin;
@@ -174,27 +174,27 @@ export function createRenderer(canvas, contentCanvas) {
         }
       }
 
-      // 3. Persistence, stronger while scrolling fast.
+      // 3. Trails, longer while scrolling fast.
       const speed = Math.min(velocity / 3000, 1);
-      ghostMat.uniforms.tPrevious.value = ghostRead.texture;
-      ghostMat.uniforms.uDecay.value = Math.min(params.ghost.decay + params.ghost.scrollGain * speed, 0.98);
-      ghostMat.uniforms.uShift.value = params.phosphor.shift;
-      const gu = ghostMat.uniforms;
-      gu.uPersistInk.value = toInk(params.phosphor.persistenceColor);
-      gu.uPersistInk2.value = toInk(params.phosphor.persistenceColor2);
-      gu.uPersistInk3.value = toInk(params.phosphor.persistenceColor3);
-      gu.uLayers.value = params.phosphor.layers;
-      gu.uLayerStep.value = 1 / params.phosphor.layerFrames;
-      gu.uBands.value = params.phosphor.layerMode === "bands" ? 1 : 0;
-      gu.uBlur.value = params.ghost.blur;
+      trailMat.uniforms.tPrevious.value = trailRead.texture;
+      trailMat.uniforms.uDecay.value = Math.min(params.trails.length + params.trails.scrollBoost * speed, 0.98);
+      trailMat.uniforms.uShift.value = params.trails.colourShift;
+      const gu = trailMat.uniforms;
+      gu.uTrailInk.value = toInk(params.trails.trail1);
+      gu.uTrailInk2.value = toInk(params.trails.trail2);
+      gu.uTrailInk3.value = toInk(params.trails.trail3);
+      gu.uLayers.value = params.trails.colours;
+      gu.uLayerStep.value = 1 / params.trails.framesPerColour;
+      gu.uBands.value = params.trails.colourMode === "bands" ? 1 : 0;
+      gu.uBlur.value = params.trails.spread;
       gu.uTexel.value.set(1 / size.bw, 1 / size.bh);
-      ghostMat.uniforms.uGroundInk.value = groundInk;
-      run(ghostMat, ghostWrite);
-      [ghostRead, ghostWrite] = [ghostWrite, ghostRead];
+      trailMat.uniforms.uGroundInk.value = groundInk;
+      run(trailMat, trailWrite);
+      [trailRead, trailWrite] = [trailWrite, trailRead];
 
       // 4. Glow: separable blur of the persisted image.
-      const r = params.glow.radius;
-      blurMat.uniforms.tInput.value = ghostRead.texture;
+      const r = params.glow.spread;
+      blurMat.uniforms.tInput.value = trailRead.texture;
       blurMat.uniforms.uDirection.value.set(r / size.bw, 0);
       run(blurMat, blurA);
       blurMat.uniforms.tInput.value = blurA.texture;
@@ -203,26 +203,26 @@ export function createRenderer(canvas, contentCanvas) {
 
       // 5. Upscale + overlay to the screen.
       const u = displayMat.uniforms;
-      u.tImage.value = ghostRead.texture;
+      u.tImage.value = trailRead.texture;
       u.uBufferSize.value.set(size.bw, size.bh);
       u.uScreenSize.value.set(size.w, size.h);
-      u.uPixelScale.value = size.ps;
+      u.uPixelSize.value = size.ps;
       u.uDpr.value = size.dpr;
-      u.uGlow.value = params.glow.intensity;
-      u.uTint.value = params.glow.tintToPhosphor;
-      u.uPhosphorInk.value = toInk(theme.phosphor);
+      u.uGlow.value = params.glow.strength;
+      u.uTint.value = params.glow.tint;
+      u.uInk.value = toInk(theme.ink);
       u.uGroundInk.value = groundInk;
-      u.uJitter.value = params.phosphor.jitter;
-      u.uFlicker.value = params.phosphor.flicker;
+      u.uJitter.value = params.noise.jitter;
+      u.uFlicker.value = params.noise.flicker;
       u.uTime.value = time;
       u.uWarpStrength.value = params.warp.strength;
-      u.uWarpSize.value = params.warp.size;
-      u.uWarpPeriod.value = params.warp.frequency > 0 ? 60 / params.warp.frequency : 0;
-      u.uWarpSpeed.value = params.warp.speed;
+      u.uWarpSize.value = params.warp.bandHeight;
+      u.uWarpPeriod.value = params.warp.perMinute > 0 ? 60 / params.warp.perMinute : 0;
+      u.uWarpSpeed.value = params.warp.rollTime;
       u.uWarpRandom.value = params.warp.randomness;
-      u.uGridMode.value = GRID_MODES[params.grid.mode];
-      u.uGridOpacity.value = params.grid.opacity;
-      u.uGridPitch.value = params.grid.pitch;
+      u.uGridMode.value = LINE_TYPES[params.lines.type];
+      u.uGridOpacity.value = params.lines.strength;
+      u.uGridPitch.value = params.lines.spacing;
       run(displayMat, null);
     },
   };

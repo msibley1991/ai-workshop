@@ -1,0 +1,40 @@
+{
+  "pixels": {
+    "size": 1,
+    "sharpText": 1
+  },
+  "glow": {
+    "strength": 1,
+    "spread": 1.5,
+    "tint": 0
+  },
+  "trails": {
+    "length": 0.9,
+    "scrollBoost": 0,
+    "spread": 0.5,
+    "colours": 2,
+    "colourMode": "blend",
+    "framesPerColour": 5,
+    "colourShift": 0.4
+  },
+  "lines": {
+    "type": "scanlines",
+    "strength": 0.5,
+    "spacing": 2,
+    "snapScroll": true
+  },
+  "noise": {
+    "jitter": 1.1,
+    "flicker": 0
+  },
+  "warp": {
+    "strength": 4,
+    "bandHeight": 0.05,
+    "perMinute": 4,
+    "rollTime": 5.5,
+    "randomness": 0.67
+  },
+  "interface": {
+    "lineWeight": 2
+  }
+}

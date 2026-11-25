@@ -263,6 +263,9 @@ function isHexColor(value) {
   return /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/.test(value);
 }
 function formatLabel(key) {
+  // Lab patch: a number after a word gets its own word (trail1 -> "Trail 1",
+  // narrowAt25 -> "Narrow At 25"); short keys like h1 stay as they are.
+  if (key.length > 2) key = key.replace(/([a-zA-Z])(\d)/g, "$1 $2");
   return key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase()).trim();
 }
 function inferStep(min, max) {

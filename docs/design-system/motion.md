@@ -94,37 +94,37 @@ Slide 12's **poster grid** (beat 2, after the line pours in) is three steps of 4
 - **The sink:** an **8 × 8 ink square** one box inset (24) in from a bottom corner of each panel that has genie text. On slides it's the **bottom-left** corner, under the text axis, so text funnels down its own side and not over the visuals ([slide-templates.md](slide-templates.md)). The hero, tab 1 and the genie page still have text on the right and keep it bottom right. It stays for as long as that tab or intro screen is in use, because every slide's text in the panel comes and goes through it.
 - **Text's only enter and exit:** text that a step removes funnels into the square, and stepping back pours it out again. New text pours out of the square on a forward step too.
 - **Line by line:** the bottom line goes out first, so on the way back the top line comes in first. Each line starts halfway through the previous line's run.
-- **Funnel with full slit-scan:**
+- **Funnel with full smear (slit-scan):**
   - Within a line, every row runs at its own moment in time, with lower rows well ahead, so the text smears and stretches as it goes.
   - The sides pull in quickly near the top and hold most of the way down.
   - **Landing:** over the funnel's last 15%, the sides always close onto the square and the swing dies out, whatever the graphs say, so the text visibly goes into it.
   - The spine swings 48 units at most, away from the sink's side (left for a sink on the right, right for one on the left), in three S-bends down the funnel.
   - **It stays inside its panel** (2026-11-22). The S-bends swing back toward the sink's side too, so each side's swing is scaled down to the room between the funnel and the panel's inner edge (inside its outline). With the text axis at column 1, the swing back toward the edge is about half the full swing, and the swing away from it stays full.
 - **Curvature over time:** two bezier graphs, each played over a line's own run, set how much the funnel curves at each moment. They're edited on the genie page (g).
-  - **arc:** eases up to the full swing by three quarters of the run, then holds.
+  - **swing:** eases up to the full swing by three quarters of the run, then holds.
   - **narrowing:** stays wide until about a sixth of the run, then pulls in gradually, reaching full only at the end.
 - **Slide:** a row holds in place while it bends, then slides down into the square from two thirds of its time, on ease.
-- **Trail:** no extra phosphor trail beyond the display layer's own ghosting.
+- **Trail:** no extra trail beyond the display layer's own trails (trailBoost 0).
 - **Text enters from the sink too:** a new sentence pours out of the square into its place, the reverse of the exit. The order of a slide change (text out, visuals, text in) is in [slide-templates.md](slide-templates.md).
 - Section changes keep the accordion as it is; the genie is for steps.
 
 ### Tuned values
-From the genie test page ([`lab/genie.html`](../../lab/genie.html)). They're the page's defaults, in `settings` and `DEFAULT_GRAPHS` in [`lab/js/genie-warp.js`](../../lab/js/genie-warp.js).
+From the genie test page ([`lab/genie.html`](../../lab/genie.html)). They're the page's defaults, in `settings` and `DEFAULT_GRAPHS` in [`lab/js/genie-warp.js`](../../lab/js/genie-warp.js). The names are the Genie panel's, grouped as there (Timing, Shape, Swing, Trail); renamed on 2026-11-25.
 
-| Setting | Value | Meaning |
-|---|---|---|
-| duration | 200 ms | one line's run |
-| follow | −0.5 | each line starts 0.5 × duration after the previous one (−1 together, 0 one after another, 1 a pause of one duration) |
-| curve | ease | each row's slide |
-| slideStart | 0.67 | when, in a row's time, the slide begins |
-| p25 / p50 / p75 | 0.8 / 0.79 / 0.77 | how far the sides have narrowed at 25 / 50 / 75% of the way down (1 = the square's width) |
-| slit | 1 | slit-scan spread within a line (the maximum) |
-| rowBand | 1 | emulated pixel rows per step of the sides |
-| sink | 8 × 8 units | the ink square the funnel lands in; it sets the funnel's final width |
-| arc / bends / severity | −48 units / 3 / 0 | the maximum spine swing (negative swings left), S-bends, rounded (0) to kinked (1) |
-| arc graph | 0 → 1 by 0.75, then holds | the swing's level over a line's run |
-| narrow graph | 0 until 0.16, then up to 1 at the end | how far the sides have pulled in over a line's run |
-| trailBoost | 0 | extra ghost decay while it runs |
+| Group | Setting | Value | Meaning |
+|---|---|---|---|
+| Timing | lineTime | 200 ms | one line's run |
+| | lineGap | −0.5 | each line starts 0.5 × lineTime after the previous one (−1 together, 0 one after another, 1 a pause of one line's time) |
+| | easing | ease | each row's slide |
+| | slideStart | 0.67 | when, in a row's time, the slide begins |
+| Shape | narrowAt25 / 50 / 75 | 0.8 / 0.79 / 0.77 | how far the sides have narrowed at 25 / 50 / 75% of the way down (1 = the square's width) |
+| | smear | 1 | slit-scan spread within a line (the maximum) |
+| | rowHeight | 1 | emulated pixel rows per step of the sides |
+| Swing | swing / bends / sharpness | −48 units / 3 / 0 | the maximum sideways swing (negative swings left), S-bends, rounded (0) to kinked (1) |
+| Trail | trailBoost | 0 | extra trail length while it runs |
+| Graphs | Swing | 0 → 1 by 0.75, then holds | the swing's level over a line's run |
+| | Narrowing | 0 until 0.16, then up to 1 at the end | how far the sides have pulled in over a line's run |
+| | sink | 8 × 8 units | the ink square the funnel lands in; it sets the funnel's final width (not a setting) |
 
 - **The whole run** is 200 × (1 + (lines − 1) × 0.5) ms. An 11-line block takes 1200 ms.
 - **The 200 ms per line is genie-specific.** It isn't one of the named durations.

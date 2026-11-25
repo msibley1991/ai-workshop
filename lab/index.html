@@ -19,7 +19,7 @@
 
   <!-- Specimen content. This DOM is invisible: it provides layout, selection,
        copy and find. Everything visible is redrawn by the WebGL renderer.
-       data-ink="phosphor|accent|dim" sets the drawing color role.
+       data-ink="ink|accent|dim" sets the drawing color role.
        data-box draws an element's border; data-fill draws its background. -->
   <main id="content">
     <header class="status" data-box>
@@ -40,7 +40,7 @@
       <h3>Heading level three</h3>
       <ul>
         <li>Lower-resolution emulation, nearest-neighbor upscale</li>
-        <li>Glow, and ghosting that grows with scroll speed</li>
+        <li>Glow, and trails that grow with scroll speed</li>
         <li>Scanline or pixel grid, with grid-snapped scroll</li>
       </ul>
       <p class="small" data-ink="dim">Small / caption text. Fig. 1 — the effects stack, in order of application.</p>
@@ -89,7 +89,7 @@
 
     <section>
       <h2>Long scroll</h2>
-      <p>Scroll quickly through this section to see the ghosting. With snap enabled the page moves in whole grid lines. Projected output usually loses contrast and fine detail, so the presenter preset should be heavier than feels right on a laptop.</p>
+      <p>Scroll quickly through this section to see the trails. With snap scroll on, the page moves in whole line steps. Projected output usually loses contrast and fine detail, so the presenter preset should be heavier than feels right on a laptop.</p>
       <p>Paperclip-punk is skimmable, diagrammatic and interactive. The display layer adds an uncanny quality: a precise interface rendered on hardware that should not exist.</p>
       <p data-ink="dim">— end of specimen —</p>
     </section>

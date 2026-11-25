@@ -1,3 +1,4 @@
+import { DialStore } from "../vendor/dialkit/index.js";
 import { createPanel } from "./panel.js";
 import { config, defaultsOf } from "./params.js";
 import { createRenderer } from "./renderer.js";
@@ -5,7 +6,7 @@ import { measure, selectionRects, draw } from "./text-raster.js";
 import { updateScroll } from "./scroll.js";
 import { viewer, enabled as viewerEnabled, applyViewer, palettesReady, paletteValues } from "./viewer.js";
 import { createPalettePanel } from "./palette-panel.js";
-import { ghostBoost } from "./genie-warp.js";
+import { trailBoost } from "./genie-warp.js";
 
 const content = document.getElementById("content");
 const viewportEl = document.getElementById("viewport3d");
@@ -22,10 +23,10 @@ let layoutDirty = true;
 const invalidate = () => (layoutDirty = true);
 
 // body[data-canvas] (layout.html): the page is a scaled canvas measured in units
-// (CSS --u = screen px per unit). The emulated pixel is then pixelScale units,
+// (CSS --u = screen px per unit). The emulated pixel is then pixels.size units,
 // snapped down to 1/2/4/8 so the 8-unit spacing lands on whole pixels, and
 // lines are counted in emulated pixels (rounded to whole device pixels in
-// frame()). Elsewhere pixelScale is screen px.
+// frame()). Elsewhere pixels.size is screen px.
 const canvasMode = "canvas" in document.body.dataset;
 const readUnit = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--u")) || 1;
 let unit = canvasMode ? readUnit() : 1;
@@ -33,9 +34,9 @@ const snapPixel = (v) => (canvasMode ? [8, 4, 2, 1].find((n) => n <= v) ?? 1 : v
 
 function applyLines(values) {
   const root = document.documentElement.style;
-  if (!canvasMode) return root.setProperty("--line", `${values.outline.width}px`);
-  const px = snapPixel(values.resolution.pixelScale);
-  root.setProperty("--line", `calc(${values.outline.width * px} * var(--u))`);
+  if (!canvasMode) return root.setProperty("--line", `${values.interface.lineWeight}px`);
+  const px = snapPixel(values.pixels.size);
+  root.setProperty("--line", `calc(${values.interface.lineWeight * px} * var(--u))`);
   root.setProperty("--line-dashed", `calc(${px} * var(--u))`);
 }
 
@@ -71,44 +72,44 @@ function toHex(color) {
   return "#" + [r, g, b].map((n) => Math.round(n).toString(16).padStart(2, "0")).join("");
 }
 
-// <body data-render> (layout, genie, type, hierarchy): the shared "Render"
-// menu, saved to presets/render.json, with every colour from the active palette
+// <body data-display> (layout, genie, type, hierarchy, glossary): the shared
+// "Display" menu, saved to presets/display.json, with every colour from the active palette
 // (js/viewer.js). Elsewhere (the specimen) the "Effects Lab" panel holds all of
 // config, colours and type dials included.
-const renderMode = "render" in document.body.dataset;
+const displayMode = "display" in document.body.dataset;
 const SPECIMEN_DEFAULTS = defaultsOf(config);
-// The invisible-DOM type on render pages (css/text-layer.css). Their own CSS
+// The invisible-DOM type on display pages (css/text-layer.css). Their own CSS
 // sets the type that shows; these only keep the base styles as they were.
-const RENDER_PAGE_TYPE = {
+const DISPLAY_PAGE_TYPE = {
   family: "JetBrains Mono", gap: 32,
   h1: { size: 72, lineHeight: 1.05 }, h2: { size: 44, lineHeight: 1.15 }, h3: { size: 32, lineHeight: 1.25 },
   body: { size: 28, lineHeight: 1.45 }, small: { size: 20, lineHeight: 1.4 },
 };
 
 // dialValues: the dials as set. params: what renders (palette colours on
-// render pages, then the viewer's motion, blur and scanlines on top; js/viewer.js).
+// display pages, then the viewer's motion, blur and lines on top; js/viewer.js).
 let dialValues = null;
-// A new ground (palette switch, mode or ground dial) clears the ghost history
+// A new ground (palette switch, mode or ground dial) clears the trail history
 // for a couple of frames: trails carried across a ground change smear the old
 // ground over the whole screen.
 let groundKey = "";
-let clearGhostFrames = 0;
+let clearTrailFrames = 0;
 
 function compose() {
   if (!dialValues) return;
   let values = structuredClone(dialValues);
-  if (renderMode) {
+  if (displayMode) {
     const pal = paletteValues(viewer.get().palette);
-    values = { ...structuredClone(SPECIMEN_DEFAULTS), ...values, type: RENDER_PAGE_TYPE, theme: pal.theme };
-    values.phosphor = { ...values.phosphor, ...pal.phosphor };
+    values = { ...structuredClone(SPECIMEN_DEFAULTS), ...values, type: DISPLAY_PAGE_TYPE, theme: pal.theme };
+    values.trails = { ...values.trails, ...pal.trails };
   }
   for (const key of ["light", "dark"]) {
     if (!values.theme[key]) continue;
-    for (const role of ["ground", "phosphor", "accent", "link"]) values.theme[key][role] = toHex(values.theme[key][role]);
+    for (const role of ["ground", "ink", "accent", "link"]) values.theme[key][role] = toHex(values.theme[key][role]);
   }
-  for (const key of ["persistenceColor", "persistenceColor2", "persistenceColor3"]) values.phosphor[key] = toHex(values.phosphor[key]);
+  for (const key of ["trail1", "trail2", "trail3"]) values.trails[key] = toHex(values.trails[key]);
   const key = `${values.theme.mode} ${values.theme[values.theme.mode].ground}`;
-  if (groundKey && key !== groundKey) clearGhostFrames = 2;
+  if (groundKey && key !== groundKey) clearTrailFrames = 2;
   groundKey = key;
   params = applyViewer(values);
   applyType(values.type);
@@ -116,14 +117,17 @@ function compose() {
   invalidate();
 }
 
-createPanel((values) => { dialValues = values; compose(); }, { render: renderMode });
+createPanel((values) => { dialValues = values; compose(); }, { display: displayMode });
 
-if (renderMode) {
+if (displayMode) {
   // Palette edits and switches recolour the render (js/palette-panel.js).
   createPalettePanel(compose);
   palettesReady.then(compose);
+  // Display above Palette, both collapsed on load, so ← → step the page until
+  // one is opened.
+  setTimeout(() => { for (const id of ["lab-display", "lab-palette"]) DialStore.setPanelOpen(id, false); });
 }
-// The viewer's palette, motion, blur and scanlines (pages with data-viewer).
+// The viewer's palette, motion, blur and lines (pages with data-viewer).
 viewer.subscribe(() => { compose(); invalidate(); });
 
 window.addEventListener("resize", () => {
@@ -145,8 +149,8 @@ function frame(t) {
   // rows and scanlines a device pixel taller, which reads as darker bands.
   const dpr = window.devicePixelRatio || 1;
   const ps = canvasMode
-    ? Math.max(1, Math.round(snapPixel(params.resolution.pixelScale) * unit * dpr)) / dpr
-    : params.resolution.pixelScale;
+    ? Math.max(1, Math.round(snapPixel(params.pixels.size) * unit * dpr)) / dpr
+    : params.pixels.size;
   renderer.resize(ps);
 
   if (layoutDirty) {
@@ -157,25 +161,25 @@ function frame(t) {
     layoutDirty = false;
   }
 
-  const { renderY, velocity } = updateScroll(params.grid.pitch * ps, params.grid.snapScroll);
+  const { renderY, velocity } = updateScroll(params.lines.spacing * ps, params.lines.snapScroll);
   const theme = params.theme[params.theme.mode];
   const colors = {
-    phosphor: theme.phosphor,
+    ink: theme.ink,
     accent: theme.accent,
     link: theme.link,
-    dim: mix(theme.ground, theme.phosphor, 0.55),
+    dim: mix(theme.ground, theme.ink, 0.55),
     ground: theme.ground, // knock-out ink, e.g. text on a filled shape
   };
 
-  draw(ctx, layout, selection, { pixelScale: ps, renderY, colors });
+  draw(ctx, layout, selection, { pixelSize: ps, renderY, colors });
   let renderParams = params;
-  if (clearGhostFrames > 0) {
-    clearGhostFrames--;
-    renderParams = { ...params, ghost: { ...params.ghost, decay: 0, scrollGain: 0 } };
+  if (clearTrailFrames > 0) {
+    clearTrailFrames--;
+    renderParams = { ...params, trails: { ...params.trails, length: 0, scrollBoost: 0 } };
   } else {
-    // A running genie (js/genie-warp.js) lengthens the phosphor trail.
-    const boost = ghostBoost(t);
-    if (boost > 0) renderParams = { ...params, ghost: { ...params.ghost, decay: Math.min(0.98, params.ghost.decay + boost) } };
+    // A running genie (js/genie-warp.js) lengthens the trails.
+    const boost = trailBoost(t);
+    if (boost > 0) renderParams = { ...params, trails: { ...params.trails, length: Math.min(0.98, params.trails.length + boost) } };
   }
   renderer.render({ params: renderParams, renderY, velocity, time: t / 1000, viewport });
 }

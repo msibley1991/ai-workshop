@@ -1,5 +1,5 @@
 import { createDialKit, createDialRoot } from "../vendor/dialkit/index.js";
-import { config, renderConfig, loadPreset, savePreset, exportJSON, importJSON } from "./params.js";
+import { config, displayConfig, loadPreset, savePreset, exportJSON, importJSON } from "./params.js";
 
 // Strips action entries so exported/imported values only contain real settings.
 function settingsOnly(values) {
@@ -16,37 +16,37 @@ export function toast(text, isError = false) {
   setTimeout(() => el.remove(), 2500);
 }
 
-// render: the shared "Render" menu (pages with <body data-render>). It shows
-// only the render dials, keeps nothing in localStorage, and loads
-// presets/render.json on every page load; "Save" writes that file (needs
+// display: the shared "Display" menu (pages with <body data-display>). It
+// shows only the display dials, keeps nothing in localStorage, and loads
+// presets/display.json on every page load; "Save" writes that file (needs
 // serve.py) and "Revert" reloads it, so every page shares one look.
 // Otherwise the specimen's "Effects Lab" panel (all of config, remembered in
 // localStorage under id).
-export function createPanel(onChange, { render = false, id = "effects-lab" } = {}) {
+export function createPanel(onChange, { display = false, id = "effects-lab" } = {}) {
   createDialRoot({ position: "top-right", theme: "dark", versions: "menu" });
-  return render ? renderPanel(onChange) : specimenPanel(onChange, id);
+  return display ? displayPanel(onChange) : specimenPanel(onChange, id);
 }
 
-const RENDER_FILE = "render";
+const DISPLAY_FILE = "display";
 
-function renderPanel(onChange) {
+function displayPanel(onChange) {
   const cfg = {
-    ...renderConfig,
-    save: { type: "action", label: "Save render settings" },
+    ...displayConfig,
+    save: { type: "action", label: "Save display settings" },
     revert: { type: "action", label: "Revert to saved" },
   };
   const strip = ({ save, revert, ...rest }) => rest;
-  const kit = createDialKit("Render", cfg, {
-    id: "lab-render",
+  const kit = createDialKit("Display", cfg, {
+    id: "lab-display",
     persist: false,
     onAction: async (path) => {
       try {
         if (path === "save") {
-          await savePreset(RENDER_FILE, strip(kit.getValues()));
-          toast("Saved render settings");
+          await savePreset(DISPLAY_FILE, strip(kit.getValues()));
+          toast("Saved display settings");
         }
         if (path === "revert") {
-          kit.setValues(await loadPreset(RENDER_FILE));
+          kit.setValues(await loadPreset(DISPLAY_FILE));
           toast("Reverted to saved");
         }
       } catch (err) {
@@ -56,7 +56,7 @@ function renderPanel(onChange) {
     },
   });
   kit.subscribe((values) => onChange(strip(values)));
-  kit.ready = loadPreset(RENDER_FILE).then((values) => kit.setValues(values)).catch((err) => console.error("[lab]", err));
+  kit.ready = loadPreset(DISPLAY_FILE).then((values) => kit.setValues(values)).catch((err) => console.error("[lab]", err));
   return kit;
 }
 
@@ -66,7 +66,7 @@ function specimenPanel(onChange, id) {
     persist: true,
     onAction: async (path) => {
       try {
-        if (path === "presets.load") kit.setValues(await loadPreset(RENDER_FILE));
+        if (path === "presets.load") kit.setValues(await loadPreset(DISPLAY_FILE));
         if (path === "presets.exportJSON") exportJSON(settingsOnly(kit.getValues()));
         if (path === "presets.importJSON") {
           const values = await importJSON();

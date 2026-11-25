@@ -1,5 +1,5 @@
 // Shared GLSL. All effects work in "ink space": light themes are inverted so
-// that ink is always bright on dark, which lets glow and ghosting stay additive.
+// that ink is always bright on dark, which lets glow and trails stay additive.
 export const vertex = /* glsl */ `
   varying vec2 vUv;
   void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }

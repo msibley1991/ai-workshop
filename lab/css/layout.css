@@ -176,7 +176,7 @@
 /* Hover/focus on a label inverts the tab's header strip only. */
 /* The open tab (aria-current, set by js/layout.js) stays inverted, so you can
    see where you are. */
-.site-tab:has(> .site-tab-label:is(:hover, :focus-visible, [aria-current="true"])) { --tab-fill: phosphor; }
+.site-tab:has(> .site-tab-label:is(:hover, :focus-visible, [aria-current="true"])) { --tab-fill: ink; }
 .site-tab-label:is(:hover, :focus-visible, [aria-current="true"]) span { --ink: ground; }
 
 /* The box grid: inset from the box edge, then 12 columns. Children place
@@ -299,7 +299,7 @@
 .site-swatches { display: flex; gap: var(--space-4); }
 .site-palette .site-swatch[data-swatch] {
   --box-line: var(--line-dashed);   /* one emulated pixel */
-  --ink: phosphor;
+  --ink: ink;
   position: relative;
   box-sizing: border-box;
   width: var(--space-8);
@@ -309,7 +309,7 @@
 .site-palette .site-swatch[data-swatch="ink"] { --ink: accent; }
 /* The button's --fill-alpha (0 at rest) would inherit and hide the fills. */
 .site-palette .site-swatch[data-swatch] > span { position: absolute; inset: 0; --fill-alpha: 1; }
-.site-palette .site-swatch[data-swatch="ink"] > span { --ink: phosphor; }
+.site-palette .site-swatch[data-swatch="ink"] > span { --ink: ink; }
 .site-palette .site-swatch[data-swatch="ground"] > span { --ink: ground; }
 .site-palette .site-swatch[data-swatch="accent"] > span { --ink: accent; }
 
@@ -718,7 +718,7 @@
 .poster[data-wire] .poster-full { display: none; }
 /* New hires: a pictogram (head, arms, body, legs) 64 x 128, ink or accent. */
 .poster-figure { position: absolute; width: calc(64 * var(--u)); height: calc(128 * var(--u)); }
-.poster-figure > * { position: absolute; --ink: phosphor; }
+.poster-figure > * { position: absolute; --ink: ink; }
 .poster-figure[data-accent] > * { --ink: accent; }
 .fig-head { left: calc(18 * var(--u)); top: 0; width: calc(28 * var(--u)); height: calc(28 * var(--u)); border-radius: 50%; }
 .fig-body { left: calc(14 * var(--u)); top: calc(34 * var(--u)); width: calc(36 * var(--u)); height: calc(50 * var(--u)); border-radius: calc(18 * var(--u)) calc(18 * var(--u)) calc(6 * var(--u)) calc(6 * var(--u)); }

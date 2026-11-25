@@ -3,9 +3,9 @@
 Status: **exploration**. Started 2026-11-21 and built on the lab layout page ([`lab/layout.html`](../../lab/layout.html), [`lab/js/viewer.js`](../../lab/js/viewer.js)). Viewers choose a palette themselves, so there's no single site palette. The colours below are starting values to tune by eye.
 
 ## Palettes
-A palette changes **colours only**: the ground, the ink (the "phosphor" dial), the accent, the link colour and the three ghost-trail colours. Light or dark mode follows the ground automatically: a ground brighter than mid-grey is light. It isn't a setting, because a light ground in dark mode breaks the ghost maths. The display effects (glow, scanlines, warp, ghosting) stay as tuned, so every palette shares one display layer.
+A palette changes **colours only**: the ground, the ink, the accent, the link colour and the three trail colours (trail 1–3). Light or dark mode follows the ground automatically: a ground brighter than mid-grey is light. It isn't a setting, because a light ground in dark mode breaks the trail maths. The display effects (glow, trails, lines, warp) stay as tuned, so every palette shares one display layer.
 
-| Palette | Mode | Ground | Ink | Accent | Link | Ghost trails | Lineage |
+| Palette | Mode | Ground | Ink | Accent | Link | Trail 1–3 | Lineage |
 |---|---|---|---|---|---|---|---|
 | Ink (default) | light | `#F2F6FF` | `#00010F` | `#F38020` | `#0050FF` blue | `#FF0088` `#00C7F7` `#8A1A00` | the tuned light preset |
 | Blueprint | light | `#F4F4F0` | `#0050FF` | `#F38020` | `#B8860B` gold | `#F38020` `#F3C020` `#8A1A00` | paperclip-punk source |
@@ -26,22 +26,22 @@ A palette changes **colours only**: the ground, the ink (the "phosphor" dial), t
   - It slides over 250 ms, or snaps when motion is off. The content reflows before it slides in and after it slides out.
 - **Controls:**
   1. **Palette:** Ink · Blueprint · Plasma · Vector.
-  2. **Motion: on/off.** Off removes ghost trails, jitter, warp and flicker, and the tab accordion and the panel jump instead of animating. It starts off when the device asks for reduced motion (`prefers-reduced-motion`).
-  3. **Blur: on/off.** Off removes the glow halo and the ghost-trail blur, and sets text to a standard softening: hardText 0, plain antialiased text.
-  4. **Scanlines: on/off.** Off removes the scanlines (or pixel grid). Scroll snapping stays. It's a separate switch for screens and projectors that rescale the image and turn the lines into moiré (see [display.md](display.md)).
-- **Labels:** group headings are bracketed (`[Palette]`, `[Display]`). Settings under a heading are plain rows, `Motion on / off`, `Blur on / off` and `Scanlines on / off`, and only the chosen option is highlighted.
+  2. **Motion: on/off.** Off removes trails, jitter, warp and flicker, and the tab accordion and the panel jump instead of animating. It starts off when the device asks for reduced motion (`prefers-reduced-motion`).
+  3. **Blur: on/off.** Off removes the glow halo and the trails' spread, and sets text to a standard softening: sharpText 0, plain antialiased text.
+  4. **Lines: on/off.** Off removes the lines (scanlines or pixel grid). Scroll snapping stays. It's a separate switch for screens and projectors that rescale the image and turn the lines into moiré (see [display.md](display.md)).
+- **Labels:** group headings are bracketed (`[Palette]`, `[Display]`). Settings under a heading are plain rows, `Motion on / off`, `Blur on / off` and `Lines on / off`, and only the chosen option is highlighted.
 - **Remembered:** each viewer's choices are saved in their browser (`localStorage` key `lab-viewer`).
 
 ## How it works in the lab
 - **Source of truth:** the palettes are in [`lab/presets/palettes.json`](../../lab/presets/palettes.json).
-- **Editing:** the **Palette** dial panel edits the active palette: ground, ink, accent, link and ghost 1–3.
+- **Editing:** the **Palette** dial panel edits the active palette: ground, ink, accent, link and trail 1–3.
   - Edits show live, and they're kept when you switch palettes.
   - **Save palette** writes only the active palette to the file (needs `serve.py`); the others stay as saved. Unsaved edits are lost on reload.
-- **Ghost history:** a ground change (a palette switch or a ground edit) clears the trail history for two frames, so old trails don't smear over the new ground.
-- **Colours live only in the palettes.** The lab's Render menu (glow, ghosting, blur, scanlines, warp) has no colour dials and no light or dark mode: the active palette sets the ground, ink, accent, link and ghost colours, and light or dark follows its ground. The palette's ink is the renderer's `phosphor` colour.
-- Motion, blur and scanlines are **overrides applied on top of the dials** at render time. Switching them back on restores the tuned values.
+- **Trail history:** a ground change (a palette switch or a ground edit) clears the trail history for two frames, so old trails don't smear over the new ground.
+- **Colours live only in the palettes.** The lab's Display menu (pixels, glow, trails, lines, noise, warp; see [display.md](display.md)) has no colour dials and no light or dark mode: the active palette sets the ground, ink, accent, link and trail colours, and light or dark follows its ground.
+- Motion, blur and lines are **overrides applied on top of the dials** at render time. Switching them back on restores the tuned values.
 
 ## Open
-- Tune each palette's ghost colours and check the dark palettes against the light-tuned effect preset. Dark grounds may want different glow.
+- Tune each palette's trail colours and check the dark palettes against the light-tuned effect preset. Dark grounds may want different glow.
 - Which palette is the presenter's projector default.
 - Whether the dark palettes need their own "dim" mix.

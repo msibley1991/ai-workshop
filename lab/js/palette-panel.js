@@ -1,7 +1,7 @@
-// The "Palette" dial panel (render pages, <body data-render>): edits the active
-// palette's ground, ink, accent, link and ghost-trail colours live (light or
+// The "Palette" dial panel (display pages, <body data-display>): edits the active
+// palette's ground, ink, accent, link and trail colours live (light or
 // dark mode follows the ground, see modeOf in viewer.js). These are the only
-// colour dials: the Render menu has none. "Save palette" writes just the
+// colour dials: the Display menu has none. "Save palette" writes just the
 // active palette into presets/palettes.json (needs serve.py); the others stay
 // as saved. Unsaved edits last until reload.
 import { createDialKit } from "../vendor/dialkit/index.js";
@@ -9,7 +9,7 @@ import { viewer, PALETTES, palettesReady } from "./viewer.js";
 import { loadPreset, savePreset } from "./params.js";
 import { toast } from "./panel.js";
 
-const FIELDS = ["ground", "ink", "accent", "link", "ghost1", "ghost2", "ghost3"];
+const FIELDS = ["ground", "ink", "accent", "link", "trail1", "trail2", "trail3"];
 
 // onEdit: called after the active palette changes, to recolour the render.
 export function createPalettePanel(onEdit) {

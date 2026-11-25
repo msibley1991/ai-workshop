@@ -73,10 +73,10 @@ const unit = () => parseFloat(getComputedStyle(document.documentElement).getProp
 
 // Genie a sentence block to 1 (in the sink) or 0 (in place); cut if asked or motion is off.
 function setGenie(el, to, animate) {
-  const d = genieSettings.duration;
-  if (!animate || !motionOn()) genieSettings.duration = 0;
+  const d = genieSettings.lineTime;
+  if (!animate || !motionOn()) genieSettings.lineTime = 0;
   play(el, to);
-  genieSettings.duration = d;
+  genieSettings.lineTime = d;
 }
 
 export function createSlides({ site, panels, goPanel, relayout, onMove = () => {} }) {
@@ -856,7 +856,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
   }
   function schedule(els, to, my) {
     if (!els.length) return 0;
-    const d = genieSettings.duration, step = (1 + genieSettings.follow) * d;
+    const d = genieSettings.lineTime, step = (1 + genieSettings.lineGap) * d;
     let start = 0, end = 0;
     for (const el of els) {
       const at = start;

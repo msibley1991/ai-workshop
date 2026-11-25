@@ -2,31 +2,33 @@
 // ramp, a flat diagram and an isometric object (drag to rotate; it springs back
 // to the isometric pose on release). Everything is drawn in two colours only,
 // the palette's ground and ink, at the emulated pixel size, into a low-res
-// canvas scaled up nearest-neighbour. Standalone: no glow, ghosting or scanlines.
+// canvas scaled up nearest-neighbour. Standalone: no glow, trails or lines.
 // The engine (patterns, raster, iso object, spring) is js/shade.js, which the
 // layout page's raster also uses for [data-iso] graphics.
 //
 // Tone t is "amount of ink" from 0 to 1. Each technique quantises it to its own
-// steps between its lightest and darkest values. "Ink means" picks whether ink
+// steps between its lightest and darkest values. "Ink shows" picks whether ink
 // marks shadow or light.
 import { createDialKit, createDialRoot } from "../vendor/dialkit/index.js";
 import { DITHERS, isErrorDiffusion, threshold, hatchInk, stepTone, Raster, fillIso, Spin, ISO_STYLE } from "./shade.js";
 
 const H = ISO_STYLE.hatch;
 const config = {
-  page: {
+  view: {
     palette: { type: "select", options: ["ink", "blueprint", "plasma", "vector"], default: "plasma" },
-    pixel: [1, 1, 8, 1],          // emulated pixel in layout units, snapped to 1/2/4/8
-    anchor: { type: "select", options: ["object", "screen"], default: ISO_STYLE.anchor }, // iso faces only
+    pixelSize: [1, 1, 8, 1],      // emulated pixel in layout units, snapped to 1/2/4/8
+    patternAnchor: { type: "select", options: ["object", "screen"], default: ISO_STYLE.patternAnchor }, // iso faces only
     edges: { type: "select", options: ["all", "iso only", "off"], default: "all" },
-    inner: [ISO_STYLE.inner, 1, 8, 1],           // iso edges between faces
-    inkMeans: { type: "select", options: ["shadow", "light", "auto"], default: ISO_STYLE.inkMeans },
-    lightAz: [ISO_STYLE.lightAz, -180, 180, 1], // degrees, view space; negative = from the left
-    lightEl: [ISO_STYLE.lightEl, 0, 90, 1],
+    innerEdges: [ISO_STYLE.innerEdges, 1, 8, 1], // iso edges between faces
+  },
+  light: {
+    inkShows: { type: "select", options: ["shadow", "light", "auto"], default: ISO_STYLE.inkShows },
+    lightAngle: [ISO_STYLE.lightAngle, -180, 180, 1], // degrees, view space; negative = from the left
+    lightHeight: [ISO_STYLE.lightHeight, 0, 90, 1],   // degrees above the horizon
   },
   dither: {
     pattern: { type: "select", options: DITHERS, default: "white noise" },
-    scale: [1, 1, 8, 1],          // pattern cell, in emulated pixels
+    cellSize: [1, 1, 8, 1],       // pattern cell, in emulated pixels
     steps: [6, 2, 8, 1],
     lightest: [0, 0, 1, 0.05],
     darkest: [1, 0, 1, 0.05],
@@ -35,11 +37,11 @@ const config = {
     mode: { type: "select", options: ["density", "coverage", "cross", "weight"], default: H.mode },
     angle: [H.angle, 0, 180, 1],
     spacing: [H.spacing, 2, 32, 1], // emulated pixels between lines
-    width: [H.width, 1, 8, 1],      // emulated pixels
+    lineWidth: [H.lineWidth, 1, 8, 1], // emulated pixels
     steps: [H.steps, 2, 8, 1],
     lightest: [H.lightest, 0, 1, 0.05],
     darkest: [H.darkest, 0, 1, 0.05],
-    solidTop: H.solidTop,           // the darkest step is solid ink
+    solidDarkest: H.solidDarkest,   // the darkest step is solid ink
   },
 };
 
@@ -70,7 +72,7 @@ function measure() {
   const dpr = devicePixelRatio || 1;
   const uCss = Math.min(innerHeight / 1080, innerWidth / 1440);
   const W = Math.min(1920, Math.max(1440, innerWidth / uCss));
-  const P = snapPixel(values.page.pixel);
+  const P = snapPixel(values.view.pixelSize);
   const devPx = Math.max(1, Math.round(P * uCss * dpr));
   const bw = Math.floor(W / P), bh = Math.floor(1080 / P);
   canvas.width = bw; canvas.height = bh;
@@ -89,15 +91,15 @@ const isoRegion = (col) => ({ x: geo.cols[col], y: 640, w: geo.colW, h: 384 });
 function render() {
   if (!PALETTES || !geo) return;
   const { P, bw, bh, raster: r } = geo;
-  const pal = PALETTES[values.page.palette] ?? PALETTES.ink;
-  const inkMeans = values.page.inkMeans === "auto" ? (isLight(pal.ground) ? "shadow" : "light") : values.page.inkMeans;
+  const pal = PALETTES[values.view.palette] ?? PALETTES.ink;
+  const inkShows = values.light.inkShows === "auto" ? (isLight(pal.ground) ? "shadow" : "light") : values.light.inkShows;
   document.documentElement.style.setProperty("--ground", pal.ground);
   document.documentElement.style.setProperty("--ink", pal.ink);
 
   r.clear();
   const colOf = []; // shape id -> column
   const specs = [values.dither, values.hatch];
-  const edgesMode = values.page.edges;
+  const edgesMode = values.view.edges;
   const B = (v) => v / P;
   const fill = (col, pts, t, opts) => { colOf[r.fill(pts, t, opts)] = col; };
   const rect = (x, y, w, h) => [[B(x), B(y)], [B(x + w), B(y)], [B(x + w), B(y + h)], [B(x), B(y + h)]];
@@ -131,15 +133,15 @@ function render() {
 
     // Iso object.
     const reg = isoRegion(col);
-    const style = { ...values.page, inkMeans, edges: edgesMode !== "off" };
+    const style = { ...values.view, ...values.light, inkShows, edges: edgesMode !== "off" };
     for (const id of fillIso(r, { spin: spins[col], cx: B(reg.x + reg.w / 2), cy: B(reg.y + reg.h / 2 + 24), k: B(104), spec, style })) colOf[id] = col;
     label("Drag to rotate", reg.x + reg.w / 2 - 64, 1032, true);
   }
 
   const d = values.dither, h = values.hatch;
-  label(`Dither · ${d.pattern} · scale ${d.scale}`, geo.cols[0], 56);
-  label(`Hatching · ${h.mode} · ${h.angle}° · spacing ${h.spacing} · width ${h.width}`, geo.cols[1], 56);
-  label(`${values.page.anchor === "object" ? "Pattern anchored to faces" : "Pattern anchored to screen"} · ink means ${inkMeans}${isErrorDiffusion(d.pattern) ? " · error diffusion is always screen-anchored" : ""}`, geo.cols[0], 88, true);
+  label(`Dither · ${d.pattern} · cell size ${d.cellSize}`, geo.cols[0], 56);
+  label(`Hatching · ${h.mode} · ${h.angle}° · spacing ${h.spacing} · line width ${h.lineWidth}`, geo.cols[1], 56);
+  label(`${values.view.patternAnchor === "object" ? "Pattern anchored to faces" : "Pattern anchored to screen"} · ink shows ${inkShows}${isErrorDiffusion(d.pattern) ? " · error diffusion is always screen-anchored" : ""}`, geo.cols[0], 88, true);
 
   // Pattern pass.
   const ink = new Uint8Array(geo.n);
@@ -152,8 +154,8 @@ function render() {
     if (colOf[r.fid[i]] === 0) {
       if (ed) continue;
       if (t >= 1) { ink[i] = 1; continue; }
-      const objectId = values.page.anchor === "object" ? r.fid[i] : 0;
-      ink[i] = t > threshold(d.pattern, r.U[i], r.V[i], objectId, d.scale) ? 1 : 0;
+      const objectId = values.view.patternAnchor === "object" ? r.fid[i] : 0;
+      ink[i] = t > threshold(d.pattern, r.U[i], r.V[i], objectId, d.cellSize) ? 1 : 0;
     } else {
       ink[i] = hatchInk(h, t, r.U[i], r.V[i]) ? 1 : 0;
     }
@@ -180,7 +182,7 @@ function render() {
 // Error diffusion over cells of `scale` pixels, dither column only. Error never
 // spills into the ground, so shapes keep clean edges.
 function errorDiffuse(ink, colOf, d) {
-  const { bw, bh } = geo, { tone, fid } = geo.raster, sc = d.scale;
+  const { bw, bh } = geo, { tone, fid } = geo.raster, sc = d.cellSize;
   const gw = Math.ceil(bw / sc), gh = Math.ceil(bh / sc);
   const val = new Float32Array(gw * gh).fill(-1);
   for (let gy = 0; gy < gh; gy++) for (let gx = 0; gx < gw; gx++) {
@@ -263,7 +265,7 @@ const kit = createDialKit("Shading", config, { id: "lab-shading", persist: true 
 let lastPixel = null;
 kit.subscribe((v) => {
   values = v;
-  if (v.page.pixel !== lastPixel || !geo) { lastPixel = v.page.pixel; measure(); }
+  if (v.view.pixelSize !== lastPixel || !geo) { lastPixel = v.view.pixelSize; measure(); }
   render();
 });
 addEventListener("resize", () => { measure(); render(); });
