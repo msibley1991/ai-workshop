@@ -28,6 +28,7 @@ This repo is a website that holds our workshop talk on designing with coding age
 
 ## Docs
 
+- [docs/glossary.md](docs/glossary.md): points to the glossary page, `lab/glossary.html`, which holds the talk's terms from the Figma Glossary frame
 - [docs/aesthetic-direction.md](docs/aesthetic-direction.md): visual direction and open questions (exploratory)
 - [docs/design-system/layout-grid.md](docs/design-system/layout-grid.md): layout grid and spacing scheme (exploratory, built in the lab layout page)
 - [docs/design-system/typography.md](docs/design-system/typography.md): typefaces and type hierarchy (settled; tokens in `css/style.css`)

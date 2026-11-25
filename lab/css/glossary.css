@@ -1,0 +1,60 @@
+/* Glossary page (lab/glossary.html). On top of css/layout.css: one open tab
+   whose body holds the index (columns 1-3) and a column of entries (4-9) that
+   scrolls inside its own box. Columns 10-12 stay empty. */
+
+/* The one tab is always open, so it takes the whole free height. */
+.glossary-tab .site-tab-label { cursor: default; }
+
+.glossary {
+  position: relative;
+  box-sizing: border-box;
+  height: 100%;
+  padding-block: var(--box-inset);
+  grid-template-rows: minmax(0, 1fr);
+}
+
+/* ---- Index: the nav's subtree, in bar text ---------------------------------- */
+/* Columns 1-2: the pressed bar ends on column 2's edge. Column 3 stays empty,
+   so the entries keep columns 4-9. */
+.glossary-index { grid-column: 1 / 3; min-height: 0; }
+.site .glossary-index p { margin: 0; }
+/* Index entries are links in li's: not the running-text link look. One line
+   each (24), so the 6 folders and 24 terms fit the box. */
+.site .glossary-index a { --ink: phosphor; text-decoration: none; }
+.glossary-index.site-nav-tree .site-bar-button { padding-block: 0; }
+.glossary-index .site-bar-button[aria-current="true"] { --fill-alpha: 1; }
+.glossary-index .site-bar-button[aria-current="true"] span { --ink: ground; }
+
+/* ---- Entries: Headline term over Body definition ---------------------------- */
+.glossary-entries {
+  grid-column: 4 / 10;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;            /* no scrollbar: the index and footer show where you are */
+  outline: none;
+}
+.glossary-entries::-webkit-scrollbar { display: none; }
+.glossary-group { display: flex; flex-direction: column; gap: var(--gap-section); }
+.site .glossary-group + .glossary-group { margin-top: var(--gap-section); }
+.glossary-entry { display: flex; flex-direction: column; gap: var(--gap-related); }
+.site .glossary-term {
+  margin: 0;
+  font-size: var(--space-64);       /* Headline */
+  line-height: var(--space-64);
+  font-weight: 700;
+}
+.site .glossary-def {
+  margin: 0;
+  max-width: var(--span-6);
+  font-size: var(--space-32);       /* Body */
+  line-height: calc(40 * var(--u));
+  font-weight: 400;
+}
+
+/* Cross-links: the palette's link colour, underlined; hover and focus invert
+   (the link colour as a fill, text knocked out in ground, no underline). The
+   underline sits on the span, which holds the text the raster reads. */
+.site .glossary-def a { --ink: link; --fill-alpha: 0; text-decoration: none; outline: none; }
+.site .glossary-def a span { text-decoration: underline; }
+.site .glossary-def a:is(:hover, :focus-visible) { --fill-alpha: 1; }
+.site .glossary-def a:is(:hover, :focus-visible) span { --ink: ground; text-decoration: none; }
