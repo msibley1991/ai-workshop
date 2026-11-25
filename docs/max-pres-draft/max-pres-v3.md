@@ -121,8 +121,9 @@
 
 - **Spoken:** So far, I have mostly talked about making rules for what the LLM should do, but none of that is really designing anything yourself. For most of us it's a hell of a lot easier to just make something in some software and figure out the details later. But how do you get an LLM to work with something made somewhere else? Theoretically you can save an image of whatever you designed and tell the coding agent to make something out of that, but 1. LLMs are actually worse with images than you might think. 2. For a lot of software, it's now pretty easy for the LLM to directly interact with it. This is achieved through MCPs. This stands for Model Context Protocol and it's basically a set of skills and tools that tell the LLM how to interact with a given piece of software. As designers, this is the most direct way to use an LLM with what you already know how to use. In a lot of cases this use can go both ways. For instance, for this site I built a design system in a project file, then I made a wireframe in Figma, connected it with an MCP, told the coding agent to apply the design system to this wireframe, make it both live in code and editable in Figma, and went back and forth in adjusting each. One major issue with this setup is each task is complex for the LLM to implement, which both costs tokens and fills chat context. Also, all of these software companies recognise they are in direct competition with LLMs, for reasons I'll explain soon, and would rather you use their native *and often worse* AI tools; because of that, they have no incentive to make it easier for the tools to communicate.
   
-  Text: 
-  MCP (Model Context Protocol): 
+  **Text:** MCP (Model Context Protocol): tools that let an LLM work directly inside other software. / Often both ways. / *(accent)* Each task is heavy: it costs tokens and fills the context.
+
+  **Visual:** Figma, the agent and the live page as three framed panes, wired in two lanes: the prompt and Figma → Agent → code on beat 1; on beat 2 the page's headline grows and the change runs back code → Agent → Figma.
   
   **TODO:** *custom graphic: Figma ↔ Agent ↔ live code back-and-forth (no screenshots)*
 
@@ -134,9 +135,12 @@
 
   Do you want to make an editable filter that turns a black and white illustration into a 3d holographic illustration? Go for it. Do you want to control how buttons melt when a user clicks on them? Go for it. Do you want to control the shadows cast by text on an interface that is pitch black except where the cursor is? Go for it.
 
-  **Text:** needed
-
-  **Visual:** *needed*
+  **Text:** 
+  In certain cases, desired visual outcomes can't be achieved with any existing tool. It is increasingly possible to generate your own tools. This presentation used many personally conceived tools.
+  
+  Test these tools out at the [link: playground]
+  
+  **Visual:** none
 
   **TODO:** *example link (new tab): graphics playground*
 
@@ -146,8 +150,16 @@
 
   Now if you want to see how this was really set up, I've provided this website's repo for download. Feel free to poke around.
 
-  **Text:** (needed)
+  **Text:** 
+  The design world is changing. Much of what I presented will change, likely soon. Some think this means we lose creative control or we will give up our ability to think. Many people who use these tools promote a, frankly, ugly vision of the future.
+  
+  But if you have vision, curiosity, and adaptability, this doesn't have to be true. 
 
-  **Visual:** *needed*
-
-  **Link:** *project folder with download link (zip)*
+  **Visual:** none
+  
+  - **Text:** 
+    Thank you for listening.
+    
+    See how this presentation was made below.
+    
+    **TO-DO:** Button for downloadable .zip of repo

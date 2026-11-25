@@ -468,6 +468,12 @@
   font-size: var(--space-64);
   line-height: calc(72 * var(--u));
 }
+/* data-statement="body" on a Text slide (slide 17's long paragraph): the
+   statement at the Split and Row size (48/56) instead of the Text size. */
+.site .slide[data-template="text"][data-statement="body"] .slide-statement {
+  font-size: var(--space-48);
+  line-height: calc(56 * var(--u));
+}
 /* data-statement="large" on a Wide or Row slide: a short statement at the
    Text size, in bold, across every open column (js/slides.js), still on the
    base line. */
@@ -494,6 +500,10 @@
    fitted inside (data-fit="box"; js/graphic.js). */
 .slide-visual { position: relative; min-width: 0; min-height: 0; }
 .slide-visual > [data-graphic] { width: 100%; height: 100%; }
+/* The hero's setup graphic spreads over all 12 columns and 6 rows, under the
+   hero text: its box reaches back over the statement's 6 columns (the scene
+   keeps the top left clear for the title). */
+.site-intro .slide-visual > [data-graphic="setup"] { width: calc(12 * var(--col) + 11 * var(--grid-gutter)); margin-left: calc(-6 * (var(--col) + var(--grid-gutter))); } /* graphic.js sets position: relative inline */
 
 /* Text artefacts (docs/design-system/text-artefacts.md). A chat hangs from the
    top of its box; your turn is boxed on the right at about two thirds of the
@@ -631,6 +641,47 @@
 .site .spec-body .spec-l { margin: 0; font-family: "JetBrains Mono", monospace; font-size: var(--space-16); line-height: var(--space-24); font-weight: 400; }
 .site .spec-body .spec-li { padding-left: 2ch; text-indent: -2ch; }
 .site .spec-body .spec-h:not(:first-child) { margin-top: var(--space-8); }
+
+/* Slide 15: Figma, the agent and the live page as three framed panes, each
+   the visual's full height, wired in two lanes (empty .mcp-lane anchors a
+   third and two thirds down each pane; js/slides.js draws the wires between
+   the frames' edges). Nested boxes are 2 thick. [data-grow-at] elements size
+   with --grow (0 -> 1 on beat 2, js/slides.js). */
+.mcp-art { height: 100%; }
+.mcp-pane { position: relative; box-sizing: border-box; height: 100%; padding: var(--space-16); overflow: hidden; display: flex; flex-direction: column; }
+.mcp-pane > * { flex: none; }
+.mcp-pane [data-box] [data-box], .mcp-wf [data-box], .mcp-cards [data-box] { --box-line: calc(2 * var(--u)); border-radius: var(--space-4); }
+.mcp-lane { position: absolute; left: 0; right: 0; height: 0; }
+.mcp-up { top: 33.33%; }
+.mcp-down { top: 66.67%; }
+.mcp-bar { display: block; height: var(--space-8); }
+/* Figma: the frame's name over a wireframe of the page. */
+.site .mcp-frame-name { margin: 0 0 var(--space-8); font-family: "JetBrains Mono", monospace; font-size: var(--space-16); line-height: var(--space-24); font-weight: 400; }
+.mcp-wf { box-sizing: border-box; flex: 1 1 0; min-height: 0; padding: var(--space-16); display: flex; flex-direction: column; gap: var(--space-16); overflow: hidden; }
+.mcp-wf > * { flex: none; }
+.mcp-wf-nav, .mcp-nav { display: flex; justify-content: space-between; align-items: center; }
+.mcp-wf-links { display: flex; gap: var(--space-8); width: 36%; }
+.mcp-wf-links > .mcp-bar { flex: 1; }
+.mcp-wf-head { display: block; height: calc(var(--space-24) + 24 * var(--u) * var(--grow, 0)); width: calc(48% + 24% * var(--grow, 0)); }
+.mcp-wf-btn { display: block; width: 32%; height: var(--space-32); }
+.mcp-wf-img { position: relative; display: block; height: calc(96 * var(--u)); }
+.mcp-wf-img > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.mcp-cards { display: flex; gap: var(--space-16); height: calc(80 * var(--u)); }
+.mcp-cards > span { flex: 1; position: relative; box-sizing: border-box; padding: var(--space-8); display: flex; }
+.mcp-card-img { flex: 1; display: block; }
+/* Agent: the turns in 24/32 (the chat's resting size), the speaker bold. */
+.site .mcp-turn { margin: 0 0 var(--space-16); font-size: var(--space-24); line-height: var(--space-32); font-weight: 400; min-height: var(--space-32); }
+/* The live page: the design system applied (Chakra Petch, accent, hatching). */
+.mcp-page { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; gap: var(--space-16); overflow: hidden; }
+.mcp-page > * { flex: none; }
+.site .mcp-logo { margin: 0; font-size: var(--space-16); line-height: var(--space-24); font-weight: 700; }
+.site .mcp-links { margin: 0; font-size: var(--space-16); line-height: var(--space-24); font-weight: 400; }
+.site .mcp-head { margin: 0; font-size: calc(var(--space-48) + 16 * var(--u) * var(--grow, 0)); line-height: calc(var(--space-48) + 24 * var(--u) * var(--grow, 0)); font-weight: 700; }
+.site .mcp-body { margin: 0; font-size: var(--space-16); line-height: var(--space-24); font-weight: 400; }
+.mcp-btn { position: relative; align-self: flex-start; padding: var(--space-4) var(--space-16); font-size: var(--space-16); line-height: var(--space-24); font-weight: 700; }
+.mcp-btn-fill { position: absolute; inset: 0; border-radius: var(--space-4); --ink: accent; }
+.mcp-btn-text { position: relative; }
+.mcp-img { display: block; height: calc(96 * var(--u)); }
 
 /* Slide 12: the poster and its grid (js/slides.js places every poster and
    figure, placePosters). A Swiss-modern roastery poster drawn in percentages of

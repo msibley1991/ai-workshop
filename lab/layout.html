@@ -56,7 +56,7 @@
               <p class="site-hero-sub">LLM-assisted coding in design</p>
             </div>
           </div>
-          <div class="slide-visual"><div data-graphic="exploded-stack" data-fit="box" data-align="top"></div></div>
+          <div class="slide-visual"><div data-graphic="setup" data-fit="box" data-align="top"></div></div>
         </section>
         <span class="genie-sink" data-genie-sink data-fill aria-hidden="true"></span>
       </div>
@@ -584,18 +584,86 @@
             </section>
           </div>
           <div data-section="MCPs">
-            <section class="slide" data-slide data-template="text">
-              <div class="slide-statement"><p data-genie>[Placeholder] Text needed: MCPs.</p></div>
+            <!-- Slide 15, Row, three beats: Figma, the agent and the live page as
+                 three framed panes (columns 1-4, 6-7, 9-12), wired in two lanes.
+                 Beat 1: the panes open one step after another, the prompt types,
+                 and the upper lane draws left to right (Figma -> Agent -> code).
+                 Beat 2: "Often both ways." pours in; the page's headline grows,
+                 the lower lane draws right to left (data-wire-beat, data-wire-step),
+                 the agent's reply types, and the Figma headline grows to match
+                 (data-grow-at). Beat 3: the accent warning on the base line from
+                 column 8 (data-at). -->
+            <section class="slide" data-slide data-template="row">
+              <div class="slide-statement"><span data-genie>MCP (Model Context Protocol): tools that let an LLM work directly inside other software. </span><span data-genie>Often both ways.</span><p data-genie data-at="8" data-ink="accent">Each task is heavy: it costs tokens and fills the context.</p></div>
+              <div class="slide-visual" data-cols="4" data-at="1">
+                <div class="artefact mcp-art" data-artefact="figma">
+                  <div class="mcp-pane" data-box data-clip data-frame>
+                    <div class="doc-head"><span class="doc-head-fill" data-fill></span><p class="doc-name" data-ink="ground">Figma</p></div>
+                    <p class="mcp-frame-name">Home</p>
+                    <div class="mcp-wf" data-box>
+                      <div class="mcp-wf-nav"><span class="mcp-bar" data-fill style="width: 24%"></span><span class="mcp-wf-links"><span class="mcp-bar" data-fill></span><span class="mcp-bar" data-fill></span><span class="mcp-bar" data-fill></span></span></div>
+                      <span class="mcp-wf-head" data-fill data-grow-at="1" data-step="2"></span>
+                      <span class="mcp-bar mcp-wf-line" data-fill style="width: 72%"></span>
+                      <span class="mcp-wf-btn" data-box></span>
+                      <span class="mcp-wf-img" data-box><svg viewBox="0 0 100 100" preserveAspectRatio="none" data-draw data-weight="2" aria-hidden="true"><polyline points="0,0 100,100"/><polyline points="100,0 0,100"/></svg></span>
+                      <div class="mcp-cards"><span data-box></span><span data-box></span><span data-box></span></div>
+                    </div>
+                    <span class="mcp-lane mcp-up" data-wire-edge data-wire-to="mcp-agent-up"></span>
+                    <span class="mcp-lane mcp-down" data-wire-edge data-wire-id="mcp-figma-down" data-wire-level></span>
+                  </div>
+                </div>
+              </div>
+              <div class="slide-visual" data-cols="2" data-at="6">
+                <div class="artefact mcp-art" data-artefact="agent" data-step="1">
+                  <div class="mcp-pane mcp-agent" data-box data-clip data-frame>
+                    <div class="doc-head"><span class="doc-head-fill" data-fill></span><p class="doc-name" data-ink="ground">Agent</p></div>
+                    <p class="mcp-turn" data-type="inline"><strong>You:</strong> Use this wireframe for the website layout and our design system for the components.</p>
+                    <p class="mcp-turn" data-type="inline" data-type-at="1" data-step="1"><strong>Agent:</strong> Our headline is larger according to typography.md, I edited the wireframe to match.</p>
+                    <span class="mcp-lane mcp-up" data-wire-edge data-wire-id="mcp-agent-up" data-wire-level data-wire-to="mcp-code-up"></span>
+                    <span class="mcp-lane mcp-down" data-wire-edge data-wire-id="mcp-agent-down" data-wire-level data-wire-to="mcp-figma-down" data-wire-beat="1" data-wire-step="1"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="slide-visual" data-cols="4" data-at="9">
+                <div class="artefact mcp-art" data-artefact="code" data-step="2">
+                  <div class="mcp-pane" data-box data-clip data-frame>
+                    <div class="doc-head"><span class="doc-head-fill" data-fill></span><p class="doc-name" data-ink="ground">localhost:8123</p></div>
+                    <div class="mcp-page">
+                      <div class="mcp-nav"><p class="mcp-logo">Roastery</p><p class="mcp-links">Beans&nbsp;&nbsp;Visit&nbsp;&nbsp;Cart</p></div>
+                      <p class="mcp-head" data-grow-at="1">Roast day</p>
+                      <p class="mcp-body">Single-origin beans, roasted every Monday.</p>
+                      <span class="mcp-btn"><span class="mcp-btn-fill" data-fill></span><span class="mcp-btn-text" data-ink="ground">Buy beans</span></span>
+                      <span class="mcp-img" data-fill data-hatch="2"></span>
+                      <div class="mcp-cards"><span data-box><span class="mcp-card-img" data-fill data-hatch="1"></span></span><span data-box><span class="mcp-card-img" data-fill data-hatch="2"></span></span><span data-box><span class="mcp-card-img" data-fill data-hatch="3"></span></span></div>
+                    </div>
+                    <span class="mcp-lane mcp-up" data-wire-edge data-wire-id="mcp-code-up" data-wire-level></span>
+                    <span class="mcp-lane mcp-down" data-wire-edge data-wire-to="mcp-agent-down" data-wire-beat="1" data-wire-step="0"></span>
+                  </div>
+                </div>
+              </div>
+              <svg class="slide-wires" data-draw data-weight="4" aria-hidden="true"></svg>
             </section>
           </div>
           <div data-section="Make your own tools">
+            <!-- Slide 16, Text, two beats: the paragraph, then a blank line and the
+                 pointer to the playground. The link has no href until the
+                 playground page exists; it already takes the link style. -->
             <section class="slide" data-slide data-template="text">
-              <div class="slide-statement"><p data-genie>[Placeholder] Text needed: make your own tools.</p></div>
+              <div class="slide-statement"><p data-genie>In certain cases, desired visual outcomes can't be achieved with any existing tool. It is increasingly possible to generate your own tools. This presentation used many personally conceived tools.</p><p data-genie data-gap="1">Test these tools out at the <a>playground</a>.</p></div>
             </section>
           </div>
           <div data-section="Conclusion">
+            <!-- Slide 17, Text, five beats, at the Split and Row size (48/56,
+                 data-statement="body"): one sentence per beat, the first four
+                 running on in one paragraph (inline genie blocks, as slide 3),
+                 then the answer from the top of row 5 (data-row on the sentence). -->
+            <section class="slide" data-slide data-template="text" data-statement="body">
+              <div class="slide-statement"><span data-genie>The design world is changing. </span><span data-genie>Much of what I presented will change, likely soon. </span><span data-genie>Some think this means we lose creative control or we will give up our ability to think. </span><span data-genie>Many people who use these tools promote a, frankly, ugly vision of the future.</span><p data-genie data-row="5">But if you have <em>vision</em>, <em>curiosity</em>, and <em>adaptability</em>, this doesn't have to be true.</p></div>
+            </section>
+            <!-- Slide 18, Text, one beat: the thanks, a blank line, then the
+                 pointer to the repo download (the button isn't built yet). -->
             <section class="slide" data-slide data-template="text">
-              <div class="slide-statement"><p data-genie>[Placeholder] Text needed: conclusion and repo download.</p></div>
+              <div class="slide-statement"><p data-genie><span class="st-line">Thank you for listening.</span><span class="st-line">See how this presentation was made below.</span></p></div>
             </section>
           </div>
           <footer class="slide-footer" data-clip><p class="slide-section-title">On creative decisions</p></footer>

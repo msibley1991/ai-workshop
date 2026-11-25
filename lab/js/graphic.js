@@ -277,14 +277,19 @@ function captionLines(scene) {
 // leader ends one gap short of its own caption.
 function leaderEnd(m, l, P, f) {
   const p = P(...labelPoint(m.scene, l));
-  if (l.side === "left") {
+  if (l.side === "left" && !freeCaptions(m.scene)) {
     // The shown label's own DOM width (canvas measureText runs a few units short).
     const span = m.labels.get(l.id), w = span.offsetWidth ? span.getBoundingClientRect().width / m.geom.u : m.caps.width.get(l.id);
     p[0] = (w + CAPTION_GAP) * f + LINE / 2; // the line stamp reaches LINE / 2 px left of its point
   }
   return p;
 }
-const labelPoint = (scene, l) => [captionLines(scene)[l.side === "left" ? "left" : "right"], l.at[1]];
+// scene.captions: "free" (the hero): each caption sits at its own `at`, beside
+// its object, instead of in a column on the span's edge; the leader ends at
+// `at`, a left caption's text ends a gap short of it and a right caption's
+// starts a gap past it. fit() then fits the design box itself (scene.align).
+const freeCaptions = (scene) => scene.captions === "free";
+const labelPoint = (scene, l) => (freeCaptions(scene) ? l.at : [captionLines(scene)[l.side === "left" ? "left" : "right"], l.at[1]]);
 
 // Label boxes follow the element box; called from draw with the current offset.
 function placeLabels(m, ox, oy, s) {
@@ -292,7 +297,9 @@ function placeLabels(m, ox, oy, s) {
     const span = m.labels.get(l.id), [lx, ly] = labelPoint(m.scene, l);
     // Left captions start on the span's edge (x 0), so all their left edges align;
     // right captions start just past the caption line.
-    const x = l.side === "left" ? 0 : ox + lx * s + CAPTION_GAP, y = oy + ly * s - 16;
+    const free = freeCaptions(m.scene);
+    const w = free && l.side === "left" ? (span.offsetWidth ? span.getBoundingClientRect().width / m.geom.u : m.caps?.width.get(l.id) ?? 0) : 0;
+    const x = l.side === "left" ? (free ? ox + lx * s - CAPTION_GAP - w : 0) : ox + lx * s + CAPTION_GAP, y = oy + ly * s - 16;
     span.style.left = `calc(${x} * var(--u))`;
     span.style.top = `calc(${y} * var(--u))`;
   }
@@ -329,6 +336,14 @@ function captionWidths(m, u) {
 // box the drawing is fitted by width and centred vertically.
 function fit(m, W, H, u, box = null) {
   const scene = m.scene, caps = captionWidths(m, u);
+  // Free captions: the design box (drawing and captions) is fitted whole, by
+  // width and height, and placed across the element by scene.align (0 left,
+  // 1 right).
+  if (freeCaptions(scene)) {
+    const s = Math.max(0.05, Math.min(W / scene.size[0], H / scene.size[1]));
+    const slack = H - scene.size[1] * s;
+    return { s, ox: (W - scene.size[0] * s) * (scene.align ?? 0.5), oy: box ? slack * box.align : slack / 2 };
+  }
   const cols = captionLines(scene);
   const dL = caps.left != null ? cols.left : 0, dR = caps.right != null ? cols.right : scene.size[0];
   const aL = caps.left != null ? caps.left + CAPTION_GAP : 0;
@@ -379,6 +394,17 @@ function loopClock(m, now, st) {
   else if (!m.spin.held) m.loopT += now - last;
   return m.loopT;
 }
+// The bob loop (state loop: "bob", an iso scene's scene.bob { amp, ms,
+// stagger }): a part with `bob: n` rises `amp` world units and settles back
+// over `ms` on a cosine, starting n * stagger ms after the loop, then repeats.
+// Connectors and leaders pinned to the part follow it.
+const BOB_FRAME = 33; // ms: the bob repaints at about 30 fps
+function bobLift(bob, T, n) {
+  if (!bob || T == null || n == null) return 0;
+  const t = T - n * (bob.stagger ?? 0);
+  if (t <= 0) return 0;
+  return (bob.amp * (1 - Math.cos((2 * Math.PI * (t % bob.ms)) / bob.ms))) / 2;
+}
 // The twist loop (state loop: "twist", an iso scene's scene.twist { deg, ms,
 // stagger }): an angle that turns `deg` and back, `ms` each leg on the
 // standard ease, starting `delay` ms after the loop does. 0 before it starts.
@@ -417,6 +443,10 @@ export function drawGraphic(ctx, item, ps, u, colors) {
   const vals = currentValues(m, now), st = stateAt(m, m.index);
   m.viewYaw = m.spin.yaw + swayYaw(m, now, st);
   m.twistT = st.loop === "twist" ? loopClock(m, now, st) : null;
+  // The bob loop (state loop: "bob", the hero): its clock, stepped to
+  // BOB_FRAME so the look repaints at most that often.
+  m.bobT = st.loop === "bob" ? loopClock(m, now, st) : null;
+  if (m.bobT != null) m.bobT = Math.floor(m.bobT / BOB_FRAME) * BOB_FRAME;
   const box = item.el.dataset.fit === "box" ? { align: m.alignT ?? alignOf(item.el) } : null;
   // data-inset (units): the drawing is fitted that far in from the box's top
   // and bottom, so a moving scene (slide 7's knot) has room to swing.
@@ -443,7 +473,7 @@ export function drawGraphic(ctx, item, ps, u, colors) {
   const blinkOn = !motion || st.loop !== "blink" || Math.floor(now / BLINK_MS) % 2 === 0;
   const flowing = motion && (st.flow?.length ?? 0) > 0;
   // A knot moves every frame (its sim and tumble), so it always repaints.
-  const key = [m.scene.kind === "knot" ? now : "", bw, bh, ox, oy, f, s, m.index, vals.explode, vals.frame, m.viewYaw, m.twistT, m.spin.pitch, m.hover, blinkOn, m.open?.o, m.open?.w,
+  const key = [m.scene.kind === "knot" ? now : "", bw, bh, ox, oy, f, s, m.index, vals.explode, vals.frame, m.viewYaw, m.twistT, m.bobT, m.spin.pitch, m.hover, blinkOn, m.open?.o, m.open?.w,
     colors.phosphor, colors.accent, colors.ground].join("|");
   let look = m.looks.find((l) => l.key === key);
   if (!look) {
@@ -487,7 +517,8 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
     const k = scene.scale * scale * f;
     const R = rotator(ISO_YAW + m.spin.yaw, ISO_PITCH + m.spin.pitch), L = lightVector(ISO_STYLE);
     const [cx, cy] = P(...scene.origin);
-    const offsetOf = (part) => (part.explode ?? [0, 0, 0]).map((v) => v * vals.explode);
+    const bob = (part) => bobLift(scene.bob, m.bobT, part.bob);
+    const offsetOf = (part) => (part.explode ?? [0, 0, 0]).map((v, i) => v * vals.explode + (i === 1 ? bob(part) : 0));
     const world = (part, p) => { const o = offsetOf(part); return [part.box.c[0] + o[0] + p[0], part.box.c[1] + o[1] + p[1], part.box.c[2] + o[2] + p[2]]; };
     const proj = (p) => { const q = R(p); return [cx + q[0] * k, cy - q[1] * k, q[2]]; };
     const byId = new Map(scene.parts.map((p) => [p.id, p]));
@@ -528,7 +559,10 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
         vis.push({ part: ring, seg: [p, q], depth: (p[2] + q[2]) / 2, weight: ring.weight ?? INNER });
       }
     }
-    vis.sort((a, b) => a.depth - b.depth);
+    // part.on: a part standing on another (the hero's plate contents) paints
+    // after every part without one, so a big face under it (the plate's
+    // top, whose centre can sit nearer than the part) never covers it.
+    vis.sort((a, b) => (a.part.on ? 1 : 0) - (b.part.on ? 1 : 0) || a.depth - b.depth);
     const facesOf = new Map();
     for (const { part, face, n, pts, seg, weight } of vis) {
       if (seg) { r.line(seg[0], seg[1], own(r.count++, part.id), weight); continue; }
@@ -580,10 +614,14 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
     if (!visible(c.id)) continue;
     let pts = c.pts.map(resolve);
     if (c.end === "arrow") pts = pullBack(pts, ARROW_GAP);
+    // start: "arrow" (the hero's MCP link): a chevron at the first point too,
+    // pulled back the same way, for a two-way connector.
+    if (c.start === "arrow") pts = pullBack([...pts].reverse(), ARROW_GAP).reverse();
     pts = rounded(pts, RADIUS, false);
     const id = own(r.count++, c.part ?? c.id, true);
     for (let i = 0; i + 1 < pts.length; i++) r.line(pts[i], pts[i + 1], id, CONNECTOR, { dash: c.dashed ? DASH : null });
     if (c.end === "arrow") chevron(r, pts[pts.length - 2], pts[pts.length - 1], id);
+    if (c.start === "arrow") chevron(r, pts[1], pts[0], id);
     if (st.flow?.includes(c.id)) m.flows.push({ pts, id }); // packets: drawn over the look (drawGraphic)
   }
 

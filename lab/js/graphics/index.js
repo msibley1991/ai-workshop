@@ -4,6 +4,7 @@ import pageLayout from "./page-layout.js";
 import stillLife from "./still-life.js";
 import layerCube from "./layer-cube.js";
 import filetypeKnot from "./filetype-knot.js";
+import setup from "./setup.js";
 
 export default {
   "exploded-stack": explodedStack,
@@ -11,4 +12,5 @@ export default {
   "still-life": stillLife,
   "layer-cube": layerCube,
   "filetype-knot": filetypeKnot,
+  setup,
 };

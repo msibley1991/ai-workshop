@@ -178,6 +178,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
     placeStack(stop);
     for (const g of stop.visuals) if (fromBeat(g, "mark") != null) setMarks(stop, g, !g.hidden && markAt(g, beat) ? 1 : 0);
     setLinks(stop, stop.visuals.some((g) => !g.hidden && markAt(g, beat)) ? 1 : 0);
+    setGrows(stop, beat);
     wiresAt(stop, beat);
     setSpans(stop, beat);
     placeCaptions(stop);
@@ -261,6 +262,13 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
 
   // Span states (slide 11): data-span-states="focus,focus,mark" sets a span's
   // data-span per beat (the last holds); CSS draws the bar.
+  // Grows (slide 15): data-grow-at="1" tweens the element's --grow from 0 to 1
+  // on that beat (CSS interpolates a size with it); data-step orders it among
+  // the beat's entrances, typing and wires.
+  const growsOf = (stop) => [...(stop.root.querySelectorAll?.("[data-grow-at]") ?? [])];
+  const setGrows = (stop, beat) => growsOf(stop).forEach((el) => el.style.setProperty("--grow", beat >= Number(el.dataset.growAt) ? 1 : 0));
+  const growRun = (els, to, my) => tween([{ apply: (k) => els.forEach((el) => el.style.setProperty("--grow", to ? k : 1 - k)) }], my)
+    .then(() => { if (my === epoch) els.forEach((el) => el.style.setProperty("--grow", to)); });
   function setSpans(stop, beat) {
     for (const el of stop.root.querySelectorAll?.("[data-span-states]") ?? []) {
       const list = el.dataset.spanStates.split(",").map((x) => x.trim());
@@ -479,7 +487,11 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
         if (!b) continue;
         const [ga, gb] = [visualOf(a), visualOf(b)];
         const later = enterOf(gb) > enterOf(ga) || (enterOf(gb) === enterOf(ga) && stepOf(gb) >= stepOf(ga)) ? gb : ga;
-        stop.wires.push({ a, b, beat: enterOf(later), step: stepOf(later) });
+        // data-wire-beat / data-wire-step on the start: the wire draws on that
+        // beat's step instead (slide 15's return lane, after both ends are in).
+        const beat = a.dataset.wireBeat != null ? Number(a.dataset.wireBeat) : enterOf(later);
+        const step = a.dataset.wireStep != null ? Number(a.dataset.wireStep) : stepOf(later);
+        stop.wires.push({ a, b, beat, step });
       }
     }
     return stop.wires;
@@ -498,11 +510,14 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
       // data-wire-edge: start from the right edge of the element's frame, and
       // end at the left edge of it, level with the element (slide 10's files).
       const frameOf = (el) => (el.hasAttribute("data-wire-edge") ? el.closest("[data-frame]") ?? el : el).getBoundingClientRect();
-      const x0 = frameOf(w.a).right - sv.left + gap, y0 = ra.top + ra.height / 2 - sv.top;
+      // An end right of its start runs right to left (slide 15's return lane):
+      // from the start's left edge to the end's right edge.
+      const fa = frameOf(w.a), fb = frameOf(w.b), rev = fb.right <= fa.left, dir = rev ? -1 : 1;
+      const x0 = (rev ? fa.left : fa.right) - sv.left + dir * gap, y0 = ra.top + ra.height / 2 - sv.top;
       // data-wire-level on the end: it arrives level with the start (slide 13).
-      const x1 = frameOf(w.b).left - sv.left - gap - miter, y1 = w.b.hasAttribute("data-wire-level") ? y0 : rb.top + rb.height / 2 - sv.top;
-      const xm = (x0 + x1) / 2, d = Math.min(Math.abs(y1 - y0), Math.max(0, x1 - x0));
-      const drawn = partial(rounded([[x0, y0], [xm - d / 2, y0], [xm + d / 2, y1], [x1, y1]], LINK_RADIUS * u), f);
+      const x1 = (rev ? fb.right : fb.left) - sv.left - dir * (gap + miter), y1 = w.b.hasAttribute("data-wire-level") ? y0 : rb.top + rb.height / 2 - sv.top;
+      const xm = (x0 + x1) / 2, d = Math.min(Math.abs(y1 - y0), Math.max(0, dir * (x1 - x0)));
+      const drawn = partial(rounded([[x0, y0], [xm - dir * d / 2, y0], [xm + dir * d / 2, y1], [x1, y1]], LINK_RADIUS * u), f);
       const line = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
       line.setAttribute("points", drawn.map((p) => p.join(",")).join(" "));
       line.setAttribute("fill", "none");
@@ -740,6 +755,16 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
         + (ROWS * FIELD + (ROWS - 1) * FIELD_GAP) * u;
       p.style.marginTop = `${Math.max(m0, m0 + bottom - r.bottom)}px`;
     }
+    // data-row="5" on a sentence: its top edge sits on the top of that row
+    // field (slide 17's answer), unless the text above reaches past it.
+    for (const p of st.querySelectorAll(":scope > [data-row]")) {
+      p.style.marginTop = "";
+      const m0 = parseFloat(getComputedStyle(p).marginTop) || 0;
+      const r = p.getBoundingClientRect(), u = unit();
+      const top = slide.getBoundingClientRect().top + parseFloat(getComputedStyle(slide).paddingTop)
+        + (Number(p.dataset.row) - 1) * (FIELD + FIELD_GAP) * u;
+      p.style.marginTop = `${Math.max(m0, m0 + top - r.top)}px`;
+    }
   }
 
   // Row fields the statement needs, measured at its full length (every
@@ -912,6 +937,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
   // VISUAL_MS tween; an empty step is skipped.
   function visualSteps(from, to, beat) {
     const exits = [], moves = [], swaps = [], enters = [], outs = from.visuals.filter((g) => !g.hidden);
+    const later = []; // data-step > 0: they enter after these steps (laterIn)
     placeVisuals(to, beat);
     for (const g of to.visuals) {
       if (g.hidden) continue;
@@ -941,6 +967,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
         swaps.push(...treeSwap(og, g));
         continue;
       }
+      if (stepOf(g) > 0) { g.hidden = true; later.push(g); continue; }
       if (isArtefact(g)) {
         emptyArtefact(to, g, beat); // it types in once its frame is open
         enters.push(frameItem(g, 1));
@@ -989,7 +1016,26 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
       exits.push(fall(old, dy));
       enters.push(rise(next, dy));
     }
-    return [exits, moves, swaps, enters];
+    return Object.assign([exits, moves, swaps, enters], { later });
+  }
+  // A slide change's wires and stepped visuals (slide 15): once the first
+  // visuals are in and typed, the wires between them draw; then each later
+  // data-step's visuals enter (and type), each followed by the wires they
+  // complete.
+  async function laterIn(to, beat, later, my) {
+    const vs = (w) => Math.max(stepOf(visualOf(w.a)), stepOf(visualOf(w.b)));
+    const draw = async (sn) => {
+      if (!wiresOf(to).some((w) => beat >= w.beat && vs(w) === sn)) return;
+      await tween([{ apply: (e) => setWires(to, (w) => (beat < w.beat ? 0 : vs(w) < sn ? 1 : vs(w) === sn ? e : 0)) }], my);
+    };
+    await draw(0);
+    for (const sn of [...new Set(later.map(stepOf))].sort((x, y) => x - y)) {
+      if (my !== epoch) return false;
+      await bringIn(to, later.filter((g) => stepOf(g) === sn), beat, my);
+      if (my !== epoch) return false;
+      await draw(sn);
+    }
+    return my === epoch;
   }
 
   async function runSteps(steps, my) {
@@ -1012,6 +1058,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
     // 1. Text out. Links (slide 1's) erase along with it, start first, over the
     // same run, then the boxes they came from fall with the other visuals.
     // Text artefacts erase alongside, so their frames can close with the exits.
+    let later = [];
     const outMs = textOut(from, my);
     const links = from.root.querySelector?.(".slide-links")?.childElementCount ? from : null;
     await Promise.all([
@@ -1034,6 +1081,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
       setTemplate(to, beat);
       layoutSlide(to.root);
       const steps = visualSteps(from, to, beat);
+      later = steps.later;
       holdLinks(to);
       relayout();
       // 2. Visuals: exits, a pause, then moves, then entrances.
@@ -1057,6 +1105,8 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
       holdLinks(to);
       // Its visuals wait below the panel while the accordion moves (set up
       // before any frame draws them); artefacts type in once they've risen.
+      later = to.visuals.filter((g) => !g.hidden && stepOf(g) > 0);
+      later.forEach((g) => (g.hidden = true));
       const enters = to.visuals.filter((g) => !g.hidden).map((g) => {
         if (isArtefact(g)) emptyArtefact(to, g, beat);
         setState(to, g, beat, false);
@@ -1073,10 +1123,7 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
     relayout();
     await typeIn(to, beat, my);
     if (my !== epoch) return;
-    if (wiresOf(to).some((w) => beat >= w.beat)) {
-      await tween([{ apply: (k) => setWires(to, (w) => (beat >= w.beat ? k : 0)) }], my);
-      if (my !== epoch) return;
-    }
+    if (!(await laterIn(to, beat, later, my))) return;
 
     // 3. Text in (line counts need a measure of the shown slide first).
     await frames(2);
@@ -1178,17 +1225,26 @@ export function createSlides({ site, panels, goPanel, relayout, onMove = () => {
     }
     const marksLast = mark.some((g) => enter.includes(g));
     if (!marksLast) ph.push(...marks);
-    // Entrances by data-step, each step's wires drawn right after it.
+    // Entrances by data-step, then that step's grows and stepped typing
+    // (data-type-at with data-step), then its wires.
     const wires = wiresOf(stop).filter((w) => w.beat === b);
-    const steps = [...new Set([...enter.map(stepOf), ...wires.map((w) => w.step)])].sort((x, y) => x - y);
+    const grows = growsOf(stop).filter((el) => Number(el.dataset.growAt) === b);
+    const typed = stop.visuals.filter((g) => isArtefact(g) && both(g)).flatMap((g) => typeBlocks(g).filter((bl) => typeAt(bl) === b));
+    const stepped = typed.filter((bl) => bl.dataset.step != null);
+    const steps = [...new Set([...enter, ...grows, ...stepped].map(stepOf).concat(wires.map((w) => w.step)))].sort((x, y) => x - y);
+    const typeRun = (bls, to) => (my) => Promise.all(bls.map((bl) => typeTo(bl, to, TYPE_MS, () => my !== epoch)));
     for (const sn of steps) {
       const gs = enter.filter((g) => stepOf(g) === sn);
       if (gs.length) ph.push({ fwd: (my) => bringIn(stop, gs, b, my), back: (my) => takeOut(stop, gs, my) });
+      const gr = grows.filter((el) => stepOf(el) === sn);
+      if (gr.length) ph.push({ fwd: (my) => growRun(gr, 1, my), back: (my) => growRun(gr, 0, my) });
+      const ty = stepped.filter((bl) => stepOf(bl) === sn);
+      if (ty.length) ph.push({ fwd: typeRun(ty, 1), back: typeRun(ty, 0) });
       if (wires.some((w) => w.step === sn)) ph.push({ fwd: (my) => wireRun(stop, b, sn, 1, my), back: (my) => wireRun(stop, b, sn, 0, my) });
     }
     if (marksLast) ph.push(...marks);
     // Blocks typed on this beat (data-type-at) in already-shown artefacts, last.
-    const due = stop.visuals.filter((g) => isArtefact(g) && both(g)).flatMap((g) => typeBlocks(g).filter((bl) => typeAt(bl) === b));
+    const due = typed.filter((bl) => bl.dataset.step == null);
     if (due.length) ph.push({
       fwd: (my) => Promise.all(due.map((bl) => typeTo(bl, 1, TYPE_MS, () => my !== epoch))),
       back: (my) => Promise.all(due.map((bl) => typeTo(bl, 0, TYPE_MS, () => my !== epoch))),
