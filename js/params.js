@@ -14,13 +14,8 @@
 //   colours and paletteDisplayConfig, saved into presets/palettes.json;
 //   "Display" holds sharedDisplayConfig, saved to presets/display.json.
 // - "Effects Lab" on the old specimen (index.html): config, which adds the
-//   theme, trail colours, type and 3D object dials it still uses.
+//   theme, trail colours and 3D object dials it still uses.
 // The defaults are the tuned look (display.md, "The look").
-
-const typeLevel = (size, lineHeight) => ({
-  size: [size, 8, 160, 1],
-  lineHeight: [lineHeight, 0.8, 2.2, 0.05],
-});
 
 // The effects each palette sets (its `display` block in palettes.json).
 export const paletteDisplayConfig = {
@@ -103,20 +98,6 @@ export const config = {
     // link: inline link text (viewer pages set it from the palette).
     light: { ground: "#F4F4F0", ink: "#0050FF", accent: "#F38020", link: "#0050FF", _collapsed: true },
     dark: { ground: "#0A0C10", ink: "#3D7BFF", accent: "#F38020", link: "#F3C020", _collapsed: true },
-  },
-  type: {
-    family: {
-      type: "select",
-      options: ["JetBrains Mono", "IBM Plex Mono", "VT323", "Inter"],
-      default: "JetBrains Mono",
-    },
-    h1: typeLevel(48, 1.1),
-    h2: typeLevel(32, 1.2),
-    h3: typeLevel(24, 1.3),
-    body: typeLevel(20, 1.5),
-    small: typeLevel(14, 1.4),
-    gap: [24, 4, 80, 1],
-    _collapsed: true,
   },
   object: {
     style: { type: "select", options: ["edges", "edges + faces"], default: "edges + faces" },

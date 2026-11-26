@@ -230,6 +230,7 @@
       <button class="site-bar-button glossary-step" type="button" data-step="-1" aria-label="Previous term" data-fill><span>[↑]</span></button>
       <button class="site-bar-button glossary-step" type="button" data-step="1" aria-label="Next term" data-fill><span>[↓]</span></button>
       <span class="site-bar-label">Term</span>
+      <button class="site-bar-button site-nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" data-fill><span>[n] Nav</span></button>
       <button class="site-bar-button site-grid-toggle" type="button" aria-pressed="false" data-fill><span>[g] Grid</span></button>
       <button class="site-bar-button site-fullscreen-toggle" type="button" aria-pressed="false" data-fill><span>[f] Fullscreen</span></button>
       <button class="site-bar-button site-controls-toggle" type="button" aria-expanded="false" aria-controls="site-controls" data-fill><span>[c] Controls</span></button>
@@ -278,6 +279,17 @@
         </div>
         <p class="site-controls-hint">[c] [Esc] Close</p>
       </aside>
+    </div>
+
+    <!-- Left nav (docs/design-system/components.md): the talk's tree and the
+         other pages over columns 1-2, built by js/site-nav.js. Like the
+         controls, the clip box is its open position. -->
+    <div class="site-nav-clip" data-clip>
+      <nav class="site-nav site-panel-box" id="site-nav" aria-label="Sections" data-box inert>
+        <p class="site-panel-title">Nav</p>
+        <div class="site-nav-tree"></div>
+        <p class="site-panel-hint">[n] [Esc] Close</p>
+      </nav>
     </div>
 
     <!-- Column-grid overlay, shown by the bottom-bar toggle. -->

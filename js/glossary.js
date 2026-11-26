@@ -3,8 +3,9 @@
 // strip and the URL (#<slug>) follow the entry at the top of the column.
 // Clicking a term (in the index or a cross-link), ↑ ↓, or a pasted #slug brings
 // that entry to the top, on ease or, with motion off, at once. The bars and
-// the controls panel work as on index.html (c, g, f, Esc).
+// the panels work as on index.html (n, c, g, f, Esc).
 import { viewer } from "./viewer.js";
+import { fetchTalkOutline, buildNavTree } from "./site-nav.js";
 
 const JUMP_MS = 400;   // motion.md: the "step" duration
 const PANEL_MS = 250;
@@ -122,36 +123,83 @@ document.addEventListener("fullscreenchange", () => {
   relayout();
 });
 
-// ---- Controls panel (columns 11-12, which the glossary leaves empty) -----------------------
-const panel = site.querySelector(".site-controls");
-const controlsToggle = site.querySelector(".site-controls-toggle");
-const panelToggles = [controlsToggle, site.querySelector(".site-palette")];
-let open = 0, target = 0, panelRaf = 0, highlighted = null;
+// ---- Panels: the controls (columns 11-12, which the glossary leaves empty) and
+// the left nav (1-2, js/site-nav.js). Only one is open at a time. Opening the
+// nav moves the index and the entries two columns right first (to 3-4 and
+// 6-11; css/glossary.css keeps the grid on the canvas's columns), then slides
+// it in; closing slides it out, then moves them back, as on index.html.
+const indexEl = site.querySelector(".glossary-index");
+function coverLeft(on) {
+  root.style.setProperty("--nav-cols", on ? "2" : "0");
+  indexEl.style.gridColumn = on ? "3 / 5" : "";
+  column.style.gridColumn = on ? "6 / 12" : "";
+  relayout();
+}
 
-function setOpen(v) { open = v; root.style.setProperty("--controls-open", v.toFixed(4)); relayout(); }
+let highlighted = null, active = null;
 function highlight(b) {
   highlighted?.removeAttribute("data-highlight");
   highlighted = b;
   if (b) { b.setAttribute("data-highlight", ""); b.focus({ preventScroll: true }); }
+  active?.onHighlight?.(b);
   relayout();
 }
-function toggleControls(want = target === 0) {
-  target = want ? 1 : 0;
-  panel.inert = !want;
-  controlsToggle.setAttribute("aria-expanded", String(want));
-  highlight(want ? panel.querySelector("[aria-pressed='true']") : null);
-  if (!want) controlsToggle.focus({ preventScroll: true });
-  cancelAnimationFrame(panelRaf);
-  if (reduceMotion()) return setOpen(target);
-  const from = open, start = performance.now();
-  const frame = (now) => {
-    const t = Math.min(1, (now - start) / PANEL_MS);
-    setOpen(from + (target - from) * ease(t));
-    if (t < 1) panelRaf = requestAnimationFrame(frame);
+
+function makePanel({ el, toggle, toggles, cssVar, items, jumps, cover = () => {}, onHighlight }) {
+  let open = 0, target = 0, raf = 0;
+  const set = (v) => { open = v; root.style.setProperty(cssVar, v.toFixed(4)); relayout(); };
+  const panel = {
+    items, jumps, onHighlight,
+    get isOpen() { return target === 1; },
+    toggle(want = target === 0) {
+      if (want && active && active !== panel) active.toggle(false);
+      target = want ? 1 : 0;
+      el.inert = !want;
+      toggle.setAttribute("aria-expanded", String(want));
+      if (want) {
+        active = panel;
+        cover(true);
+        highlight(el.querySelector("[aria-current='page'], [aria-current='true'], [aria-pressed='true']") ?? items()[0] ?? null);
+      } else if (active === panel) {
+        highlight(null);
+        active = null;
+        toggle.focus({ preventScroll: true });
+      }
+      const closed = () => { if (target === 0) cover(false); };
+      cancelAnimationFrame(raf);
+      if (reduceMotion()) { set(target); return closed(); }
+      const from = open, start = performance.now();
+      const frame = (now) => {
+        const t = Math.min(1, (now - start) / PANEL_MS);
+        set(from + (target - from) * ease(t));
+        if (t < 1) raf = requestAnimationFrame(frame);
+        else closed();
+      };
+      raf = requestAnimationFrame(frame);
+    },
   };
-  panelRaf = requestAnimationFrame(frame);
+  toggles.forEach((t) => t?.addEventListener("click", () => panel.toggle()));
+  return panel;
 }
-panelToggles.forEach((t) => t.addEventListener("click", () => toggleControls()));
+
+const panel = site.querySelector(".site-controls");
+const controlsToggle = site.querySelector(".site-controls-toggle");
+const controls = makePanel({
+  el: panel, toggle: controlsToggle, toggles: [controlsToggle, site.querySelector(".site-palette")], cssVar: "--controls-open",
+  items: () => [...panel.querySelectorAll("button")].filter((b) => !b.closest("[hidden]")),
+  jumps: () => [...panel.querySelectorAll(".site-controls-group:not([hidden])")].map((g) => g.querySelector("button")),
+});
+
+const navEl = site.querySelector(".site-nav");
+const navToggle = site.querySelector(".site-nav-toggle");
+let navTree = null;
+fetchTalkOutline()
+  .then((outline) => { navTree = buildNavTree(navEl.querySelector(".site-nav-tree"), outline, { page: "glossary.html", relayout }); })
+  .catch((err) => console.error("[site] nav", err));
+const nav = makePanel({
+  el: navEl, toggle: navToggle, toggles: [navToggle], cssVar: "--nav-open", cover: coverLeft,
+  items: () => navTree?.items() ?? [], jumps: () => navTree?.jumps() ?? [], onHighlight: (b) => navTree?.highlight(b),
+});
 
 const paletteButtons = [...panel.querySelectorAll("[data-palette]")];
 const settingButtons = [...panel.querySelectorAll("[data-setting]")];
@@ -168,36 +216,35 @@ viewer.subscribe(showViewer);
 showViewer(viewer.get());
 
 // ---- Keys ---------------------------------------------------------------------------------------
-// While the controls are open they take ↑ ↓ (highlight, wrapping), Tab (next
-// group), Enter and Space (select), as on index.html. Otherwise ↑ ↓ step terms.
-const panelItems = () => [...panel.querySelectorAll("button")].filter((b) => !b.closest("[hidden]"));
-const panelJumps = () => [...panel.querySelectorAll(".site-controls-group:not([hidden])")].map((g) => g.querySelector("button"));
+// While a panel is open it takes ↑ ↓ (highlight, wrapping), Tab (next group),
+// Enter and Space (select), as on index.html; Esc or its own key closes it, and
+// the other's key swaps to it. Otherwise ↑ ↓ step terms.
 document.addEventListener("keydown", (e) => {
   if (e.altKey || e.ctrlKey || e.metaKey) return;
   if (!site.contains(e.target) && e.target !== document.body) return; // leave the dial panel alone
   const k = e.key.toLowerCase();
-  if (target === 1) {
+  if (active) {
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-      const items = panelItems(), i = items.indexOf(highlighted), dir = e.key === "ArrowDown" ? 1 : -1;
-      highlight(i < 0 ? items[dir > 0 ? 0 : items.length - 1] : items[(i + dir + items.length) % items.length]);
+      const items = active.items(), i = items.indexOf(highlighted), dir = e.key === "ArrowDown" ? 1 : -1;
+      if (items.length) highlight(i < 0 ? items[dir > 0 ? 0 : items.length - 1] : items[(i + dir + items.length) % items.length]);
       return e.preventDefault();
     }
     if (e.key === "Tab") {
-      const jumps = panelJumps(), items = panelItems(), at = items.indexOf(highlighted);
-      let g = jumps.map((j) => items.indexOf(j)).findLastIndex((s) => s <= at);
+      const jumps = active.jumps(), items = active.items(), at = items.indexOf(highlighted);
+      let g = jumps.map((j) => items.indexOf(j)).findLastIndex((s) => s >= 0 && s <= at);
       g = e.shiftKey ? (highlighted === jumps[g] ? g - 1 : g) : g + 1;
-      highlight(jumps[(g + jumps.length) % jumps.length]);
+      if (jumps.length) highlight(jumps[(g + jumps.length) % jumps.length]);
       return e.preventDefault();
     }
     if (e.key === "Enter" || e.key === " ") { highlighted?.click(); return e.preventDefault(); }
-    if (e.key === "Escape" || k === "c") { toggleControls(false); return e.preventDefault(); }
+    if (e.key === "Escape") { active.toggle(false); return e.preventDefault(); }
   } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
     stepBy(e.key === "ArrowDown" ? 1 : -1);
     return e.preventDefault();
-  } else if (k === "c") {
-    toggleControls(true);
   }
-  if (k === "g") showGrid(gridOverlay.hidden);
+  if (k === "c") controls.toggle();
+  else if (k === "n") nav.toggle();
+  else if (k === "g") showGrid(gridOverlay.hidden);
   else if (k === "f") toggleFullscreen();
 });
 

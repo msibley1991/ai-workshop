@@ -12,6 +12,11 @@
   padding-block: var(--box-inset);
   grid-template-rows: minmax(0, 1fr);
 }
+/* The tab's box steps in as the nav opens (--nav-push, css/site.css); the grid
+   keeps the canvas's columns, as the talk's slides do, and js/glossary.js moves
+   the index and the entries two columns right. The footer stays on the box. */
+.glossary-tab .glossary { margin-left: calc(-1 * var(--nav-push)); }
+.glossary-tab .slide-footer { left: calc(var(--box-inset) + var(--space-32)); }
 
 /* ---- Index: the nav's subtree, in bar text ---------------------------------- */
 /* Columns 1-2: the pressed bar ends on column 2's edge. Column 3 stays empty,
@@ -39,16 +44,16 @@
 .glossary-entry { display: flex; flex-direction: column; gap: var(--gap-related); }
 .site .glossary-term {
   margin: 0;
-  font-size: var(--space-64);       /* Headline */
-  line-height: var(--space-64);
-  font-weight: 700;
+  font-size: var(--type-headline-size);
+  line-height: var(--type-headline-lh);
+  font-weight: var(--type-headline-weight);
 }
 .site .glossary-def {
   margin: 0;
   max-width: var(--span-6);
   font-size: var(--type-body-size); /* Body */
   line-height: var(--type-body-lh);
-  font-weight: 400;
+  font-weight: var(--type-body-weight);
 }
 
 /* Cross-links: the palette's link colour, underlined; hover and focus invert

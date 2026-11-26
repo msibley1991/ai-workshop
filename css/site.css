@@ -39,7 +39,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--row-gap);
-  font-family: var(--site-font);
+  font-family: var(--font-sans);
 }
 
 .site a { color: inherit; text-decoration: none; }
@@ -63,8 +63,8 @@
   display: flex;
   align-items: center;
   padding: 0 var(--box-inset);
-  font-size: var(--space-16);
-  font-weight: 500;
+  font-size: var(--type-bar-size);
+  font-weight: var(--type-bar-weight);
   line-height: 1;
 }
 
@@ -97,9 +97,9 @@
   display: flex;
   align-items: center;
   padding: 0 var(--box-inset);
-  font-size: var(--space-24);   /* label role */
+  font-size: var(--type-tab-size);
   line-height: 1;
-  font-weight: 500;
+  font-weight: var(--type-tab-weight);
 }
 .site-tab-label:focus-visible { outline: none; }
 .site-tab-body {
@@ -154,9 +154,8 @@
   height: var(--space-8);
 }
 
-/* Emphasis (typography.md): a step up to 700, no italic, no colour, as in
-   css/style.css. Literal values: the lab has no --weight-* tokens. */
-.site em { font-style: normal; font-weight: 700; }
+/* Emphasis (typography.md): a step up to 700, no italic, no colour. */
+.site em { font-style: normal; font-weight: var(--weight-bold); }
 
 /* Scene graphic labels (js/graphic.js): label role, placed by the engine. */
 .graphic-label {
@@ -164,7 +163,7 @@
   white-space: nowrap;
   font-size: var(--type-label-size);
   line-height: var(--type-label-lh);
-  font-weight: 500;
+  font-weight: var(--type-label-weight);
 }
 
 .site-hero-text,
@@ -183,22 +182,22 @@
   margin: 0;
   font-size: var(--type-display-size);
   line-height: var(--type-display-lh);
-  font-weight: 700;
+  font-weight: var(--type-display-weight);
 }
 .site .site-hero-sub {             /* statement role */
   margin: var(--gap-related) 0 0;
   max-width: var(--span-6);
   font-size: var(--type-statement-size);
   line-height: var(--type-statement-lh);
-  font-weight: 500;
+  font-weight: var(--type-statement-weight);
 }
 
 .site-section-text { gap: var(--gap-related); }
 .site .site-headline {
   margin: 0;
-  font-size: var(--space-64);
-  line-height: var(--space-64);
-  font-weight: 700;
+  font-size: var(--type-headline-size);
+  line-height: var(--type-headline-lh);
+  font-weight: var(--type-headline-weight);
 }
 .site-section-content {
   display: flex;
@@ -210,13 +209,14 @@
   max-width: var(--span-6);
   font-size: var(--type-statement-size);
   line-height: var(--type-statement-lh);
-  font-weight: 500;
+  font-weight: var(--type-statement-weight);
 }
 .site .site-body {
   margin: 0;
   max-width: var(--span-6);
   font-size: var(--type-body-size);
   line-height: var(--type-body-lh);
+  font-weight: var(--type-body-weight);
 }
 
 /* Bars (docs/design-system/components.md). Button text sits on the box inset:
@@ -322,12 +322,12 @@
   flex-direction: column;
   gap: var(--gap-group);
   pointer-events: auto;
-  font-size: var(--space-24);       /* label role */
-  line-height: var(--space-32);
-  font-weight: 500;
+  font-size: var(--type-panel-size);
+  line-height: var(--type-panel-lh);
+  font-weight: var(--type-panel-weight);
 }
 .site-controls p { margin: 0; }
-.site-controls-title { font-weight: 700; }
+.site-controls-title { font-weight: var(--weight-bold); }
 .site-controls-group { display: flex; flex-direction: column; gap: var(--gap-tight); }
 .site-controls-group[hidden] { display: none; }
 .site-controls-group .site-bar-button {
@@ -342,7 +342,7 @@
 .site-controls-setting > span { padding-block: 0; }
 .site-controls-setting > span:first-child { flex-basis: 100%; }
 .site-controls-group .site-controls-setting .site-bar-button { margin: 0; align-self: auto; }
-.site-controls-hint { margin-top: auto; font-size: var(--space-16); line-height: var(--space-24); }
+.site-controls-hint { margin-top: auto; font-size: var(--type-bar-size); line-height: var(--type-bar-lh); }
 
 /* Playground controls (js/controls.js, playground.md "The two controls"). Both
    take their type from where they sit; the name sits on its own line above.
@@ -414,7 +414,7 @@
   margin: 0;
   font-size: var(--type-statement-size);
   line-height: var(--type-statement-lh);
-  font-weight: 500;
+  font-weight: var(--type-statement-weight);
 }
 .site .slide-statement > p { margin: 0; font-weight: inherit; } /* over text-layer.css's p 400 */
 /* data-at on a sentence (slide 14): on the statement's base line from that
@@ -447,7 +447,7 @@
 /* data-statement="large" on a Wide or Row slide: a short statement at the
    Text size, in bold, across every open column (js/slides.js), still on the
    base line. */
-.site .slide[data-statement="large"] .slide-statement { font-weight: 700; }
+.site .slide[data-statement="large"] .slide-statement { font-weight: var(--weight-bold); }
 /* A grid statement (data-place="grid", slide 7): a subgrid over the open
    columns and every row field, each sentence placed in its own cell (columns
    from the text axis). The lead and "or" at the Text size, the captions at the
@@ -502,7 +502,7 @@
   margin: 0;
   font-size: calc(var(--space-24) * var(--s));
   line-height: var(--chat-lh);
-  font-weight: 700;
+  font-weight: var(--weight-bold);
 }
 .chat-turn {
   box-sizing: border-box;
@@ -530,7 +530,7 @@
 .instr-boxes { gap: var(--space-32); }
 .doc-stack { gap: var(--space-16); }
 .instr-box { box-sizing: border-box; padding: var(--space-16); }
-.site .instr-box p { margin: 0; font-size: var(--space-24); line-height: var(--space-32); font-weight: 400; min-height: var(--space-32); }
+.site .instr-box p { margin: 0; font-size: var(--space-24); line-height: var(--space-32); font-weight: var(--weight-regular); min-height: var(--space-32); }
 /* File tree (text-artefacts.md): a framed pane with the root folder as its
    header, then the tree in mono 24/32 with the nav's drawn lines (2, nested
    in the 4 frame): a trunk under each folder name's first letter, a 16 tick
@@ -541,9 +541,9 @@
 .tree-pane li { position: relative; padding-left: var(--space-24); }
 .site .tree-pane .tree-name {
   display: block;
-  font-family: "JetBrains Mono", monospace;
-  font-size: var(--space-24);
-  line-height: var(--space-32);
+  font-family: var(--font-mono);
+  font-size: var(--type-code-size);
+  line-height: var(--type-code-lh);
   white-space: pre;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -564,7 +564,7 @@
    don't fit are cut by its clip). */
 .doc-pane { box-sizing: border-box; flex: 1 1 0; min-height: 0; max-height: calc(160 * var(--u)); overflow: hidden; padding: var(--space-16); display: flex; flex-direction: column; }
 .doc-pane > * { flex: none; }
-.site .doc-name { margin: 0; font-family: "JetBrains Mono", monospace; font-size: var(--space-24); line-height: var(--space-32); font-weight: 400; }
+.site .doc-name { margin: 0; font-family: var(--font-mono); font-size: var(--type-code-size); line-height: var(--type-code-lh); font-weight: var(--type-code-weight); }
 /* The header (filename or root folder) is inverted: an ink strip across the
    pane's top, its top corners rounded with the frame, the name knocked out. */
 .doc-head { position: relative; margin: calc(-1 * var(--space-16)) calc(-1 * var(--space-16)) var(--space-16); padding: var(--space-8) var(--space-16); }
@@ -584,10 +584,10 @@
    items 2 characters in. On beat 3 the symbols type in where they hang, so
    the text never moves: a heading's "#" / "##" in a 3-character gutter left
    of the text (1 clear of it), an item's "-" in its indent. */
-.md-pane { box-sizing: border-box; width: calc(3 * var(--col) + 2 * var(--grid-gutter)); padding: var(--space-16); padding-left: calc(var(--space-16) + 3ch); font-family: "JetBrains Mono", monospace; font-size: var(--space-24); }
+.md-pane { box-sizing: border-box; width: calc(3 * var(--col) + 2 * var(--grid-gutter)); padding: var(--space-16); padding-left: calc(var(--space-16) + 3ch); font-family: var(--font-mono); font-size: var(--type-code-size); }
 .md-pane .doc-head { margin-left: calc(-1 * (var(--space-16) + 3ch)); padding-left: var(--space-16); }
-.site .md-pane .md { margin: 0; font-family: "JetBrains Mono", monospace; font-size: var(--space-24); line-height: var(--space-32); font-weight: 400; }
-.site .md-pane .md-h { font-weight: 700; }
+.site .md-pane .md { margin: 0; font-family: var(--font-mono); font-size: var(--type-code-size); line-height: var(--type-code-lh); font-weight: var(--type-code-weight); }
+.site .md-pane .md-h { font-weight: var(--weight-bold); }
 .site .md-pane .md-gap { margin-top: var(--space-32); }
 .site .md-pane .md { position: relative; }
 .site .md-pane .md-li { padding-left: 2ch; }
@@ -613,7 +613,7 @@
 .spec-row > .spec-doc { flex: 1 1 0; min-width: 0; }
 .spec-doc { height: 100%; }
 .spec-pane { box-sizing: border-box; height: 100%; padding: var(--space-16); overflow: hidden; }
-.site .spec-body .spec-l { margin: 0; font-family: "JetBrains Mono", monospace; font-size: var(--space-16); line-height: var(--space-24); font-weight: 400; }
+.site .spec-body .spec-l { margin: 0; font-family: var(--font-mono); font-size: var(--space-16); line-height: var(--space-24); font-weight: var(--weight-regular); }
 .site .spec-body .spec-li { padding-left: 2ch; text-indent: -2ch; }
 .site .spec-body .spec-h:not(:first-child) { margin-top: var(--space-8); }
 
@@ -631,7 +631,7 @@
 .mcp-down { top: 66.67%; }
 .mcp-bar { display: block; height: var(--space-8); }
 /* Figma: the frame's name over a wireframe of the page. */
-.site .mcp-frame-name { margin: 0 0 var(--space-8); font-family: "JetBrains Mono", monospace; font-size: var(--space-16); line-height: var(--space-24); font-weight: 400; }
+.site .mcp-frame-name { margin: 0 0 var(--space-8); font-family: var(--font-mono); font-size: var(--space-16); line-height: var(--space-24); font-weight: var(--weight-regular); }
 .mcp-wf { box-sizing: border-box; flex: 1 1 0; min-height: 0; padding: var(--space-16); display: flex; flex-direction: column; gap: var(--space-16); overflow: hidden; }
 .mcp-wf > * { flex: none; }
 .mcp-wf-nav, .mcp-nav { display: flex; justify-content: space-between; align-items: center; }
@@ -645,15 +645,15 @@
 .mcp-cards > span { flex: 1; position: relative; box-sizing: border-box; padding: var(--space-8); display: flex; }
 .mcp-card-img { flex: 1; display: block; }
 /* Agent: the turns in 24/32 (the chat's resting size), the speaker bold. */
-.site .mcp-turn { margin: 0 0 var(--space-16); font-size: var(--space-24); line-height: var(--space-32); font-weight: 400; min-height: var(--space-32); }
+.site .mcp-turn { margin: 0 0 var(--space-16); font-size: var(--space-24); line-height: var(--space-32); font-weight: var(--weight-regular); min-height: var(--space-32); }
 /* The live page: the design system applied (Chakra Petch, accent, hatching). */
 .mcp-page { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; gap: var(--space-16); overflow: hidden; }
 .mcp-page > * { flex: none; }
-.site .mcp-logo { margin: 0; font-size: var(--space-16); line-height: var(--space-24); font-weight: 700; }
-.site .mcp-links { margin: 0; font-size: var(--space-16); line-height: var(--space-24); font-weight: 400; }
-.site .mcp-head { margin: 0; font-size: calc(var(--space-48) + 16 * var(--u) * var(--grow, 0)); line-height: calc(var(--space-48) + 24 * var(--u) * var(--grow, 0)); font-weight: 700; }
-.site .mcp-body { margin: 0; font-size: var(--space-16); line-height: var(--space-24); font-weight: 400; }
-.mcp-btn { position: relative; align-self: flex-start; padding: var(--space-4) var(--space-16); font-size: var(--space-16); line-height: var(--space-24); font-weight: 700; }
+.site .mcp-logo { margin: 0; font-size: var(--space-16); line-height: var(--space-24); font-weight: var(--weight-bold); }
+.site .mcp-links { margin: 0; font-size: var(--space-16); line-height: var(--space-24); font-weight: var(--weight-regular); }
+.site .mcp-head { margin: 0; font-size: calc(var(--space-48) + 16 * var(--u) * var(--grow, 0)); line-height: calc(var(--space-48) + 24 * var(--u) * var(--grow, 0)); font-weight: var(--weight-bold); }
+.site .mcp-body { margin: 0; font-size: var(--space-16); line-height: var(--space-24); font-weight: var(--weight-regular); }
+.mcp-btn { position: relative; align-self: flex-start; padding: var(--space-4) var(--space-16); font-size: var(--space-16); line-height: var(--space-24); font-weight: var(--weight-bold); }
 .mcp-btn-fill { position: absolute; inset: 0; border-radius: var(--space-4); --ink: accent; }
 .mcp-btn-text { position: relative; }
 .mcp-img { display: block; height: calc(96 * var(--u)); }
@@ -683,11 +683,11 @@
 .poster-coffee-l { left: calc(var(--c2) + var(--st)); border-radius: 9999px 0 0 9999px; }
 .poster-coffee-r { left: var(--c3); border-radius: 0 9999px 9999px 0; }
 .poster-handle { left: var(--c1); top: calc(var(--cy) - var(--st) / 2); width: calc(var(--c2) - var(--c1) + var(--st) / 2); height: var(--st); }
-.site .poster-num { left: 6%; top: 3%; font-size: 4.5cqw; line-height: 1; font-weight: 700; }
-.site .poster-head { left: 6%; top: 52%; font-size: 19cqw; line-height: 0.95; font-weight: 700; margin-left: -0.05em; } /* Chakra Petch 700's side bearing ("d" 0.05em, "r" 0.06em): the ink touches the first column line */
+.site .poster-num { left: 6%; top: 3%; font-size: 4.5cqw; line-height: 1; font-weight: var(--weight-bold); }
+.site .poster-head { left: 6%; top: 52%; font-size: 19cqw; line-height: 0.95; font-weight: var(--weight-bold); margin-left: -0.05em; } /* Chakra Petch 700's side bearing ("d" 0.05em, "r" 0.06em): the ink touches the first column line */
 .poster-rule { left: 6%; right: 6%; top: 86%; height: var(--space-4); }
 .site .poster-info { left: 6%; right: 6%; top: 88.5%; display: grid; grid-template-columns: 31% 32% 1fr; }
-.site .poster-info p { margin: 0; font-size: 3.6cqw; line-height: 1.3; font-weight: 500; white-space: nowrap; }
+.site .poster-info p { margin: 0; font-size: 3.6cqw; line-height: 1.3; font-weight: var(--weight-medium); white-space: nowrap; }
 .poster .poster-wire { display: none; }
 .poster[data-wire] .poster-wire { display: block; }
 .poster[data-wire] .poster-full { display: none; }
@@ -717,7 +717,7 @@
   margin: 0;
   font-size: calc(var(--space-24) * var(--s));
   line-height: var(--chat-lh);
-  font-weight: 400;
+  font-weight: var(--weight-regular);
   white-space: pre-line; /* a new line per design area */
   min-height: var(--chat-lh); /* one line while it's empty, before typing */
 }
@@ -736,9 +736,9 @@
   margin: 0;
   font-size: var(--space-24);
   line-height: var(--space-32);
-  font-weight: 400;
+  font-weight: var(--weight-regular);
 }
-.prompt-label { font-weight: 700; }
+.prompt-label { font-weight: var(--weight-bold); }
 
 /* Typing (js/artefact.js): the rest of the word being typed keeps its room but
    isn't drawn; the cursor is a block one em tall that takes no width. */
@@ -777,9 +777,9 @@
   top: 0;
   margin: 0;
   white-space: nowrap;
-  font-size: var(--space-24);
-  line-height: var(--space-32);
-  font-weight: 700;
+  font-size: var(--type-section-size);
+  line-height: var(--type-section-lh);
+  font-weight: var(--type-section-weight);
 }
 .site .slide-number {
   right: 0;
@@ -810,13 +810,13 @@
   flex-direction: column;
   gap: var(--gap-group);
   pointer-events: auto;
-  font-size: var(--space-24);       /* label role */
-  line-height: var(--space-32);
-  font-weight: 500;
+  font-size: var(--type-panel-size);
+  line-height: var(--type-panel-lh);
+  font-weight: var(--type-panel-weight);
 }
 .site-nav p { margin: 0; }
-.site-panel-title { font-weight: 700; }
-.site-panel-hint { margin-top: auto; font-size: var(--space-16); line-height: var(--space-24); }
+.site-panel-title { font-weight: var(--weight-bold); }
+.site-panel-hint { margin-top: auto; font-size: var(--type-bar-size); line-height: var(--type-bar-lh); }
 
 /* The subtree: bar text. Buttons pad 8 and pull back 8, so their text sits on
    the panel's content edge. Each folder's trunk hangs under its name's first
@@ -827,8 +827,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--gap-tight);
-  font-size: var(--space-16);
-  line-height: var(--space-24);
+  font-size: var(--type-bar-size);
+  line-height: var(--type-bar-lh);
 }
 .site-nav-tree ul { list-style: none; margin: 0; padding: 0; }
 .site-nav-tree .site-bar-button {
@@ -865,8 +865,8 @@
 .site-frame { box-sizing: border-box; flex: 1 1 0; min-height: 0; width: 100%; position: relative; display: flex; flex-direction: column; overflow: hidden; }
 .site-frame [data-box] { --box-line: calc(2 * var(--u)); }
 .site-phone { width: auto; aspect-ratio: 9 / 19.5; }
-.site .site-caption { margin: var(--space-16) 0 0; font-size: var(--space-24); line-height: var(--space-32); font-weight: 500; flex: none; }
-.site .era-site .site-frame :is(p, li) { margin: 0; font-size: var(--space-16); line-height: var(--space-24); font-weight: 400; }
+.site .site-caption { margin: var(--space-16) 0 0; font-size: var(--type-label-size); line-height: var(--type-label-lh); font-weight: var(--type-label-weight); flex: none; }
+.site .era-site .site-frame :is(p, li) { margin: 0; font-size: var(--space-16); line-height: var(--space-24); font-weight: var(--weight-regular); }
 
 /* Browser chrome: three squares and an address line, then a rule. Scoped to
    the frame: unscoped, it also padded the page's own top bar (16 instead of
@@ -879,7 +879,7 @@
 .site-page { flex: 1; min-height: 0; position: relative; padding: var(--space-16); display: flex; flex-direction: column; }
 
 /* Plain HTML: one column, heading, rules, ragged lines, a bulleted link list. */
-.site .era-site .site-frame .site-h1 { font-size: var(--space-24); line-height: var(--space-32); font-weight: 700; margin-bottom: var(--space-8); }
+.site .era-site .site-frame .site-h1 { font-size: var(--space-24); line-height: var(--space-32); font-weight: var(--weight-bold); margin-bottom: var(--space-8); }
 .site-html .site-rule { margin: var(--space-8) 0; }
 .site .site-links { margin: var(--space-8) 0; padding-left: var(--space-24); }
 
@@ -891,18 +891,18 @@
 .geo-panel { position: relative; box-sizing: border-box; }
 .geo-ground { position: absolute; inset: 0; }
 .geo-marquee { height: var(--space-32); flex: none; overflow: hidden; }
-.site .geo-marquee-text { position: absolute; top: var(--space-4); left: 0; white-space: nowrap; font-size: var(--space-16); line-height: var(--space-24); font-weight: 700; }
+.site .geo-marquee-text { position: absolute; top: var(--space-4); left: 0; white-space: nowrap; font-size: var(--space-16); line-height: var(--space-24); font-weight: var(--weight-bold); }
 .geo-table { position: relative; display: flex; gap: var(--space-16); flex: none; margin-left: var(--space-16); }
 .geo-links { flex: 1; padding: var(--space-8) var(--space-16); }
 .site .era-site .site-frame .geo-links p + p { margin-top: var(--space-8); }
 .geo-photo { flex: none; width: 34%; align-self: stretch; }
 .geo-new { position: absolute; left: calc(-28 * var(--u)); top: calc(-20 * var(--u)); width: calc(72 * var(--u)); height: calc(48 * var(--u)); }
 .geo-new svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-.site .geo-new-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: var(--space-16); line-height: var(--space-24); font-weight: 700; }
+.site .geo-new-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: var(--space-16); line-height: var(--space-24); font-weight: var(--weight-bold); }
 .geo-construction { position: relative; height: var(--space-32); flex: none; display: flex; align-items: center; justify-content: center; }
 .geo-stripes { position: absolute; inset: 0; }
 .geo-construction-label { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: calc(176 * var(--u)); height: var(--space-24); }
-.site .geo-construction-text { position: relative; font-size: var(--space-16); line-height: var(--space-24); font-weight: 700; }
+.site .geo-construction-text { position: relative; font-size: var(--space-16); line-height: var(--space-24); font-weight: var(--weight-bold); }
 .geo-counter { align-self: center; display: flex; align-items: center; gap: var(--space-8); padding: var(--space-4) var(--space-8); margin-left: var(--space-32); }
 .geo-counter > span:not(.geo-ground) { position: relative; font-size: var(--space-16); line-height: var(--space-24); }
 .geo-digits { display: flex; gap: calc(2 * var(--u)); }
@@ -912,7 +912,7 @@
 .phone-status { flex: none; height: var(--space-24); display: flex; align-items: center; justify-content: space-between; padding: 0 var(--space-16); }
 .phone-bit { display: block; width: var(--space-24); height: calc(6 * var(--u)); }
 .phone-bit-short { width: var(--space-16); }
-.site .era-site .site-frame .phone-title { margin: 0; padding: 0 var(--space-16) var(--space-8); font-size: var(--space-16); line-height: var(--space-24); font-weight: 700; }
+.site .era-site .site-frame .phone-title { margin: 0; padding: 0 var(--space-16) var(--space-8); font-size: var(--space-16); line-height: var(--space-24); font-weight: var(--weight-bold); }
 .feed-window { flex: 1; min-height: 0; position: relative; overflow: hidden; }
 .feed-list { position: absolute; left: 0; right: 0; top: 0; }
 .feed-post { padding: var(--space-8) var(--space-8) var(--space-16); }
@@ -923,7 +923,7 @@
 .feed-image { display: block; width: 100%; aspect-ratio: 1; margin-top: var(--space-8); }
 .feed-actions { display: flex; gap: var(--space-8); margin: var(--space-8) 0 var(--space-4); }
 .feed-icon { width: var(--space-16); height: var(--space-16); overflow: visible; }
-.site .era-site .site-frame .feed-likes { font-weight: 700; }
+.site .era-site .site-frame .feed-likes { font-weight: var(--weight-bold); }
 .feed-post .site-line { margin: var(--space-8) 0 0; }
 .phone-tabs { flex: none; height: var(--space-32); display: flex; align-items: center; justify-content: space-around; padding: 0 var(--space-8); }
 .artefact .phone-tabs > span { width: calc(12 * var(--u)); height: calc(12 * var(--u)); border-radius: 0; }
@@ -956,9 +956,9 @@
 .tpl-card .site-line { margin: var(--space-8); }
 .tpl-footer { flex: none; height: calc(40 * var(--u)); }
 .tpl-footer .tpl-copy { margin-left: auto; }
-.site .era-site .site-frame .tpl-logo { font-weight: 700; white-space: nowrap; }
-.site .era-site .site-frame .tpl-headline { position: relative; font-size: var(--space-24); line-height: var(--space-32); font-weight: 700; }
-.tpl-site .tpl-button { position: relative; flex: none; padding: 0 var(--space-16); border-radius: var(--space-24); font-size: var(--space-16); line-height: var(--space-32); font-weight: 500; white-space: nowrap; }
+.site .era-site .site-frame .tpl-logo { font-weight: var(--weight-bold); white-space: nowrap; }
+.site .era-site .site-frame .tpl-headline { position: relative; font-size: var(--space-24); line-height: var(--space-32); font-weight: var(--weight-bold); }
+.tpl-site .tpl-button { position: relative; flex: none; padding: 0 var(--space-16); border-radius: var(--space-24); font-size: var(--space-16); line-height: var(--space-32); font-weight: var(--weight-medium); white-space: nowrap; }
 .tpl-nav .tpl-button { line-height: var(--space-24); }
 
 /* Connector lines, leader lines and highlights are accent (graphics.md). */

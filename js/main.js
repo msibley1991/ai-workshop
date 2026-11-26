@@ -39,19 +39,6 @@ function applyLines(values) {
   root.setProperty("--line-dashed", `calc(${px} * var(--u))`);
 }
 
-// Type dials drive CSS variables, so the invisible DOM lays out exactly what gets drawn.
-function applyType(type) {
-  const root = document.documentElement.style;
-  const fallback = type.family === "Inter" ? "sans-serif" : "monospace";
-  root.setProperty("--font", `"${type.family}", ${fallback}`);
-  for (const level of ["h1", "h2", "h3", "body", "small"]) {
-    root.setProperty(`--${level}-size`, `${type[level].size}px`);
-    root.setProperty(`--${level}-lh`, type[level].lineHeight);
-  }
-  root.setProperty("--gap", `${type.gap}px`);
-  document.fonts.load(`16px "${type.family}"`).then(invalidate);
-}
-
 function mix(a, b, t) {
   const pa = parseInt(a.slice(1), 16);
   const pb = parseInt(b.slice(1), 16);
@@ -76,13 +63,6 @@ function toHex(color) {
 // colour and effect from the active palette (js/viewer.js).
 const displayMode = "display" in document.body.dataset;
 const SPECIMEN_DEFAULTS = defaultsOf(config);
-// The invisible-DOM type on display pages (css/text-layer.css). Their own CSS
-// sets the type that shows; these only keep the base styles as they were.
-const DISPLAY_PAGE_TYPE = {
-  family: "JetBrains Mono", gap: 32,
-  h1: { size: 72, lineHeight: 1.05 }, h2: { size: 44, lineHeight: 1.15 }, h3: { size: 32, lineHeight: 1.25 },
-  body: { size: 28, lineHeight: 1.45 }, small: { size: 20, lineHeight: 1.4 },
-};
 
 // dialValues: the dials as set. params: what renders (palette colours on
 // display pages, then the viewer's motion, blur and lines on top; js/viewer.js).
@@ -98,7 +78,7 @@ function compose() {
   let values = structuredClone(dialValues);
   if (displayMode) {
     const pal = paletteValues(viewer.get().palette);
-    values = { ...structuredClone(SPECIMEN_DEFAULTS), ...values, type: DISPLAY_PAGE_TYPE, theme: pal.theme };
+    values = { ...structuredClone(SPECIMEN_DEFAULTS), ...values, theme: pal.theme };
     // The palette's effects, group by group over the shared dials (pixels
     // gets the palette's sharpText beside the shared size).
     for (const [group, v] of Object.entries(pal.display)) values[group] = { ...values[group], ...v };
@@ -112,7 +92,6 @@ function compose() {
   if (groundKey && key !== groundKey) clearTrailFrames = 2;
   groundKey = key;
   params = applyViewer(values);
-  applyType(values.type);
   applyLines(values);
   invalidate();
 }

@@ -18,6 +18,7 @@ import { stepGraphics, setMotion, graphicSpan } from "./graphic.js";
 import { genie } from "./genie-play.js";
 import { createSlides } from "./slides.js";
 import { startSiteLoops } from "./site-loops.js";
+import { talkOutline, fetchTalkOutline, buildNavTree } from "./site-nav.js";
 
 // Motion off (viewer controls; it starts off when the OS asks for reduced motion)
 // makes the accordion and the controls panel jump instead of animating.
@@ -369,109 +370,30 @@ settingButtons.forEach((b) => b.addEventListener("click", () => viewer.set({ [b.
 viewer.subscribe(showViewer);
 showViewer(viewer.get());
 
-// ---- Left nav: the talk as a subtree ---------------------------------------------
-// The hero is a root entry; each tab is a folder ("Max's Section/") whose
-// sections hang from its trunk. A folder opens while the pointer (or the menu
-// highlight) is on it, and the one you're in stays open; the rest are closed
-// and end in "…". Clicking a section lands on its first slide, and clicking a
-// folder lands on its tab's first slide. The current section stays pressed.
-const nav = (() => {
-  const el = site.querySelector(".site-nav");
-  const tree = el?.querySelector(".site-nav-tree");
-  if (!el || !tree || !slides.enabled) return null;
-  const button = (text, cls = "") => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = `site-bar-button ${cls}`.trim();
-    b.dataset.fill = "";
-    const span = document.createElement("span");
-    span.textContent = text;
-    b.append(span);
-    return b;
-  };
-  const line = (cls) => { const l = document.createElement("span"); l.className = cls; l.dataset.fill = ""; return l; };
-
-  const entries = [];   // { button, pi, section }
-  const folders = [];   // { el, nameEl, name, pi, first }
-  let currentPi = -1, hovered = null, highlighted = null;
-
-  const hero = button(site.querySelector(".site-title")?.textContent.trim() || "Home");
-  hero.addEventListener("click", () => slides.goto(0));
-  tree.append(hero);
-  entries.push({ button: hero, pi: 0, section: null });
-
-  // A folder is open if you're in it, the pointer is on it, or the menu
-  // highlight is on it or one of its sections.
-  function showFolders() {
-    for (const f of folders) {
-      const open = f.pi === currentPi || f === hovered || f === highlighted;
-      f.el.toggleAttribute("data-collapsed", !open);
-      f.nameEl.firstElementChild.textContent = open ? `${f.name}/` : `${f.name}/…`;
-    }
-    relayout();
-  }
-
-  panels.forEach((panel, pi) => {
-    if (pi === 0) return; // the intro is the root entry
-    const name = panel.querySelector(".site-tab-label")?.textContent.trim() ?? "";
-    const folder = document.createElement("div");
-    folder.className = "site-nav-folder";
-    const nameEl = button(`${name}/`, "site-nav-folder-name");
-    const list = document.createElement("ul");
-    folder.append(nameEl, list);
-    const f = { el: folder, nameEl, name, pi, first: null };
-    folders.push(f);
-    folder.addEventListener("pointerenter", () => { hovered = f; showFolders(); });
-    folder.addEventListener("pointerleave", () => { if (hovered === f) hovered = null; showFolders(); });
-    const seen = new Set();
-    slides.stops.forEach((stop, i) => {
-      if (stop.pi !== pi || !stop.section || seen.has(stop.section)) return;
-      seen.add(stop.section);
-      const li = document.createElement("li");
-      li.className = "site-nav-entry";
-      const b = button(stop.section);
-      b.addEventListener("click", () => slides.goto(i));
-      li.append(line("site-nav-trunk"), line("site-nav-tick"), b);
-      list.append(li);
-      entries.push({ button: b, pi, section: stop.section });
-      f.first ??= { button: b, i };
-    });
-    nameEl.addEventListener("click", () => slides.goto(slides.stops.findIndex((s) => s.pi === pi)));
-    tree.append(folder);
+// ---- Left nav: the talk as a subtree, then the other pages (js/site-nav.js) ----
+// On the talk the tree is read from this page and its entries jump the slides;
+// on the playground it's fetched from index.html and its entries are links.
+const navEl = site.querySelector(".site-nav");
+const navTree = navEl?.querySelector(".site-nav-tree");
+let nav = null;
+if (navTree) (slides.enabled
+  ? Promise.resolve(talkOutline(document))
+  : fetchTalkOutline()
+).then((outline) => {
+  if (!outline) return;
+  nav = buildNavTree(navTree, outline, {
+    page: slides.enabled ? "" : location.pathname.split("/").pop(),
+    goto: slides.enabled ? (pi, number) => slides.goto(slides.stops.findIndex((s) => s.pi === pi && s.number === number)) : null,
+    relayout,
   });
-
-  for (const b of el.querySelectorAll("button")) {
-    for (const type of ["pointerenter", "pointerleave", "focus", "blur"]) b.addEventListener(type, relayout);
-  }
-
-  return {
-    el,
-    // Every button you can see, top to bottom (a closed folder's sections are hidden).
-    items: () => [...tree.querySelectorAll("button")].filter((b) => b.offsetParent !== null),
-    // Tab: the hero, then each folder's first section.
-    jumps: () => [hero, ...folders.map((f) => f.first?.button ?? f.nameEl)],
-    highlight(b) {
-      highlighted = b ? folders.find((f) => f.el.contains(b)) ?? null : null;
-      showFolders();
-    },
-    show(pos) {
-      const { pi, section } = pos.stop;
-      currentPi = pi;
-      for (const e of entries) {
-        const on = e.pi === pi && (e.section === null ? pi === 0 : e.section === section);
-        e.button.setAttribute("aria-current", String(on));
-        e.button.setAttribute("aria-pressed", String(on));
-      }
-      showFolders();
-    },
-  };
-})();
+  if (slides.enabled) nav.show(slides.position());
+}).catch((err) => console.error("[site] nav", err));
 const navToggle = site.querySelector(".site-nav-toggle");
-const navPanel = nav && makePanel({
-  el: nav.el, toggles: [navToggle].filter(Boolean), cssVar: "--nav-open", side: "left",
-  items: nav.items, jumps: nav.jumps, onHighlight: nav.highlight,
+const navPanel = navEl && makePanel({
+  el: navEl, toggles: [navToggle].filter(Boolean), cssVar: "--nav-open", side: "left",
+  items: () => nav?.items() ?? [], jumps: () => nav?.jumps() ?? [], onHighlight: (b) => nav?.highlight(b),
 });
-if (!nav) navToggle?.remove();
+if (!navEl) navToggle?.remove();
 
 // ---- Menu keys ----------------------------------------------------------------------
 // While a panel is open it takes the keys (capture phase, so nothing else
@@ -500,7 +422,7 @@ const menu = (() => {
     get active() { return active; },
     open(panel) {
       active = panel;
-      mark(panel.el.querySelector("[aria-current='true'], [aria-pressed='true']") ?? panel.items()[0] ?? null);
+      mark(panel.el.querySelector("[aria-current='true'], [aria-current='page'], [aria-pressed='true']") ?? panel.items()[0] ?? null);
     },
     close(panel) {
       if (active !== panel) return;
@@ -591,4 +513,4 @@ window.addEventListener("hashchange", () => goHash(GOTO_MS));
 
 // Start where the URL says, without animating.
 goHash(0);
-if (slides.enabled) { showStepEnds(slides.position()); nav?.show(slides.position()); }
+if (slides.enabled) showStepEnds(slides.position());
