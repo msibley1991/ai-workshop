@@ -18,13 +18,13 @@
         "tint": 0
       },
       "trails": {
-        "length": 0.85,
+        "length": 0.95,
         "scrollBoost": 0,
-        "spread": 0.5,
+        "spread": 2,
         "colourCount": 2,
         "colourMode": "blend",
         "framesPerColour": 5,
-        "colourShift": 0.4
+        "colourShift": 0
       },
       "lines": {
         "type": "scanlines",
@@ -116,7 +116,7 @@
         "colourCount": 2,
         "colourMode": "blend",
         "framesPerColour": 5,
-        "colourShift": 0.4
+        "colourShift": 0
       },
       "lines": {
         "type": "scanlines",
