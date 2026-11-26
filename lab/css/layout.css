@@ -117,8 +117,9 @@
 }
 
 .site a { color: inherit; text-decoration: none; }
-/* Inline links in running text: the palette's link colour, underlined (drawn by the raster). */
-.site :is(p, li) a { --ink: link; text-decoration: underline; }
+/* Inline links in running text: the palette's link colour, underlined (drawn by the raster).
+   Statement sentences that are spans (they run on in one paragraph) count too. */
+.site :is(p, li, .slide-statement) a { --ink: link; text-decoration: underline; }
 .site section { margin: 0; }
 
 .site-bar {
@@ -503,7 +504,12 @@
 /* The hero's setup graphic spreads over all 12 columns and 6 rows, under the
    hero text: its box reaches back over the statement's 6 columns (the scene
    keeps the top left clear for the title). */
-.site-intro .slide-visual > [data-graphic="setup"] { width: calc(12 * var(--col) + 11 * var(--grid-gutter)); margin-left: calc(-6 * (var(--col) + var(--grid-gutter))); } /* graphic.js sets position: relative inline */
+/* The hero's setup graphic: as wide as its drawing, so its hit box (drag,
+   hover) is the drawing and not the hero text beside it. The scene is
+   1240 x 752 units (graphics/setup.js) and the box is 752 tall, so it draws
+   at scale 1; it hangs from the visual's right edge and reaches left under
+   the text. (A margin, not left: graphic.js sets position: relative inline.) */
+.site-intro .slide-visual > [data-graphic="setup"] { --art-w: calc(1240 * var(--u)); width: var(--art-w); margin-left: calc(100% - var(--art-w)); }
 
 /* Text artefacts (docs/design-system/text-artefacts.md). A chat hangs from the
    top of its box; your turn is boxed on the right at about two thirds of the
@@ -893,8 +899,10 @@
 .site .site-caption { margin: var(--space-16) 0 0; font-size: var(--space-24); line-height: var(--space-32); font-weight: 500; flex: none; }
 .site .era-site .site-frame :is(p, li) { margin: 0; font-size: var(--space-16); line-height: var(--space-24); font-weight: 400; }
 
-/* Browser chrome: three squares and an address line, then a rule. */
-.site-bar { flex: none; height: var(--space-32); display: flex; align-items: center; gap: var(--space-8); padding: 0 var(--space-16); }
+/* Browser chrome: three squares and an address line, then a rule. Scoped to
+   the frame: unscoped, it also padded the page's own top bar (16 instead of
+   the box inset), pulling the title out of column 1. */
+.site-frame .site-bar { flex: none; height: var(--space-32); display: flex; align-items: center; gap: var(--space-8); padding: 0 var(--space-16); }
 .artefact .site-dot { width: var(--space-8); height: var(--space-8); border-radius: 0; flex: none; }
 .site-address { flex: 1; height: var(--space-16); margin-left: var(--space-8); }
 .site-rule { display: block; flex: none; height: calc(2 * var(--u)); width: 100%; }

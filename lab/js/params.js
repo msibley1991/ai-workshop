@@ -4,11 +4,15 @@
 // everywhere: the menu, the presets, the code and the docs
 // (docs/design-system/display.md).
 //
-// Two menus use it:
-// - "Display" (pages with <body data-display>: layout, genie, type, hierarchy,
-//   glossary): displayConfig only. Shared by every page, saved to
-//   presets/display.json. Colours aren't dials there: they come from the
-//   active palette (presets/palettes.json, js/viewer.js).
+// Each palette carries its own display effects (paletteDisplayConfig): a
+// palette is one look, its colours plus how it glows, trails and scans. Only
+// pixel size and line weight are shared (sharedDisplayConfig).
+//
+// The menus that use it:
+// - On pages with <body data-display> (layout, genie, type, hierarchy,
+//   glossary): "Palette" (js/palette-panel.js) edits the active palette's
+//   colours and paletteDisplayConfig, saved into presets/palettes.json;
+//   "Display" holds sharedDisplayConfig, saved to presets/display.json.
 // - "Effects Lab" on the old specimen (index.html): config, which adds the
 //   theme, trail colours, type and 3D object dials it still uses.
 // The defaults are the tuned look (display.md, "The look").
@@ -18,9 +22,9 @@ const typeLevel = (size, lineHeight) => ({
   lineHeight: [lineHeight, 0.8, 2.2, 0.05],
 });
 
-export const displayConfig = {
+// The effects each palette sets (its `display` block in palettes.json).
+export const paletteDisplayConfig = {
   pixels: {
-    size: [1, 1, 10, 1],          // the emulated pixel: units on canvas pages (locked at 1 in the look), CSS px elsewhere
     sharpText: [1, 0, 1],         // 0 = antialiased text edges, 1 = thresholded 1-bit edges
   },
   glow: {
@@ -34,7 +38,7 @@ export const displayConfig = {
     scrollBoost: [0, 0, 1],       // extra length while scrolling fast
     spread: [0.5, 0, 3, 0.05],    // how far a trail spreads each frame, in emulated pixels (compounds as it ages)
     // Trail colours (trail 1-3) are the palette's; the specimen adds them as dials (specimenColors below).
-    colours: [2, 1, 3, 1],        // how many of the trail colours a trail passes through
+    colourCount: [2, 1, 3, 1],    // how many of the trail colours a trail passes through
     // blend: the colours drift in by colourShift while the trail fades. bands:
     // each colour switches in at full strength and holds; only the last one fades.
     colourMode: { type: "select", options: ["blend", "bands"], default: "blend" },
@@ -62,10 +66,25 @@ export const displayConfig = {
     rollTime: [5.5, 0.5, 10, 0.1], // seconds for a wave to roll top to bottom
     randomness: [0.67, 0, 1],     // 0 = identical, evenly spaced waves; more varies timing, size, strength and adds a ragged edge
   },
+};
+
+// Shared by every palette: weights and type are counted in emulated pixels,
+// so neither changes between palettes.
+export const sharedDisplayConfig = {
+  pixels: {
+    size: [1, 1, 10, 1],          // the emulated pixel: units on canvas pages (locked at 1), CSS px elsewhere
+  },
   // Interface: the chrome, not the display effects.
   interface: {
     lineWeight: [2, 1, 16, 1],    // emulated pixels on canvas pages (CSS px elsewhere); sets --line (bars, tab outlines)
   },
+};
+
+// Both together, Pixels holding size and sharpText (the specimen's dials).
+export const displayConfig = {
+  ...paletteDisplayConfig,
+  pixels: { ...sharedDisplayConfig.pixels, ...paletteDisplayConfig.pixels },
+  interface: sharedDisplayConfig.interface,
 };
 
 // Trail colours: trails drift toward these as they fade (trail 1, then 2,

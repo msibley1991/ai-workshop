@@ -545,7 +545,8 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
     // segments (or `weight`; slide 3's are 8), sorted in among the faces by
     // depth so the object hides the stretch behind it. { id, r, tilt: [x°, z°], spin: "x" | "z" }: the twist
     // loop's angle (no delay) turns the ring about that axis of its own plane,
-    // then it's tilted into place.
+    // then it's tilted into place. `accent: true` draws it in the accent, like
+    // a line.
     for (const ring of scene.rings ?? []) {
       if (!visible(ring.id)) continue;
       const a = tw ? twistAngle(tw, T) : 0, N = 96;
@@ -565,7 +566,7 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
     vis.sort((a, b) => (a.part.on ? 1 : 0) - (b.part.on ? 1 : 0) || a.depth - b.depth);
     const facesOf = new Map();
     for (const { part, face, n, pts, seg, weight } of vis) {
-      if (seg) { r.line(seg[0], seg[1], own(r.count++, part.id), weight); continue; }
+      if (seg) { r.line(seg[0], seg[1], own(r.count++, part.id, part.accent === true), weight); continue; }
       const id = own(fillFace(r, face, n, pts, { k, spec: ISO_STYLE.hatch, style: ISO_STYLE, L }), part.id);
       if (!facesOf.has(part.id)) facesOf.set(part.id, []);
       facesOf.get(part.id).push(id);

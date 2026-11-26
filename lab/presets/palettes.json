@@ -7,17 +7,89 @@
     "link": "#0050FF",
     "trail1": "#00010F",
     "trail2": "#00010F",
-    "trail3": "#00010F"
+    "trail3": "#00010F",
+    "display": {
+      "pixels": {
+        "sharpText": 1
+      },
+      "glow": {
+        "strength": 1.4,
+        "spread": 0.8,
+        "tint": 0
+      },
+      "trails": {
+        "length": 0.85,
+        "scrollBoost": 0,
+        "spread": 0.5,
+        "colourCount": 2,
+        "colourMode": "blend",
+        "framesPerColour": 5,
+        "colourShift": 0.4
+      },
+      "lines": {
+        "type": "scanlines",
+        "strength": 1,
+        "spacing": 2,
+        "snapScroll": true
+      },
+      "noise": {
+        "jitter": 1.1,
+        "flicker": 0
+      },
+      "warp": {
+        "strength": 4,
+        "bandHeight": 0.05,
+        "perMinute": 4,
+        "rollTime": 5.5,
+        "randomness": 0.67
+      }
+    }
   },
   "blueprint": {
     "name": "Blueprint",
     "ground": "#F4F4F0",
     "ink": "#0050FF",
     "accent": "#F38020",
-    "link": "#B8860B",
+    "link": "#F38020",
     "trail1": "#0050FF",
     "trail2": "#2f00eb",
-    "trail3": "#5d00b6"
+    "trail3": "#5d00b6",
+    "display": {
+      "pixels": {
+        "sharpText": 1
+      },
+      "glow": {
+        "strength": 1.2,
+        "spread": 1,
+        "tint": 0
+      },
+      "trails": {
+        "length": 0.9,
+        "scrollBoost": 0,
+        "spread": 0.5,
+        "colourCount": 2,
+        "colourMode": "blend",
+        "framesPerColour": 5,
+        "colourShift": 0
+      },
+      "lines": {
+        "type": "scanlines",
+        "strength": 1,
+        "spacing": 2,
+        "snapScroll": true
+      },
+      "noise": {
+        "jitter": 1.1,
+        "flicker": 0
+      },
+      "warp": {
+        "strength": 22.5,
+        "bandHeight": 0.03,
+        "perMinute": 4,
+        "rollTime": 5.5,
+        "randomness": 0.67
+      }
+    }
   },
   "plasma": {
     "name": "Plasma",
@@ -27,7 +99,43 @@
     "link": "#1F94FF",
     "trail1": "#FF8A1F",
     "trail2": "#eb4400",
-    "trail3": "#b7033c"
+    "trail3": "#b7033c",
+    "display": {
+      "pixels": {
+        "sharpText": 1
+      },
+      "glow": {
+        "strength": 1.2,
+        "spread": 2.3,
+        "tint": 0
+      },
+      "trails": {
+        "length": 0.96,
+        "scrollBoost": 0,
+        "spread": 0,
+        "colourCount": 2,
+        "colourMode": "blend",
+        "framesPerColour": 5,
+        "colourShift": 0.4
+      },
+      "lines": {
+        "type": "scanlines",
+        "strength": 1,
+        "spacing": 2,
+        "snapScroll": true
+      },
+      "noise": {
+        "jitter": 1.1,
+        "flicker": 0
+      },
+      "warp": {
+        "strength": 23.5,
+        "bandHeight": 0.05,
+        "perMinute": 4,
+        "rollTime": 5.5,
+        "randomness": 1
+      }
+    }
   },
   "vector": {
     "name": "Vector",
@@ -37,6 +145,42 @@
     "link": "#FF3DC2",
     "trail1": "#34ff83",
     "trail2": "#1fb5c0",
-    "trail3": "#005ea0"
+    "trail3": "#005ea0",
+    "display": {
+      "pixels": {
+        "sharpText": 1
+      },
+      "glow": {
+        "strength": 1,
+        "spread": 1.2,
+        "tint": 0
+      },
+      "trails": {
+        "length": 0.95,
+        "scrollBoost": 0,
+        "spread": 0,
+        "colourCount": 1,
+        "colourMode": "blend",
+        "framesPerColour": 5,
+        "colourShift": 0
+      },
+      "lines": {
+        "type": "scanlines",
+        "strength": 0.5,
+        "spacing": 2,
+        "snapScroll": true
+      },
+      "noise": {
+        "jitter": 1.1,
+        "flicker": 0
+      },
+      "warp": {
+        "strength": 4,
+        "bandHeight": 0.05,
+        "perMinute": 4,
+        "rollTime": 5.5,
+        "randomness": 0.67
+      }
+    }
   }
 }

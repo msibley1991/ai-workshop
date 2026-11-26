@@ -183,7 +183,7 @@ export function createRenderer(canvas, contentCanvas) {
       gu.uTrailInk.value = toInk(params.trails.trail1);
       gu.uTrailInk2.value = toInk(params.trails.trail2);
       gu.uTrailInk3.value = toInk(params.trails.trail3);
-      gu.uLayers.value = params.trails.colours;
+      gu.uLayers.value = params.trails.colourCount;
       gu.uLayerStep.value = 1 / params.trails.framesPerColour;
       gu.uBands.value = params.trails.colourMode === "bands" ? 1 : 0;
       gu.uBlur.value = params.trails.spread;

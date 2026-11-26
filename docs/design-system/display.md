@@ -1,18 +1,18 @@
 # Display layer
 
-Status: **exploration**, from the display grilling session (2026-11-21). The look was tuned on the lab layout page ([`lab/layout.html`](../../lab/layout.html)), which is the working basis for the real site. The values below are `lab/presets/display.json`, the shared display settings every lab display page loads (colours come from the palettes). It hasn't been tested on a projector yet (see "Projector test").
+Status: **exploration**, from the display grilling session (2026-11-21). The look was tuned on the lab layout page ([`lab/layout.html`](../../lab/layout.html)), which is the working basis for the real site. Each palette carries its own effects (2026-11-25); the values below are the starting values all four palettes share for now, in each palette's `display` block in `lab/presets/palettes.json`. Only pixel size and line weight are shared, in `lab/presets/display.json`. It hasn't been tested on a projector yet (see "Projector test").
 
 ## What it is
 - The page is drawn through a WebGL "pre-window" display. The DOM is laid out but transparent. Each frame, [`lab/js/text-raster.js`](../../lab/js/text-raster.js) redraws it into a low-res canvas, and [`lab/js/renderer.js`](../../lab/js/renderer.js) runs the passes: content → trails → blur → display.
 - **It stays on the real site as the one renderer.** The settled rules assume it: no fades (motion.md), weights and hatching in emulated pixels (graphics.md), the genie's trail from the trails, and links and selected text drawn by the raster.
-- **One look.** There's no separate presenter or reader look. Viewers who want it calmer use the controls (Motion, Blur, Lines). Projector wash-out is a test for the one look, not a second preset. The look is split only if the projector test shows a fix that breaks the laptop view.
+- **One look per palette** (2026-11-25; until then every palette shared one look). A palette is its colours plus its effects, so choosing a palette chooses the whole look. There's still no separate presenter or reader look: viewers who want it calmer use the controls (Motion, Blur, Lines). Projector wash-out is a test for each palette's look, not a second preset.
 
 ## The look
-The settings are named and grouped as in the lab's **Display** menu (`displayConfig` in [`lab/js/params.js`](../../lab/js/params.js)). A menu label is its key in words (`sharpText` is "Sharp Text"), so the names below are the same in the menu, the presets, the code and these docs. Renamed and regrouped on 2026-11-25.
+The settings are named and grouped as in the lab's menus ([`lab/js/params.js`](../../lab/js/params.js)): the effects are in the **Palette** panel (`paletteDisplayConfig`, per palette), and Pixels → size and Interface → lineWeight in the **Display** panel (`sharedDisplayConfig`, shared). A menu label is its key in words (`sharpText` is "Sharp Text"), so the names below are the same in the menus, the presets, the code and these docs. Renamed and regrouped on 2026-11-25.
 
 | Group | Setting | Value | What it does |
 |---|---|---|---|
-| Pixels | size | 1 unit (locked) | the emulated pixel: the screen is always 1080 emulated rows tall, rounded to whole device pixels |
+| Pixels | size (shared) | 1 unit (locked) | the emulated pixel: the screen is always 1080 emulated rows tall, rounded to whole device pixels |
 | | sharpText | 1 | text edges thresholded to 1-bit (0 is plain antialiasing) |
 | Glow | strength | 1 | how bright the soft halo around ink is |
 | | spread | 1.5 emulated px | how far it reaches |
@@ -20,7 +20,7 @@ The settings are named and grouped as in the lab's **Display** menu (`displayCon
 | Trails | length | 0.9 | how much of a trail stays each frame. Trails are left behind anything that moves, and persist only on bare ground, so a colour change in place cuts on its first frame |
 | | scrollBoost | 0 (unused) | extra length while scrolling fast |
 | | spread | 0.5 emulated px | how far a trail spreads each frame |
-| | colours | 2 | how many of the palette's trail colours a trail passes through as it fades |
+| | colourCount | 2 | how many of the palette's trail colours a trail passes through as it fades |
 | | colourMode | blend | blend glides between the colours; bands switches each in at full strength |
 | | framesPerColour | 5 | frames a trail spends on each colour |
 | | colourShift | 0.4 | how far each frame moves toward the next colour |
@@ -35,15 +35,15 @@ The settings are named and grouped as in the lab's **Display** menu (`displayCon
 | | perMinute | 4 | waves per minute |
 | | rollTime | 5.5 s | for a wave to roll top to bottom |
 | | randomness | 0.67 | varies the waves' timing, size and strength, and roughens their edge |
-| Interface | lineWeight | 2 emulated px | the chrome line (`--line`: bars, tab outlines); not a display effect |
+| Interface | lineWeight (shared) | 2 emulated px | the chrome line (`--line`: bars, tab outlines); not a display effect |
 
-- **Every setting stays in the menu,** including the locked size and the ones the look leaves at 0, so people can try them.
-- The defaults in `params.js` are these values; `display.json` loads on top.
+- **Every setting stays in the menus,** including the locked size and the ones the look leaves at 0, so people can try them.
+- The defaults in `params.js` are these values. A palette's `display` block loads over them group by group, so a palette missing a setting gets the default.
 
 - **The emulated pixel is locked at 1 unit.** Line weights, hatch spacing, dashes and leader gaps are all counted in emulated pixels, so a larger pixel would double them all and drop Label text to 12 emulated pixels tall. On a 1080p projector one emulated pixel is one real pixel, so there the low-res character comes from the lines, sharpText and the coarse 4 / 2 weights.
-- **Palettes share these values,** light and dark alike. A palette changes colours only (see [palettes.md](palettes.md)).
-  - The dark palettes (Plasma, Vector) are to be checked by eye. The effects run in "ink space", so on a dark ground the same glow reads as a brighter bloom.
-  - **The one allowed exception:** if the dark palettes need it, a glow strength for dark grounds, picked automatically by the ground's mode. Everything else stays shared.
+- **Pixel size and line weight are shared** by every palette, because weights and type are counted in emulated pixels: they never change between palettes.
+- **Every other setting is the palette's** (see [palettes.md](palettes.md)). All four start with the values above.
+  - The dark palettes (Plasma, Vector) are to be tuned by eye. The effects run in "ink space", so on a dark ground the same glow reads as a brighter bloom; a dark palette now sets its own glow instead of the dark-glow exception planned before.
 
 ## Ambient effects
 - **Warp and jitter run all the time,** even when nothing is changing. They belong to the screen, not the content.
@@ -70,12 +70,12 @@ These are overrides applied on top of the look at render time (`applyViewer()` i
 ## On the real site
 - **Performance to carry over:** the raster's cost is in painting graphics, not in measuring the page (about 1 ms). Keep the lab's caching (two looks per graphic, flow packets drawn on top), the span-based fills and the box-limited leader anchors, and skip hidden content when measuring (see [graphics.md](graphics.md), "Rendering cost").
 - **Code:** the raster, the passes, the scene engine and the viewer controls move into the site's `js/`. The dial panels, the preset actions and the vendored dialkit stay in the lab. **The live site has no dial panel.**
-- **The look:** one frozen file (proposed `js/display/look.js`) holding only the display values above, plus the dark-glow exception if it's needed. Colours stay in the palettes file. Layout, type and spacing tokens stay in `:root` in `css/style.css`. The effect values aren't CSS tokens, because only the WebGL passes read them.
-- **Changing the look:** tune on the lab layout page, then update the look file and this doc together.
-- **Lab clean-up (done):** `dark.json`, `presenter.json` and `reader.json` are retired. `light.json` became `render.json` (2026-11-22), then `display.json` (2026-11-25): one Display menu shared by the layout, genie, type, hierarchy and glossary pages, with one save, and no colours, theme or light/dark mode, which all come from the palettes. Its Interface group (`lineWeight`, the 2-pixel chrome line) doesn't go into the site's look file: there, the line token is in `:root`.
+- **The look:** frozen with the palettes: each palette's colours and effects in one file (the lab's `palettes.json` shape), plus the shared pixel size. Layout, type and spacing tokens stay in `:root` in `css/style.css`. The effect values aren't CSS tokens, because only the WebGL passes read them.
+- **Changing the look:** tune a palette on the lab layout page (Palette panel), then update the palettes file and this doc together.
+- **Lab clean-up (done):** `dark.json`, `presenter.json` and `reader.json` are retired. `light.json` became `render.json` (2026-11-22), then `display.json` (2026-11-25), which now holds only the shared pixel size and line weight; the effects moved into each palette the same day. Its Interface group (`lineWeight`, the 2-pixel chrome line) doesn't go into the site's look file: there, the line token is in `:root`.
 
 ## Projector test
-Run once, at the venue or on a comparable projector. Change the one look only for something that fails.
+Run once, at the venue or on a comparable projector, for each palette the talk may use. Change a palette's look only for something that fails.
 1. **Setup:** the projector at its native resolution, the browser fullscreen, mirroring (not scaled). Note the projector's resolution and the room's lighting.
 2. **Lines:** no moiré or banding. If there is some, turn Lines off for that screen. Lower the tuned strength only if the lines still read badly at native resolution.
 3. **Type:** Label (24) and Statement (48) can be read from the back row, in Ink and in one dark palette.
@@ -86,5 +86,5 @@ Run once, at the venue or on a comparable projector. Change the one look only fo
 
 ## Open
 - The projector test itself.
-- Checking Plasma and Vector by eye, and whether they need the dark glow.
+- Tuning Plasma and Vector's effects by eye.
 - Building the fallback and the frozen look file when the site is built.

@@ -101,7 +101,9 @@ function compose() {
   if (displayMode) {
     const pal = paletteValues(viewer.get().palette);
     values = { ...structuredClone(SPECIMEN_DEFAULTS), ...values, type: DISPLAY_PAGE_TYPE, theme: pal.theme };
-    values.trails = { ...values.trails, ...pal.trails };
+    // The palette's effects, group by group over the shared dials (pixels
+    // gets the palette's sharpText beside the shared size).
+    for (const [group, v] of Object.entries(pal.display)) values[group] = { ...values[group], ...v };
   }
   for (const key of ["light", "dark"]) {
     if (!values.theme[key]) continue;

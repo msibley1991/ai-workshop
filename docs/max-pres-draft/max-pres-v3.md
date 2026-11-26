@@ -66,14 +66,14 @@
 
 - **Spoken:** Nora has taught you how to generate a website by giving specific instructions to an LLM model in a single chat. In this case that chat is the extent of the model's context and Lovable is the only place you can do anything. But LLMs like Claude have been modified to interact with files on your computer for your own software or web development projects. Particularly, this modified LLM, called a coding agent, can be opened in a folder where you can do and save what you want. This folder can have many files with specific purposes within a folder, and it turns out an LLM's context can too. These files can be rules for the LLM to follow, image references, documents about the project itself, or tools that help you make things for the project. You can think of it as a mini-internet all about your project for the LLM to read. If you thought Prof. Poljicak's emphasis on file folder organisation was a formality before, I promise it becomes very crucial from this point on. But specifically how you organise it is up to you.
 
-  **Text:** A single chat is limited context. Using an LLM in a project folder allows context to exist in multiple documents.
+  **Text:** A single chat has a limited context window. Using an LLM in a project folder allows context to exist in multiple documents.
 
   **Visual:** *large prompt with individual decisions highlighted transformed to project folder with connector lines to detailed documents.*
 
 - **Spoken:** It is also common for the project to have an overview document that tells the LLM what the purpose of the project is and how to navigate it. If you're using Claude Code this will be called a CLAUDE.md; other coding agents call it something different. md stands for Markdown, and it's best to just think of it as somewhere between plain text and HTML, so it's easy to read but also easy to organize. I highly recommend getting a free application called Obsidian, which makes Markdown super easy to read and write. Honestly, it's best to just tell the LLM what you are trying to do and imagine how you want it organised and have it write its own overview.
 
   **Text:** 
-  Overview File (CLAUDE.md or AGENTS.md): 
+  Rules (CLAUDE.md or AGENTS.md): 
   Tells the coding agent what we're doing and where to look. 
   Uses Markdown: legible but organised.
 

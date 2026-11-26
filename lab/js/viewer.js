@@ -3,10 +3,11 @@
 // layout.js drives the panel. Pages opt in with <body data-viewer>; elsewhere
 // nothing here changes the render.
 //
-// On display pages (<body data-display>) every colour comes from the active
-// palette (main.js composes it with the Display dials). Motion, blur and
+// On display pages (<body data-display>) every colour and effect comes from
+// the active palette (main.js composes it with the shared Display dials). Motion, blur and
 // lines are overrides applied on top, so turning them back on restores the
 // tuned look.
+import { paletteDisplayConfig, defaultsOf } from "./params.js";
 
 // Palettes live in presets/palettes.json (edited with the Palette dial panel,
 // js/palette-panel.js). PALETTES is filled once palettesReady resolves; the
@@ -38,6 +39,14 @@ if (!PALETTE_IDS.includes(state.palette)) state.palette = "ink";
 
 const listeners = new Set();
 
+// A palette's effects, group by group over the defaults (a palette saved
+// before it had a display block, or a group added later, gets the defaults).
+const EFFECT_DEFAULTS = defaultsOf(paletteDisplayConfig);
+export function paletteDisplay(p) {
+  const d = p?.display ?? {};
+  return Object.fromEntries(Object.entries(EFFECT_DEFAULTS).map(([g, v]) => [g, { ...v, ...d[g] }]));
+}
+
 export const viewer = {
   get: () => state,
   set(patch) {
@@ -61,14 +70,15 @@ export function modeOf(ground) {
   return luma > 0.5 ? "light" : "dark";
 }
 
-// Display values for a palette: the theme (mode from the ground) and the
-// trail colours.
+// Display values for a palette: the theme (mode from the ground), the trail
+// colours and its effects (its `display` block, defaults filling any gaps).
 export function paletteValues(id) {
   const p = PALETTES[id] ?? PALETTES.ink;
   const mode = modeOf(p.ground);
+  const display = paletteDisplay(p);
   return {
     theme: { mode, [mode]: { ground: p.ground, ink: p.ink, accent: p.accent, link: p.link ?? p.accent } },
-    trails: { trail1: p.trail1, trail2: p.trail2, trail3: p.trail3 },
+    display: { ...display, trails: { ...display.trails, trail1: p.trail1, trail2: p.trail2, trail3: p.trail3 } },
   };
 }
 

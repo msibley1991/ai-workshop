@@ -1,5 +1,5 @@
 import { createDialKit, createDialRoot } from "../vendor/dialkit/index.js";
-import { config, displayConfig, loadPreset, savePreset, exportJSON, importJSON } from "./params.js";
+import { config, sharedDisplayConfig, loadPreset, savePreset, exportJSON, importJSON } from "./params.js";
 
 // Strips action entries so exported/imported values only contain real settings.
 function settingsOnly(values) {
@@ -17,7 +17,8 @@ export function toast(text, isError = false) {
 }
 
 // display: the shared "Display" menu (pages with <body data-display>). It
-// shows only the display dials, keeps nothing in localStorage, and loads
+// shows only the settings every palette shares (pixel size, line weight; each
+// palette's effects are in the Palette panel), keeps nothing in localStorage, and loads
 // presets/display.json on every page load; "Save" writes that file (needs
 // serve.py) and "Revert" reloads it, so every page shares one look.
 // Otherwise the specimen's "Effects Lab" panel (all of config, remembered in
@@ -31,7 +32,7 @@ const DISPLAY_FILE = "display";
 
 function displayPanel(onChange) {
   const cfg = {
-    ...displayConfig,
+    ...sharedDisplayConfig,
     save: { type: "action", label: "Save display settings" },
     revert: { type: "action", label: "Revert to saved" },
   };

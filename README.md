@@ -91,7 +91,7 @@ Pages:
 
 Saving needs `serve.py`, and only works from your own machine.
 
-- The **Display** menu loads `lab/presets/display.json` on every page load. **Save display settings** writes that file and **Revert to saved** reloads it. Unsaved tweaks are lost on reload.
+- The **Palette** panel edits the active palette's colours and display effects, saved into `lab/presets/palettes.json` by **Save palette**. The **Display** menu holds only the shared pixel size and line weight, from `lab/presets/display.json` on every page load. **Save display settings** writes that file and **Revert to saved** reloads it. Unsaved tweaks are lost on reload.
 - The **Palette** panel edits the active palette. **Save palette** writes it into `lab/presets/palettes.json`.
 
 Commit and push those files to share a look. Both of you can save to these files, so if you each save different values, the merge will conflict. Sync your branch first (see [Working together](#working-together)).

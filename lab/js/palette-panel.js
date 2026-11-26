@@ -1,12 +1,14 @@
-// The "Palette" dial panel (display pages, <body data-display>): edits the active
-// palette's ground, ink, accent, link and trail colours live (light or
-// dark mode follows the ground, see modeOf in viewer.js). These are the only
-// colour dials: the Display menu has none. "Save palette" writes just the
-// active palette into presets/palettes.json (needs serve.py); the others stay
-// as saved. Unsaved edits last until reload.
+// The "Palette" dial panel (display pages, <body data-display>): edits the
+// active palette live, its colours (ground, ink, accent, link and trail 1-3;
+// light or dark mode follows the ground, see modeOf in viewer.js) and its
+// effects (Pixels' sharpText, Glow, Trails, Lines, Noise, Warp:
+// paletteDisplayConfig, kept in the palette's `display` block). The shared
+// Display menu has only pixel size and line weight. "Save palette" writes just
+// the active palette into presets/palettes.json (needs serve.py); the others
+// stay as saved. Unsaved edits last until reload.
 import { createDialKit } from "../vendor/dialkit/index.js";
-import { viewer, PALETTES, palettesReady } from "./viewer.js";
-import { loadPreset, savePreset } from "./params.js";
+import { viewer, PALETTES, palettesReady, paletteDisplay } from "./viewer.js";
+import { loadPreset, savePreset, paletteDisplayConfig } from "./params.js";
 import { toast } from "./panel.js";
 
 const FIELDS = ["ground", "ink", "accent", "link", "trail1", "trail2", "trail3"];
@@ -15,9 +17,11 @@ const FIELDS = ["ground", "ink", "accent", "link", "trail1", "trail2", "trail3"]
 export function createPalettePanel(onEdit) {
   const active = () => viewer.get().palette;
   const config = {
-    ...Object.fromEntries(FIELDS.map((f) => [f, PALETTES.ink[f]])),
+    colours: Object.fromEntries(FIELDS.map((f) => [f, PALETTES.ink[f]])),
+    ...paletteDisplayConfig,
     save: { type: "action", label: "Save palette" },
   };
+  const GROUPS = Object.keys(paletteDisplayConfig);
 
   let syncing = false; // true while the panel is being set from a palette
   const kit = createDialKit("Palette", config, {
@@ -40,7 +44,7 @@ export function createPalettePanel(onEdit) {
   function showPalette() {
     const p = PALETTES[active()] ?? PALETTES.ink;
     syncing = true;
-    kit.setValues({ ...Object.fromEntries(FIELDS.map((f) => [f, p[f]])) });
+    kit.setValues({ colours: Object.fromEntries(FIELDS.map((f) => [f, p[f]])), ...paletteDisplay(p) });
     syncing = false;
   }
 
@@ -49,7 +53,8 @@ export function createPalettePanel(onEdit) {
     if (syncing) return;
     const p = PALETTES[active()];
     if (!p) return;
-    for (const f of FIELDS) p[f] = v[f];
+    for (const f of FIELDS) p[f] = v.colours[f];
+    p.display = Object.fromEntries(GROUPS.map((g) => [g, { ...v[g] }]));
     onEdit();
   }, false);
 

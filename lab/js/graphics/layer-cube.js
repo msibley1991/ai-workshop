@@ -21,10 +21,11 @@ export default {
     twist: i,
   })),
   // No tilt: both rings start and end the twist flat, on their own axes (x and
-  // z, both in the horizontal plane), and tumble off them in between.
+  // z, both in the horizontal plane), and tumble off them in between. Both in
+  // the accent.
   rings: [
-    { id: "ring-inner", r: 1.25, spin: "x", weight: 8 },
-    { id: "ring-outer", r: 1.5, spin: "z", weight: 8 },
+    { id: "ring-inner", r: 1.25, spin: "x", weight: 8, accent: true },
+    { id: "ring-outer", r: 1.5, spin: "z", weight: 8, accent: true },
   ],
   // First tuned at 600 ms legs with a 100 ms stagger, then slowed to 4 s legs
   // keeping that ratio (100 × 4000 / 600).
