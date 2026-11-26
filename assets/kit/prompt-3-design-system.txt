@@ -1,0 +1,38 @@
+Keep the structure, text, images and behaviour exactly as they are. Now replace your reading of the moodboard with this exact design system. Do not add any colours, fonts, shadows, gradients, icons or effects that are not listed.
+
+COLOURS (use only these)
+- Deep Blue: #181269
+- Indigo: #4A209D
+- Purple: #7D18A6
+- Magenta: #D5189E
+- Green: #62CD7D
+- Lime, for highlights and buttons: #B2E64F
+- White, for all text unless stated: #FFFFFF
+
+BACKGROUND
+- One fixed background for the whole page: large, heavily blurred colour blobs (700px–1000px each, blur 140px) that blend into each other.
+- Proportions: Deep Blue and Indigo cover about half of the background, Purple and Magenta about a third, and one smaller Green glow the rest. Deep Blue top-left, Magenta centre-right, Purple bottom-left, Green bottom-right.
+- On top of it, 3 large circles with only a stroke: 120px wide white stroke at 8% opacity, no fill, 700px–1000px in size, placed partly off-screen on the left and right edges.
+
+TYPOGRAPHY
+- Font: Inter from Google Fonts (the closest free match to the posters' Helvetica), weights 300 (Light) and 700 (Bold) only.
+- Title Case for headings, labels and buttons. Paragraphs stay as written in the wireframe.
+- Headline pattern from the posters: every tile heading is two lines, a Light line in White followed by a Bold line in Lime: "How" / "(Did You [Make] This?)", "AI As An Ally," / "Not A Replacement", "Your" / "Instructors", "Save" / "Your Spot".
+- Hero title: 118px on desktop, 52px on mobile, line-height 0.95. The word in brackets has a 6px Lime underline; on hover it turns White.
+- Hero subtitle: 24px, "LLM-Assisted Coding" Bold White, "In Design" Light White. Hero info line: 24px Bold Lime.
+- Tile headings: 56px, line-height 1.0. Part titles: 44px Bold White, one line. Body text: 18px Light White, line-height 1.5. Labels: 13px Bold Lime.
+
+LAYOUT
+- Content max-width 1360px, centred, 24px padding around the page.
+- A 12-column grid with a 14px gap; rows at least 110px tall.
+- Tiles: white at 9% opacity, 1px border in white at 14% opacity, backdrop blur 20px, border-radius 28px, padding 28px. On hover the tile background goes to 13%.
+- Figure tile (3): a gradient from Indigo at 60% to Magenta at 35% (160 degrees) instead of the white tile background.
+- Ring tile (4): solid Lime background, ring text 15.5px Bold Deep Blue with 1px letter spacing, centre text 15px Bold Deep Blue.
+- Part tags: pill with a 2px Lime outline, 13px Bold Lime text.
+- Chat: page bubbles white at 14% opacity, border-radius 18px (6px bottom-left); your bubbles Lime with 16px Bold Deep Blue text (6px bottom-right). Year buttons: pill with a 2px Lime outline and Lime text; on hover Lime fill with Deep Blue text.
+- Buttons: Lime background, Deep Blue text, 16px Bold, padding 18px 36px, fully rounded (pill).
+- Form fields: white at 20% opacity, no border, border-radius 16px, height 56px, White text.
+- No shadows, gradients (other than the background and the Figure tile), icons or effects that are not listed here.
+
+MOBILE
+- Below 900px every tile is full width, stacked in the wireframe's order; the four detail tiles sit two per row.
