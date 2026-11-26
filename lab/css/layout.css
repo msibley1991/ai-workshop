@@ -120,6 +120,14 @@
 /* Inline links in running text: the palette's link colour, underlined (drawn by the raster).
    Statement sentences that are spans (they run on in one paragraph) count too. */
 .site :is(p, li, .slide-statement) a { --ink: link; text-decoration: underline; }
+/* Statement links (components.md, Links): <a data-fill><span>…</span></a>. At
+   rest the fill is off and the text underlined; hover and focus invert them,
+   the link colour as a fill with the text knocked out in ground and no
+   underline (as on the glossary page). */
+.site .slide-statement a[data-fill] { --fill-alpha: 0; text-decoration: none; outline: none; }
+.site .slide-statement a[data-fill] > span { text-decoration: underline; }
+.site .slide-statement a[data-fill]:is(:hover, :focus-visible) { --fill-alpha: 1; }
+.site .slide-statement a[data-fill]:is(:hover, :focus-visible) > span { --ink: ground; text-decoration: none; }
 .site section { margin: 0; }
 
 .site-bar {

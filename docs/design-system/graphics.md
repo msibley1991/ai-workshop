@@ -82,11 +82,13 @@ All in emulated pixels:
 - **Ends:**
   - **Arrows:** an open chevron (2026-11-22, from slide 1's links): legs at 45° in the connector's weight, 32 tall, its tip 32 short of what it points at (on slide 1, the phrase). It replaces the solid triangular arrowhead.
   - **Leader lines:** a small solid square dot where they touch the object, and nothing at the label end.
+  - **Two-way connectors** (2026-11-25, the hero) carry a chevron at both ends, each pulled back the same 32. They're one connector, not two.
 - **On iso parts, the dot sits on the part's most visible plane:** the face with the most visible area after occlusion. On the demo, that's the top face of the cap and the base.
   - Near-ties go to the face on the label's side.
   - The dot sits well inside the visible area, toward the label.
   - It's chosen again as the object turns.
 - **Captions align per side,** on their left edges. Left captions all start on the span's left edge, and each leader ends 8 short of its own caption. Right captions all start just past one shared caption line, where their leaders end.
+- **Free captions** (2026-11-25, the hero): in a graphic whose captions would otherwise run to far-apart edges, each caption sits beside its own object instead, 8 past the end of its own leader (a left caption ends 8 before it). The graphic is then fitted by its drawing box alone and can hang from either side of its span.
 - **Leader lines always bend,** in flat graphics too. They run 45° out of the anchor, then horizontally into the label. So a label always sits above or below its anchor, never on its row.
 - **Casing:** a leader line that enters a graphic gets a ground-coloured outline (proposed: 2 px each side, to test), so it separates from the object and its hatching.
 - **Dashed means hypothetical:** a removed part, an assembly path, where a part travels. Never decoration.
@@ -120,7 +122,7 @@ The named curves, durations, loops and enter/exit motions are in [motion.md](mot
 - **Loops**, all optional per state:
   - **Focus blink:** the focused element switches between accent and ink with a hard cut, about once a second. Connectors and leaders stay accent.
   - **Flow packet:** a short solid segment travels along a connector at one constant speed, site-wide. It isn't marching dashes, because dashes mean hypothetical.
-  - **Idle motion:** an element may bob, sway or similar. What each motion means isn't defined yet.
+  - **Idle motion:** an element may bob, sway or similar. What each motion means isn't defined yet. **Bob is built** (the hero): layered parts rise and settle one after another, and connectors and leaders pinned to a bobbing part follow it (motion.md, Loops).
   - With motion off, all loops stop. Focus shows as plain accent, and flow shows with arrowheads only.
 
 ## Authoring
@@ -155,10 +157,28 @@ Added 2026-11-23. A third scene kind, `kind: "knot"` ([`lab/js/knot.js`](../../l
   - A straight link with an arrow runs from the folder's middle to column 6's right edge.
 - **Shading:** only the solids and boxes are hatched, by the global light.
 
+## The hero's setup scene (exploration, 2026-11-25)
+The hero's graphic is the setup the talk teaches, as one iso object ([`lab/js/graphics/setup.js`](../../lab/js/graphics/setup.js)).
+- **Objects:**
+  - **`project/`** is a raised plate. What's on the plate is in the project: **Design System** (three stacked tiles) and **Generated Tools** (four cubes on a 2 × 2 grid), in two equal halves.
+  - **Context** is one cube: in this talk a context is a set limit on a chat's memory, one thing that can reach many things.
+  - **Chat** is three stacked turns in front of Context.
+  - **External Tools** is a block with a plug, apart from the plate on the right.
+  - **Output** is an upright screen at the front.
+- **Links:**
+  - Chat ↔ Context and Context ↔ `project/`, both ways. A chat reaches the project through its context; it doesn't contain it.
+  - `project/` ↔ External Tools, both ways, labelled **MCP**. The MCP label's dot sits at the connector's middle.
+  - Chat → Output and `project/` → Output.
+- **Connectors run on centre lines.** Each link leaves one object's centre line toward the next. Connectors draw over everything, so an end at a face we can't see sits where the line comes out from behind the object (half the object's width past that face), plus a clearance so the line and an arrow's legs stay off it. Visible ends stop the same clearance short. No connector touches or crosses an object.
+- **Labels** are capitalised (`project/` keeps the file name) and sit beside their objects (free captions).
+- **Motion:** one state, assembled, with flow packets on every connector. The layers bob one after another (bob 0.15 world units, 1600 ms, 120 ms apart): context, chat's turns, the tiles, then External Tools and Output. The MCP connector holds still while External Tools bobs.
+- **Placement:** fitted by height to the hero's 6 rows, hung from the right edge and reaching left under the hero text. Its box is the drawing's width, so it doesn't take the pointer over the text.
+- **Engine features it added** (scene format in [`lab/CLAUDE.md`](../../lab/CLAUDE.md)): two-way connectors, parts standing on another part (`on`, painted after it so a big face under it never covers them), free captions with `align`, and the bob loop. Rings can also be accent now (`accent: true`): slide 3's two rings use it.
+
 ## Open
 - **Motion session (separate):** easing curves for tweens and idle motion, the idle-motion vocabulary, and the 400/800 durations. Easing matters more than defining each motion's meaning.
 - **Not built yet:**
-  - idle motion loops: their vocabulary waits for the motion session
+  - idle motion loops other than bob: their vocabulary waits for the motion session
   - iso parts other than boxes
   - flat polygons that aren't convex
   - flat connectors with automatic routing: authors give the points

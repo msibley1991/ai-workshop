@@ -106,11 +106,13 @@ The chrome is everything that isn't slide content: the bars, the accordion tabs,
 - **No visited style.**
 - **Hover and focus invert** the link: the link colour as a fill, the text knocked out in ground, and the underline gone.
 - **In statements,** a link inside genie text pours in with its line and can be clicked once the line has landed.
+- **Glossary links on slides** (2026-11-26): the first time a glossary term appears in the slide statements, it links to its entry on the glossary page. Later appearances stay plain. Terms inside graphics aren't linked.
+- **As built:** a statement link is `<a data-fill><span>…</span></a>`: the underline is on the span, and hover and focus turn on the fill and knock the text out (`css/layout.css`; the glossary page's links in `css/glossary.css` match).
 - **Text artefacts carry no links** ([text-artefacts.md](text-artefacts.md)). Links to the real files are text links in the presentation.
 
 ## Open
 - **Hover, focus and pressed look the same.** A distinct focus look waits for the accessibility session.
-- **Not built yet:** the link rules.
+- **Not built yet:** links that leave the site (new tab, `↗`).
 - **On the lab's genie page,** g already opens the graph editor, so the `[g] Grid` key works only as a button there. The page has no nav.
 - The real tab names, after the layout recording.
 - Whether the palette indicator's ink box and its accent outline read on the dark palettes (Plasma, Vector), for the projector test ([display.md](display.md)).

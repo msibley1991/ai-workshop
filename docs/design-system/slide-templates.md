@@ -132,7 +132,12 @@ As built on the lab layout page:
 - **Line breaks within a sentence:** wrap each line in `<span class="st-line">`. Each line starts on its own, a blank line (1lh) below the one before (slides 9 and 11; slide 1's stacked statement keeps its plain `<br>`).
 - `data-bottom` on a sentence sets its bottom edge on the bottom of the last row field (slide 9's spoiler, 2026-11-24).
 - `data-at="<column>"` on a sentence takes it out of the statement's flow and sets it on the base line, from that open column to the last (slide 14's warning, column 8, on beat 2).
-- `data-delay="<ms>"` on a visual starts its entrance that many ms into the step (slide 12's figures 100 apart, slide 13's docs 200 apart). `data-step="1"` makes a visual enter after the beat's step-0 entrances and their wires (slide 10's docs).
+- `data-delay="<ms>"` on a visual starts its entrance that many ms into the step (slide 12's figures 100 apart, slide 13's docs 200 apart). `data-step="1"` makes a visual enter after the beat's step-0 entrances and their wires (slide 10's docs). On a slide change too (2026-11-25, slide 15), stepped visuals hold back: the first visuals enter and type, their wires draw, then each later step's visuals enter and type, followed by the wires they complete. Within a beat, each step runs its entrances, then its grows, then its stepped typing (`data-type-at` with `data-step`), then its wires.
+- `data-grow-at="<beat>"` on any element tweens its CSS `--grow` from 0 to 1 on that beat, in its `data-step`, and back on the way back; CSS sizes the element with it (slide 15's wireframe headline grows to match the typography doc).
+- `data-row="<n>"` on a sentence sets its top edge on the top of that row field, unless the text above already reaches past it (slide 17's answer, on row 5).
+- `data-gap="1"` or `"2"` on a sentence: that many blank lines above it (slides 11 and 16).
+- **Run-on sentences:** sentences that are `<span data-genie>` instead of `<p>` run on in one paragraph, each still its own beat (slides 3, 15 and 17).
+- `data-statement="body"` on a Text slide sets a long statement at 48/56, the Split and Row size, instead of the Text size (slide 17).
 - `data-exit-fade` on a visual fades its fills out (400) instead of its usual exit (slide 12's figures).
 - `data-grid-at="<beat>"` on a `.posters` artefact runs slide 12's poster grid on that beat (motion.md, One-beat sequences).
 - Wires, span states, `data-type-at` and document captions are in [text-artefacts.md](text-artefacts.md), Authoring.

@@ -182,16 +182,19 @@ export function measure(root, ctx) {
   // data-hatch="1|2|3" fills with that hatch step (the graphics ramp, anchored
   // to the page) instead of solid; CSS --hatch-shift (emulated px) slides the
   // pattern along (marching stripes). CSS border-radius rounds the fill.
+  // An inline fill (a link that wraps) takes one box per line, not the box
+  // around all its lines.
   const fills = [...root.querySelectorAll("[data-fill]")]
-    .map((el) => {
+    .flatMap((el) => {
       const style = getComputedStyle(el);
       const alpha = parseFloat(style.getPropertyValue("--fill-alpha"));
-      return {
-        ...toDoc(el.getBoundingClientRect()), el, ink: inkOf(el, style), clip: clipOf(el), alpha: Number.isNaN(alpha) ? 1 : alpha,
+      const rects = style.display === "inline" ? [...el.getClientRects()] : [el.getBoundingClientRect()];
+      return rects.map((rect) => ({
+        ...toDoc(rect), el, ink: inkOf(el, style), clip: clipOf(el), alpha: Number.isNaN(alpha) ? 1 : alpha,
         hatch: Number(el.dataset.hatch) || 0, shift: parseFloat(style.getPropertyValue("--hatch-shift")) || 0,
         // Per corner (top-left, top-right, bottom-right, bottom-left), for canvas roundRect.
         radius: [style.borderTopLeftRadius, style.borderTopRightRadius, style.borderBottomRightRadius, style.borderBottomLeftRadius].map((v) => parseFloat(v) || 0),
-      };
+      }));
     })
     .filter((f) => f.w > 0 && f.h > 0 && f.alpha > 0)
     // Translucent first, under solid fills, and fainter under stronger (the

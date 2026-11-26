@@ -153,6 +153,12 @@ labels.forEach((a, i) => {
   for (const type of ["pointerenter", "pointerleave", "focus", "blur"]) a.addEventListener(type, relayout);
 });
 
+// Statement links (glossary terms, the playground) invert on hover and focus:
+// re-measure so the raster draws it.
+for (const a of site.querySelectorAll(".slide-statement a")) {
+  for (const type of ["pointerenter", "pointerleave", "focus", "blur"]) a.addEventListener(type, relayout);
+}
+
 site.querySelector(".site-title").addEventListener("click", (e) => {
   e.preventDefault();
   animateTo(0, GOTO_MS);

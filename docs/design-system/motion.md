@@ -53,6 +53,7 @@ All are sine waves unless noted. The size is the travel from rest to the peak, o
 
 - **Leaving a step:** a running loop eases back to rest along the step's tween, so nothing snaps.
 - **Dragging** pauses the graphic's loops. They restart from rest after the spring-back.
+- **Bob as built** (2026-11-25, the hero): each layered part rises 0.15 world units and settles back over 1600 ms on a cosine (rest to peak and back, not ± about rest), 120 ms after the part before it, and repeats. The parts go in a set order, so the wave runs across the object. Connectors and leaders pinned to a bobbing part move with it; a connector between a still part and a bobbing one stays put. It repaints at about 30 fps. Motion off stops it.
 
 ## Enter and exit
 Added 2026-11-23: every visual on a slide now enters and leaves by **open / close** or **wipe**. Rise and fall are left only for the footer's section title.
