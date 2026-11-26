@@ -5,6 +5,7 @@ import stillLife from "./still-life.js";
 import layerCube from "./layer-cube.js";
 import filetypeKnot from "./filetype-knot.js";
 import setup from "./setup.js";
+import shadeRamp from "./shade-ramp.js";
 
 export default {
   "exploded-stack": explodedStack,
@@ -13,4 +14,5 @@ export default {
   "layer-cube": layerCube,
   "filetype-knot": filetypeKnot,
   setup,
+  "shade-ramp": shadeRamp,
 };

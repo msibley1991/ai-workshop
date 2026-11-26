@@ -140,6 +140,18 @@ export function threshold(pattern, U, V, id, sc) {
   return 0.5;
 }
 
+// The ink decision for the live style (ISO_STYLE): hatching, or, with
+// technique "dither", an ordered or noise pattern (dither.pattern, cell size
+// dither.cellSize) on its own tone steps (toneSpec). Full tone is solid. id
+// varies the noise patterns per face.
+export function shadeInk(t, U, V, id = 0) {
+  const s = ISO_STYLE, h = s.hatch;
+  if (s.technique !== "dither") return hatchInk(h, t, U, V);
+  if (t <= 0) return false;
+  if (t >= 1 - 1e-6) return true;
+  return t > threshold(s.dither?.pattern ?? "bayer 4x4", U, V, id, s.dither?.cellSize ?? 1);
+}
+
 const HATCH_ANGLES = [0, 90, 45, 135]; // cross mode adds layers in this order
 
 // Hatching at pattern coords (U, V). Spacing and width are in emulated pixels.
@@ -178,6 +190,23 @@ export function hatchInk(h, t, U, V) {
 
 export const stepTone = (spec, k) => spec.lightest + ((spec.darkest - spec.lightest) * k) / (spec.steps - 1);
 export const quantize = (spec, s) => stepTone(spec, Math.round(Math.min(1, Math.max(0, s)) * (spec.steps - 1)));
+
+// The live style's tone steps: the hatch ramp, or with technique "dither" the
+// dither's own (dither.steps from lightest to darkest, 6 by default). Bayer
+// matrices nest, so on the hatch ramp's quarters a 2x2, 4x4 and 8x8 light the
+// same pixels; their own steps fall between and tell them apart.
+export function toneSpec() {
+  const s = ISO_STYLE;
+  if (s.technique !== "dither") return s.hatch;
+  const d = s.dither ?? {};
+  return { steps: d.steps ?? 6, lightest: d.lightest ?? 0, darkest: d.darkest ?? 1 };
+}
+// A scene's fill step k (1-3, on the hatch ramp) in the live style: the hatch
+// tone, or the dither step nearest it.
+export function liveStep(k) {
+  const t = stepTone(ISO_STYLE.hatch, k);
+  return ISO_STYLE.technique === "dither" ? quantize(toneSpec(), t) : t;
+}
 
 // ---------- raster: convex polygons into per-pixel tone + pattern coords ----------
 

@@ -26,7 +26,7 @@ export const genieStore = createStore(
 // styles (technique "dither"), not drawn yet.
 export const shadingStore = createStore(
   "shading",
-  { ...structuredClone(ISO_STYLE), dither: { pattern: "bayer 4x4", cellSize: 1 } },
+  { ...structuredClone(ISO_STYLE), dither: { pattern: "bayer 4x4", cellSize: 1, steps: 6 } },
   (v) => {
     for (const [k, val] of Object.entries(structuredClone(v))) {
       if (val && typeof val === "object" && ISO_STYLE[k] && typeof ISO_STYLE[k] === "object") Object.assign(ISO_STYLE[k], val);
@@ -58,5 +58,6 @@ export const typeStore = createStore(
     set("body", v.body, v.body + 8);
     set("label", v.label, v.label + 8);
     layoutChanged();
+    window.dispatchEvent(new Event("site:type")); // layout.js re-lays the slides out
   },
 );

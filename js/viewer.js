@@ -86,6 +86,8 @@ export const viewer = {
     listeners.forEach((fn) => fn(state, { effects: true }));
     changed();
   },
+  // The viewer's changes to one palette's effects, { "<group>.<key>": value }.
+  effectChanges: (id = state.palette) => ({ ...effects[id] }),
   // Whether the viewer changed `id`'s effects, or any palette's.
   effectsDiffer: (id) => (id ? !!effects[id] : Object.keys(effects).length > 0),
   resetEffects(id) {

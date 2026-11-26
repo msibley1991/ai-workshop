@@ -21,7 +21,7 @@
 // (`graphicSpan`). Iso scenes put the world origin at `origin` (design units)
 // and draw `scale` design units per world unit.
 import {
-  ISO_STYLE, styleRev, ISO_YAW, ISO_PITCH, Raster, Spin, hatchInk, stepTone, rotator, boxFaces, lightVector, fillFace, rgb, quantize,
+  ISO_STYLE, styleRev, ISO_YAW, ISO_PITCH, Raster, Spin, shadeInk, stepTone, toneSpec, liveStep, rotator, boxFaces, lightVector, fillFace, rgb, quantize,
 } from "./shade.js";
 import SCENES from "./graphics/index.js";
 import { paintKnot, wireKnotDrag, releaseKnot, syncTemplate } from "./knot.js";
@@ -566,7 +566,7 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
     const facesOf = new Map();
     for (const { part, face, n, pts, seg, weight } of vis) {
       if (seg) { r.line(seg[0], seg[1], own(r.count++, part.id, part.accent === true), weight); continue; }
-      const id = own(fillFace(r, face, n, pts, { k, spec: ISO_STYLE.hatch, style: ISO_STYLE, L }), part.id);
+      const id = own(fillFace(r, face, n, pts, { k, spec: toneSpec(), style: ISO_STYLE, L }), part.id);
       if (!facesOf.has(part.id)) facesOf.set(part.id, []);
       facesOf.get(part.id).push(id);
     }
@@ -596,7 +596,7 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
       return [Math.floor(x0), Math.floor(y0), Math.ceil(x1), Math.ceil(y1)];
     })();
     shapes.forEach((s, i) => {
-      const t = s.fill === "solid" ? 1 : typeof s.fill === "number" ? stepTone(ISO_STYLE.hatch, s.fill) : 0;
+      const t = s.fill === "solid" ? 1 : typeof s.fill === "number" ? liveStep(s.fill) : 0;
       const nested = boxes.some((b, j) => j !== i && inside(boxes[i], b));
       const sh = box && s === box ? { ...s, w: s.w * m.open.o, h: s.h * m.open.o } : s;
       if (box && s === box && (sh.w * scale * f < 1 || sh.h * scale * f < 1)) return; // nothing yet
@@ -818,7 +818,7 @@ function paintPersp(m, r, st, { P, own, visible, anchors, scale, f }) {
       const v0 = fc.v[0], toEye = [eyeAt[0] - v0[0], eyeAt[1] - v0[1], eyeAt[2] - v0[2]];
       if (fc.n[0] * toEye[0] + fc.n[1] * toEye[1] + fc.n[2] * toEye[2] <= 1e-6) continue;
       const lit = Math.max(0, fc.n[0] * L[0] + fc.n[1] * L[1] + fc.n[2] * L[2]);
-      const t = quantize(ISO_STYLE.hatch, 1 - lit);
+      const t = quantize(toneSpec(), 1 - lit);
       const pts = fc.v.map(proj);
       // Hatching anchored to the face: pattern coords along its first and last edges.
       const p0 = pts[0], p1 = pts[1], pl = pts[pts.length - 1];
@@ -1060,13 +1060,13 @@ function packet(pts, now, rect, bw, bh) {
 }
 
 function compose(m, ink, accent, ground) {
-  const r = m.raster, data = m.image.data, spec = ISO_STYLE.hatch;
+  const r = m.raster, data = m.image.data;
   for (let i = 0; i < r.tone.length; i++) {
     const o = i * 4;
     let owner, on;
     if (r.edge[i]) { owner = r.edge[i] - 1; on = true; }
     else if (r.tone[i] < 0) { data[o + 3] = 0; continue; }
-    else { owner = r.fid[i]; on = hatchInk(spec, r.tone[i], r.U[i], r.V[i]); }
+    else { owner = r.fid[i]; on = shadeInk(r.tone[i], r.U[i], r.V[i], owner); }
     const c = on ? (m.accent[owner] ? accent : ink) : ground;
     data[o] = c[0]; data[o + 1] = c[1]; data[o + 2] = c[2]; data[o + 3] = 255;
   }

@@ -18,6 +18,7 @@
   "lightHeight": 48,
   "dither": {
     "pattern": "bayer 4x4",
-    "cellSize": 1
+    "cellSize": 1,
+    "steps": 6
   }
 }

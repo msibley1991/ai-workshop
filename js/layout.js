@@ -1,4 +1,4 @@
-// index.html only: the intro and the two tabs form an accordion driven by scroll.
+// index.html, playground.html and lab/genie.html: the intro and the tabs form an accordion driven by scroll.
 //
 // State is a weight per panel (intro, then each tab), summing to 1; site.css
 // turns each weight (--w) into that panel's share of the free height. Scrolling
@@ -170,6 +170,7 @@ const KEYS = { ArrowDown: 1, " ": 1, ArrowUp: -1 };
 document.addEventListener("keydown", (e) => {
   if (!(e.key in KEYS) || e.altKey || e.ctrlKey || e.metaKey) return;
   if (e.target.closest?.(".site-controls, .site-nav")) return; // the panels' own buttons take Space
+  if (e.target.closest?.("[data-control]")) return; // a playground control takes its own keys
   if (!site.contains(e.target) && e.target !== document.body) return; // leave the dial panel alone
   if (e.target.closest("button")) return; // let buttons take Space
   e.preventDefault();
@@ -199,6 +200,7 @@ document.addEventListener("keydown", (e) => {
   const dir = STEP_KEYS[e.key];
   if (!dir) return;
   if (e.altKey || e.ctrlKey || e.metaKey) return;
+  if (e.target.closest?.("[data-control]")) return; // a slider takes ← →
   if (!site.contains(e.target) && e.target !== document.body) return; // leave the dial panel alone
   if (stepBy(dir)) e.preventDefault();
 });
@@ -273,7 +275,9 @@ function reflow() {
   const avail = COLUMNS - left - coverRight;
   for (const split of splits) {
     const graphic = split.querySelector(".site-graphic"), text = split.lastElementChild;
-    const [min, max] = graphicSpan(graphic) ?? DEFAULT_SPAN;
+    // A scene's span, else data-span="min,max" (a specimen that isn't one scene, playground.html).
+    const own = graphic.dataset.span?.split(",").map(Number);
+    const [min, max] = graphicSpan(graphic) ?? (own?.length === 2 ? own : DEFAULT_SPAN);
     const span = Math.max(min, Math.min(max, avail - TEXT_MIN));
     graphic.style.gridColumn = `${1 + left} / span ${span}`;
     text.style.gridColumn = `${1 + left + span} / ${COLUMNS + 1 - coverRight}`;
@@ -282,6 +286,9 @@ function reflow() {
   relayout();
 }
 window.addEventListener("resize", () => reflow());
+// A type size changed (the playground's Type tab, js/stores.js): statements
+// need different row fields, so the slides lay out again.
+window.addEventListener("site:type", () => reflow());
 reflow();
 
 // ---- Panels: viewer controls ([c], columns 11-12) and left nav ([n], 1-2) ------

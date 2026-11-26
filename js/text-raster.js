@@ -3,7 +3,7 @@
 // draw() runs every frame and only translates by the render scroll offset.
 
 import { mountGraphic, drawGraphic } from "./graphic.js";
-import { ISO_STYLE, styleRev, hatchInk, stepTone } from "./shade.js";
+import { styleRev, shadeInk, liveStep } from "./shade.js";
 import { genieT, warpBlock, setLines, settings as genieSettings } from "./genie-warp.js";
 
 // Ink comes from the CSS custom property --ink (so states like :hover can set it),
@@ -360,11 +360,14 @@ function offscreen(canvas) {
   return offCtx;
 }
 
-// A hatch-step fill pattern in `color`: the graphics ramp (shade.js ISO_STYLE,
-// 45° lines 4 px wide every 24, 12 or 8 px) in emulated pixels, one pattern
-// pixel per emulated pixel, slid by `shift` px. 24 is a whole period of every
-// step, so a 24 x 24 tile repeats seamlessly.
+// A tone-step fill pattern in `color`, in the live shading style (shade.js
+// shadeInk: ISO_STYLE's hatching, or its dither), one pattern pixel per
+// emulated pixel, slid by `shift` px.
 const hatchTiles = new Map();
+// 192 repeats every hatch period the tuned look uses (24, 12, 8), the Bayer
+// cells at sizes 1-4 and the 64-pixel blue noise; other spacings may show a
+// seam every 192 pixels.
+const TILE = 192;
 let tilesRev = 0; // the shading style the tiles were drawn in
 function hatchPattern(ctx, color, step, shift, ps) {
   if (tilesRev !== styleRev) { hatchTiles.clear(); tilesRev = styleRev; }
@@ -372,10 +375,10 @@ function hatchPattern(ctx, color, step, shift, ps) {
   let tile = hatchTiles.get(key);
   if (!tile) {
     tile = document.createElement("canvas");
-    tile.width = tile.height = 24;
-    const c = tile.getContext("2d"), spec = ISO_STYLE.hatch, t = stepTone(spec, step);
+    tile.width = tile.height = TILE;
+    const c = tile.getContext("2d"), t = liveStep(step);
     c.fillStyle = color;
-    for (let y = 0; y < 24; y++) for (let x = 0; x < 24; x++) if (hatchInk(spec, t, x + 0.5, y + 0.5)) c.fillRect(x, y, 1, 1);
+    for (let y = 0; y < TILE; y++) for (let x = 0; x < TILE; x++) if (shadeInk(t, x + 0.5, y + 0.5)) c.fillRect(x, y, 1, 1);
     hatchTiles.set(key, tile);
   }
   const pat = ctx.createPattern(tile, "repeat");

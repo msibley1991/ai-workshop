@@ -31,7 +31,7 @@
 // The sim runs in view space (design units, x right, y down, z towards the
 // viewer), so a drag is in the screen plane.
 
-import { ISO_STYLE, stepTone } from "./shade.js";
+import { ISO_STYLE, liveStep } from "./shade.js";
 
 const N = 96;          // cord points
 const STEP = 1 / 480;  // sim step, s
@@ -416,10 +416,10 @@ function paintTile(r, own, t, [x, y], size, f, rounded) {
   if (t.icon === "cube") {
     const h = a * 0.866;
     fill([[cx, cy - a], [cx + h, cy - a / 2], [cx, cy], [cx - h, cy - a / 2]], 0);
-    fill([[cx - h, cy - a / 2], [cx, cy], [cx, cy + a], [cx - h, cy + a / 2]], stepTone(ISO_STYLE.hatch, 2));
-    fill([[cx, cy], [cx + h, cy - a / 2], [cx + h, cy + a / 2], [cx, cy + a]], stepTone(ISO_STYLE.hatch, 1));
+    fill([[cx - h, cy - a / 2], [cx, cy], [cx, cy + a], [cx - h, cy + a / 2]], liveStep(2));
+    fill([[cx, cy], [cx + h, cy - a / 2], [cx + h, cy + a / 2], [cx, cy + a]], liveStep(1));
   } else if (t.icon === "swatch") {
-    fill(rounded([[cx - a, cy - a], [cx + a, cy - a], [cx + a, cy + a], [cx - a, cy + a]], RADIUS / 2, true), stepTone(ISO_STYLE.hatch, 2));
+    fill(rounded([[cx - a, cy - a], [cx + a, cy - a], [cx + a, cy + a], [cx - a, cy + a]], RADIUS / 2, true), liveStep(2));
   } else if (t.icon === "panels") {
     fill(rounded([[cx - a, cy - a], [cx + a, cy - a], [cx + a, cy + a], [cx - a, cy + a]], RADIUS / 2, true), 0);
     const sx = cx - a / 3;

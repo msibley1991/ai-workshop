@@ -6,6 +6,7 @@ import { viewer } from "./viewer.js";
 
 const site = document.getElementById("content");
 const blocks = () => [...site.querySelectorAll("[data-genie]")];
+const relayout = () => window.dispatchEvent(new Event("lab:layout"));
 
 // The text block of the panel that's open (its accordion weight is over half).
 export function openBlock() {
@@ -26,6 +27,9 @@ export function genie(to) {
   play(el, to);
   settings.lineTime = dur;
   clearTimeout(timers.get(el));
-  if (to === 0) el.style.visibility = "";
-  else timers.set(el, setTimeout(() => { if (genieT(el) >= 1) el.style.visibility = "hidden"; }, motion ? totalFor(el) : 0));
+  // The raster skips hidden text, so each change of visibility asks for a new
+  // measure: without one, a block coming back in isn't in the layout until
+  // something else re-measures (pages without slides fire nothing else).
+  if (to === 0) { el.style.visibility = ""; relayout(); }
+  else timers.set(el, setTimeout(() => { if (genieT(el) >= 1) { el.style.visibility = "hidden"; relayout(); } }, motion ? totalFor(el) : 0));
 }

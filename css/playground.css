@@ -1,0 +1,52 @@
+/* Playground page (playground.html, docs/design-system/playground.md). On top
+   of css/site.css: the intro and four tabs, each a specimen (left) beside its
+   controls (right). */
+
+/* Four tab headers, not two: an open panel gets the canvas minus the margins,
+   both bars, four tab headers and the six gaps between seven rows. */
+:root {
+  --avail: calc(var(--canvas-h) - 2 * var(--frame-margin) - 2 * var(--bar-height) - 4 * var(--tab-height) - 6 * var(--row-gap));
+}
+
+/* ---- Controls column: a note, the controls, then the actions at the bottom -- */
+.pg-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-group);
+  min-height: 0;
+  font-size: var(--space-24);   /* label role */
+  line-height: var(--space-32);
+  font-weight: 500;
+}
+.site .pg-note { margin: 0; }
+.pg-controls { display: flex; flex-direction: column; gap: var(--gap-related); }
+.pg-actions { display: flex; flex-wrap: wrap; gap: var(--space-8); margin-top: auto; }
+.pg-actions .site-bar-button { margin: 0; }
+/* Flex rules would beat the hidden attribute (data-when, data-local-only). */
+.pg-panel [hidden] { display: none; }
+
+/* The genie tab's sink sits bottom left, as on the slides (.slides .genie-sink). */
+.site-tab[data-panel="genie"] .genie-sink { left: calc(var(--box-inset) + var(--nav-push)); right: auto; }
+
+/* ---- Specimens ---------------------------------------------------------------- */
+.pg-specimen { min-height: 0; }
+/* Display: the hero graphic over a key hint telling you to drag it. */
+.pg-display { display: flex; flex-direction: column; gap: var(--gap-related); height: 100%; }
+.pg-display > [data-graphic] { flex: 1 1 0; min-height: 0; }
+.site .pg-hint { margin: 0; flex: none; font-size: var(--space-16); line-height: var(--space-24); font-weight: 500; }
+.site .pg-genie p { margin: 0; }
+.pg-genie { display: flex; flex-direction: column; gap: var(--gap-group); }
+
+/* Shading: the tone ramp across the top, a flat and an iso graphic under it. */
+.pg-shading { display: flex; flex-direction: column; gap: var(--gap-group); height: 100%; }
+.pg-ramp { flex: 0 0 calc(112 * var(--u)); }
+.pg-shading-row { flex: 1 1 0; min-height: 0; display: flex; gap: var(--grid-gutter); }
+.pg-shading-row > [data-graphic] { flex: 1 1 0; min-width: 0; }
+
+/* Type: one line per role, read from the --type-* tokens (js/stores.js). */
+.pg-type { display: flex; flex-direction: column; gap: var(--gap-group); }
+.site .pg-type p { margin: 0; max-width: var(--span-6); }
+.site .pg-type-display { font-size: var(--type-display-size); line-height: var(--type-display-lh); font-weight: 700; }
+.site .pg-type-statement { font-size: var(--type-statement-size); line-height: var(--type-statement-lh); font-weight: 500; }
+.site .pg-type-body { font-size: var(--type-body-size); line-height: var(--type-body-lh); font-weight: 400; }
+.site .pg-type-label { font-size: var(--type-label-size); line-height: var(--type-label-lh); font-weight: 500; }

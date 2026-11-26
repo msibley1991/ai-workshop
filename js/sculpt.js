@@ -17,7 +17,7 @@
 // it (the boxes, the solids) is hatched by the light. Solids:
 // an icosahedron, a (2,3) torus knot tube, a twisted square prism, hatched by
 // the global light with 4 edges (docs/design-system/graphics.md).
-import { ISO_STYLE, ISO_YAW, ISO_PITCH, rotator, lightVector, quantize, boxFaces, Spin } from "./shade.js";
+import { ISO_STYLE, ISO_YAW, ISO_PITCH, rotator, lightVector, quantize, toneSpec, boxFaces, Spin } from "./shade.js";
 import { drawPart } from "./knot.js";
 
 const INK = 4;          // iso edges, the page's frame
@@ -248,7 +248,7 @@ export function paintSculpt(m, r, ctx) {
 
 function fill(r, own, fc, hatched) {
   const lit = Math.max(0, dot(fc.n, lightVector(ISO_STYLE)));
-  const t = hatched && fc.shaded ? quantize(ISO_STYLE.hatch, 1 - lit) : 0;
+  const t = hatched && fc.shaded ? quantize(toneSpec(), 1 - lit) : 0;
   const pts = fc.pts.map(([x, y]) => [x, y]);
   // Hatching anchored to the face: pattern coords along its first and last edges.
   const p0 = pts[0], p1 = pts[1], pl = pts[pts.length - 1];
