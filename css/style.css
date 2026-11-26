@@ -40,7 +40,9 @@
   --gap-group: var(--space-32);    /* statement -> body, text -> code or figure */
   --gap-section: var(--space-64);  /* between beats or major blocks */
 
-  /* Type (docs/design-system/typography.md). Sentence case everywhere; emphasis is weight 700. */
+  /* Type (docs/design-system/typography.md). Sentence case everywhere; emphasis is weight 700.
+     The playground's Type tab can move display, statement, body and label a step
+     (js/stores.js sets these on the root element; css/site.css reads them). */
   --font-sans: "Chakra Petch", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
   --weight-regular: 400;
@@ -51,6 +53,7 @@
   --type-display-size: var(--space-128);  --type-display-lh: var(--space-128);  --type-display-weight: var(--weight-bold);
   --type-headline-size: var(--space-64);  --type-headline-lh: var(--space-64);  --type-headline-weight: var(--weight-bold);
   --type-statement-size: var(--space-48); --type-statement-lh: calc(56 * var(--u)); --type-statement-weight: var(--weight-medium);
+  --type-statement-large-size: var(--space-64); --type-statement-large-lh: calc(72 * var(--u)); /* Text slides: one step above the statement */
   --type-body-size: var(--space-32);      --type-body-lh: calc(40 * var(--u));   --type-body-weight: var(--weight-regular);
   --type-label-size: var(--space-24);     --type-label-lh: var(--space-32);     --type-label-weight: var(--weight-medium);
   --type-bar-size: var(--space-16);       --type-bar-lh: var(--space-24);       --type-bar-weight: var(--weight-medium);

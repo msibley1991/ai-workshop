@@ -41,4 +41,5 @@ This repo is a website that holds our workshop talk on designing with coding age
 - [docs/design-system/display.md](docs/design-system/display.md): the display layer: one tuned look, ambient effects, viewer overrides, the DOM fallback, the projector test (exploration; tuned on the talk page)
 - [docs/design-system/text-artefacts.md](docs/design-system/text-artefacts.md): prompts, chats, documents and file trees as graphics of legible text: the face rule, span states, cross-links, carried spans, retype, the camera, detail levels, pixelated blur (exploration; partly built in the talk page, slides 1, 2 and 10–13)
 - [docs/design-system/components.md](docs/design-system/components.md): interface chrome: bars, palette indicator, key hints, buttons, panels, the subtree nav, tab headers, links (exploration; partly built in the talk page)
+- [docs/design-system/playground.md](docs/design-system/playground.md): the playground page: a tab per tool (genie, shading, type, display), curated controls, viewer overrides on preset defaults, the build order (exploration; not built)
 - [docs/handoffs/](docs/handoffs/): session handoff notes, newest last

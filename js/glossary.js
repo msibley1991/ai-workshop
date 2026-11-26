@@ -170,8 +170,8 @@ showViewer(viewer.get());
 // ---- Keys ---------------------------------------------------------------------------------------
 // While the controls are open they take ↑ ↓ (highlight, wrapping), Tab (next
 // group), Enter and Space (select), as on index.html. Otherwise ↑ ↓ step terms.
-const panelItems = () => [...panel.querySelectorAll("button")];
-const panelJumps = () => [...panel.querySelectorAll(".site-controls-group")].map((g) => g.querySelector("button"));
+const panelItems = () => [...panel.querySelectorAll("button")].filter((b) => !b.closest("[hidden]"));
+const panelJumps = () => [...panel.querySelectorAll(".site-controls-group:not([hidden])")].map((g) => g.querySelector("button"));
 document.addEventListener("keydown", (e) => {
   if (e.altKey || e.ctrlKey || e.metaKey) return;
   if (!site.contains(e.target) && e.target !== document.body) return; // leave the dial panel alone

@@ -4,6 +4,8 @@ import { measure, selectionRects, draw } from "./text-raster.js";
 import { updateScroll } from "./scroll.js";
 import { viewer, enabled as viewerEnabled, applyViewer, palettesReady, paletteValues } from "./viewer.js";
 import { trailBoost } from "./genie-warp.js";
+import "./stores.js"; // the genie, shading and type settings, saved look + viewer changes
+import { bindResetRow } from "./settings.js";
 
 const content = document.getElementById("content");
 const viewportEl = document.getElementById("viewport3d");
@@ -142,6 +144,8 @@ if (displayMode && LOCAL_HOSTS.includes(location.hostname)) {
     })
     .catch((err) => console.error("[lab]", err));
 }
+// The Controls panel's playground reset row (js/settings.js).
+bindResetRow();
 // The viewer's palette, motion, blur and lines (pages with data-viewer).
 viewer.subscribe(() => { compose(); invalidate(); });
 

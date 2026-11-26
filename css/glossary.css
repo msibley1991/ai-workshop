@@ -46,8 +46,8 @@
 .site .glossary-def {
   margin: 0;
   max-width: var(--span-6);
-  font-size: var(--space-32);       /* Body */
-  line-height: calc(40 * var(--u));
+  font-size: var(--type-body-size); /* Body */
+  line-height: var(--type-body-lh);
   font-weight: 400;
 }
 

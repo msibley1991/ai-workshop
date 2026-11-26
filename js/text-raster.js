@@ -3,7 +3,7 @@
 // draw() runs every frame and only translates by the render scroll offset.
 
 import { mountGraphic, drawGraphic } from "./graphic.js";
-import { ISO_STYLE, hatchInk, stepTone } from "./shade.js";
+import { ISO_STYLE, styleRev, hatchInk, stepTone } from "./shade.js";
 import { genieT, warpBlock, setLines, settings as genieSettings } from "./genie-warp.js";
 
 // Ink comes from the CSS custom property --ink (so states like :hover can set it),
@@ -365,7 +365,9 @@ function offscreen(canvas) {
 // pixel per emulated pixel, slid by `shift` px. 24 is a whole period of every
 // step, so a 24 x 24 tile repeats seamlessly.
 const hatchTiles = new Map();
+let tilesRev = 0; // the shading style the tiles were drawn in
 function hatchPattern(ctx, color, step, shift, ps) {
+  if (tilesRev !== styleRev) { hatchTiles.clear(); tilesRev = styleRev; }
   const key = `${color}|${step}`;
   let tile = hatchTiles.get(key);
   if (!tile) {

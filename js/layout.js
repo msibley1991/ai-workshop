@@ -339,8 +339,8 @@ const controls = makePanel({
   toggles: [controlsToggle, paletteIndicator].filter(Boolean),
   cssVar: "--controls-open",
   side: "right",
-  items: () => [...controlsPanel.querySelectorAll("button")],
-  jumps: () => [...controlsPanel.querySelectorAll(".site-controls-group")].map((g) => g.querySelector("button")).filter(Boolean),
+  items: () => [...controlsPanel.querySelectorAll("button")].filter((b) => !b.closest("[hidden]")),
+  jumps: () => [...controlsPanel.querySelectorAll(".site-controls-group:not([hidden])")].map((g) => g.querySelector("button")).filter(Boolean),
 });
 const paletteButtons = [...controlsPanel.querySelectorAll("[data-palette]")];
 const settingButtons = [...controlsPanel.querySelectorAll("[data-setting]")];

@@ -21,13 +21,12 @@
 // (`graphicSpan`). Iso scenes put the world origin at `origin` (design units)
 // and draw `scale` design units per world unit.
 import {
-  ISO_STYLE, ISO_YAW, ISO_PITCH, Raster, Spin, hatchInk, stepTone, rotator, boxFaces, lightVector, fillFace, rgb, quantize,
+  ISO_STYLE, styleRev, ISO_YAW, ISO_PITCH, Raster, Spin, hatchInk, stepTone, rotator, boxFaces, lightVector, fillFace, rgb, quantize,
 } from "./shade.js";
 import SCENES from "./graphics/index.js";
 import { paintKnot, wireKnotDrag, releaseKnot, syncTemplate } from "./knot.js";
 import { paintSculpt } from "./sculpt.js";
 
-const INNER = ISO_STYLE.innerEdges;    // 4, iso edges and outermost flat shapes
 const NESTED = 2;                 // flat shapes inside another shape
 const LINE = 2;                   // leader lines
 const CONNECTOR = 4;              // connectors
@@ -474,7 +473,7 @@ export function drawGraphic(ctx, item, ps, u, colors) {
   const flowing = motion && (st.flow?.length ?? 0) > 0;
   // A knot moves every frame (its sim and tumble), so it always repaints.
   const key = [m.scene.kind === "knot" ? now : "", bw, bh, ox, oy, f, s, m.index, vals.explode, vals.frame, m.viewYaw, m.twistT, m.bobT, m.spin.pitch, m.hover, blinkOn, m.open?.o, m.open?.w,
-    colors.ink, colors.accent, colors.ground].join("|");
+    colors.ink, colors.accent, colors.ground, styleRev].join("|");
   let look = m.looks.find((l) => l.key === key);
   if (!look) {
     look = m.looks.length < 2 ? { canvas: document.createElement("canvas") } : m.looks.shift();
@@ -557,7 +556,7 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
       });
       for (let i = 0; i < N; i++) {
         const p = pts[i], q = pts[(i + 1) % N];
-        vis.push({ part: ring, seg: [p, q], depth: (p[2] + q[2]) / 2, weight: ring.weight ?? INNER });
+        vis.push({ part: ring, seg: [p, q], depth: (p[2] + q[2]) / 2, weight: ring.weight ?? ISO_STYLE.innerEdges });
       }
     }
     // part.on: a part standing on another (the hero's plate contents) paints
@@ -604,7 +603,7 @@ function paint(m, vals, st, { f, s: scale, ox, oy, now, blinkOn }) {
       r.clip = box && s !== box ? cut : null;
       const rad = Math.min(RADIUS, (sh.w ?? Infinity) * scale * f / 2, (sh.h ?? Infinity) * scale * f / 2);
       const pts = sh.type === "circle" ? shapePoints(sh, P) : rounded(shapePoints(sh, P), rad, true);
-      own(r.fill(pts, t, { edges: sh.outline !== "none", edgeWidth: nested ? NESTED : INNER }), sh.part ?? sh.id);
+      own(r.fill(pts, t, { edges: sh.outline !== "none", edgeWidth: nested ? NESTED : ISO_STYLE.innerEdges }), sh.part ?? sh.id);
     });
     r.clip = box ? cut : null; // connectors too
   }
@@ -825,7 +824,7 @@ function paintPersp(m, r, st, { P, own, visible, anchors, scale, f }) {
       const p0 = pts[0], p1 = pts[1], pl = pts[pts.length - 1];
       const ax = p1[0] - p0[0], ay = p1[1] - p0[1], bx = pl[0] - p0[0], by = pl[1] - p0[1], det = ax * by - bx * ay;
       const basis = Math.abs(det) > 1 ? { ox: p0[0], oy: p0[1], inv: [by / det, -bx / det, -ay / det, ax / det], la: Math.hypot(ax, ay), lb: Math.hypot(bx, by) } : null;
-      ids.push(own(r.fill(pts, t, { edges: true, edgeWidth: INNER, basis }), part.id));
+      ids.push(own(r.fill(pts, t, { edges: true, edgeWidth: ISO_STYLE.innerEdges, basis }), part.id));
     }
     facesOf.set(part.id, ids);
   }
@@ -834,7 +833,7 @@ function paintPersp(m, r, st, { P, own, visible, anchors, scale, f }) {
   // the element's edge by half its line so it all draws.
   const fbox = m.geom.frameBox;
   if (fbox) {
-    const h = INNER / 2 / f, [x0, y0] = [fbox[0] + h, fbox[1] + h];
+    const h = ISO_STYLE.innerEdges / 2 / f, [x0, y0] = [fbox[0] + h, fbox[1] + h];
     // Opening or closing (m.open): the box at o of its size from its top-left,
     // the drawing down to w of its height.
     const o = m.open?.o ?? 1, w = Math.min(o, m.open?.w ?? 1);
@@ -852,7 +851,7 @@ function paintPersp(m, r, st, { P, own, visible, anchors, scale, f }) {
     if ((x1 - x0) * f >= 1 && (y1 - y0) * f >= 1) {
       const pts = rounded([[x0 * f, y0 * f], [x1 * f, y0 * f], [x1 * f, y1 * f], [x0 * f, y1 * f]], Math.min(RADIUS, ((x1 - x0) * f) / 2, ((y1 - y0) * f) / 2), true);
       const id = own(r.count++, "frame");
-      for (let i = 0; i < pts.length; i++) r.line(pts[i], pts[(i + 1) % pts.length], id, INNER);
+      for (let i = 0; i < pts.length; i++) r.line(pts[i], pts[(i + 1) % pts.length], id, ISO_STYLE.innerEdges);
     }
   }
 

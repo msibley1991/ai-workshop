@@ -1,0 +1,23 @@
+{
+  "technique": "hatch",
+  "hatch": {
+    "mode": "density",
+    "angle": 45,
+    "spacing": 8,
+    "lineWidth": 4,
+    "steps": 5,
+    "lightest": 0,
+    "darkest": 1,
+    "solidDarkest": true
+  },
+  "patternAnchor": "object",
+  "edges": true,
+  "innerEdges": 4,
+  "inkShows": "shadow",
+  "lightAngle": -60,
+  "lightHeight": 48,
+  "dither": {
+    "pattern": "bayer 4x4",
+    "cellSize": 1
+  }
+}

@@ -20,6 +20,12 @@ export const ISO_STYLE = {
   lightHeight: 48,    // degrees above the horizon
 };
 
+// ISO_STYLE is live: the shading store (js/stores.js) writes into it, then
+// bumpStyle(), and painted graphics and hatch tiles key their caches on
+// styleRev so they repaint with the new look.
+export let styleRev = 0;
+export function bumpStyle() { styleRev++; }
+
 // ---------- patterns ----------
 
 const mod = (a, n) => ((a % n) + n) % n;

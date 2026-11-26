@@ -8,6 +8,7 @@
 // lines are overrides applied on top, so turning them back on restores the
 // tuned look.
 import { paletteDisplayConfig, defaultsOf, presetURL } from "./params.js";
+import { register, changed } from "./settings.js";
 
 // Palettes live in presets/palettes.json (edited with the Palette dial panel,
 // js/palette-panel.js). PALETTES is filled once palettesReady resolves; the
@@ -47,12 +48,52 @@ export function paletteDisplay(p) {
   return Object.fromEntries(Object.entries(EFFECT_DEFAULTS).map(([g, v]) => [g, { ...v, ...d[g] }]));
 }
 
+// The viewer's own changes to the palettes' effects (the playground's Display
+// tab), per palette: { <palette id>: { "<group>.<key>": value } }, so each
+// palette keeps its own. Applied over the saved effects by paletteValues().
+const EFFECTS_KEY = "site-palette-effects";
+let effects = {};
+try { effects = JSON.parse(localStorage.getItem(EFFECTS_KEY) || "{}") ?? {}; } catch {}
+const saveEffects = () => {
+  try {
+    if (Object.keys(effects).length) localStorage.setItem(EFFECTS_KEY, JSON.stringify(effects));
+    else localStorage.removeItem(EFFECTS_KEY);
+  } catch {}
+};
+
 export const viewer = {
   get: () => state,
   set(patch) {
     state = { ...state, ...patch };
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {}
     listeners.forEach((fn) => fn(state, patch));
+  },
+  // The active palette's effect at path ("glow.strength"), with the viewer's change.
+  effect(path, id = state.palette) {
+    const own = effects[id]?.[path];
+    if (own !== undefined) return own;
+    const [g, k] = path.split(".");
+    return paletteDisplay(PALETTES[id])[g]?.[k];
+  },
+  // A viewer change to one palette's effect; the saved value drops the change.
+  setEffect(path, value, id = state.palette) {
+    const [g, k] = path.split(".");
+    const own = (effects[id] ??= {});
+    if (paletteDisplay(PALETTES[id])[g]?.[k] === value) delete own[path];
+    else own[path] = value;
+    if (!Object.keys(own).length) delete effects[id];
+    saveEffects();
+    listeners.forEach((fn) => fn(state, { effects: true }));
+    changed();
+  },
+  // Whether the viewer changed `id`'s effects, or any palette's.
+  effectsDiffer: (id) => (id ? !!effects[id] : Object.keys(effects).length > 0),
+  resetEffects(id) {
+    if (id) delete effects[id];
+    else effects = {};
+    saveEffects();
+    listeners.forEach((fn) => fn(state, { effects: true }));
+    changed();
   },
   subscribe(fn) {
     listeners.add(fn);
@@ -76,6 +117,10 @@ export function paletteValues(id) {
   const p = PALETTES[id] ?? PALETTES.ink;
   const mode = modeOf(p.ground);
   const display = paletteDisplay(p);
+  for (const [path, v] of Object.entries(effects[id] ?? {})) {
+    const [g, k] = path.split(".");
+    if (display[g]) display[g][k] = v;
+  }
   return {
     theme: { mode, [mode]: { ground: p.ground, ink: p.ink, accent: p.accent, link: p.link ?? p.accent } },
     display: { ...display, trails: { ...display.trails, trail1: p.trail1, trail2: p.trail2, trail3: p.trail3 } },
@@ -103,3 +148,6 @@ export function applyViewer(params) {
   if (!state.lines) out.lines.type = "off";
   return out;
 }
+
+// The palettes' effects count as playground changes (js/settings.js).
+register({ name: "palettes", differs: () => viewer.effectsDiffer(), reset: () => viewer.resetEffects() });

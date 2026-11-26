@@ -711,6 +711,15 @@
             <button class="site-bar-button" type="button" data-setting="lines" data-value="off" aria-pressed="false" data-fill><span>off</span></button>
           </div>
         </div>
+        <!-- Playground changes (docs/design-system/playground.md): shown only
+             while the viewer's look differs from the saved one (js/settings.js). -->
+        <div class="site-controls-group" data-playground-reset hidden>
+          <p class="site-controls-heading">[Playground]</p>
+          <div class="site-controls-setting" role="group" aria-label="Playground changes">
+            <span>Changes</span>
+            <button class="site-bar-button" type="button" data-reset-all data-fill><span>reset</span></button>
+          </div>
+        </div>
         <p class="site-controls-hint">[c] [Esc] Close</p>
       </aside>
     </div>
