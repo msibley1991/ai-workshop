@@ -9,7 +9,7 @@ The playground is a page where viewers try the tools the talk was made with: the
 - **A tab per tool** in the site's accordion: Genie, Shading, Type, Display. Each tab can be linked to directly (`playground.html#genie` and so on), as the talk's tabs are.
 - **Each tab has a specimen** beside its controls: test content made for that tool, not a slide from the talk. The specimens are drawn by the site's engine, so what viewers see matches the talk.
   - **Genie:** a multi-line statement block with its sink square, and Genie out / in buttons.
-  - **Shading:** a step ramp, a flat diagram and an isometric object. All three are drawn by the site's graphic engine, not the lab's standalone shading canvas.
+  - **Shading:** a step ramp, a flat diagram and an isometric object. All three are drawn by the site's graphic engine, not the old lab shading page's standalone canvas.
   - **Type:** a ladder of the exposed roles (display, statement, body, label).
   - **Display:** text, boxes and something that moves, so glow, trails, lines, noise and warp all show.
 
@@ -56,7 +56,7 @@ Both have to be drawable by the raster, so they're made of boxes, fills and bar 
   - Each playground tab has a Reset bar button.
   - The `[c]` Controls panel on every page gets a "Playground changes: reset" row, shown only when something differs from the saved look.
 - **Saving the defaults:** on localhost, each tab shows "Save as default". It writes that tool's preset through `serve.py`, and the published site (static) hides it.
-- **Your full dials:** each tool's dialkit panel (Genie with its graph editor, Shading, Type scale) moves onto its playground tab, localhost only, as Display and Palette are on the talk. It edits the same store that "Save as default" writes. After that, `lab/` is deleted, along with `type.css` and the rejected fonts in `lab/fonts/`.
+- **Your full dials:** each tool's dialkit panel (Genie with its graph editor, Shading, Type scale) moves onto its playground tab, localhost only, as Display and Palette are on the talk. It edits the same store that "Save as default" writes. After that, `lab/` is deleted, along with `type.css` and the rejected fonts in `lab/fonts/`. On localhost every dial panel is hidden until `d` shows it (2026-11-26: the point is no visible dialkit on any page).
 
 ## Build order
 1. **Settings stores.**
@@ -73,7 +73,7 @@ Both have to be drawable by the raster, so they're made of boxes, fills and bar 
 4. **Dither in the engine:**
    - One ink function in `shade.js` picks hatch or the dither `threshold()` by the style. It replaces the direct `hatchInk()` calls in `graphic.js`, `sculpt.js` and the raster's tiles in `text-raster.js`, and the tone steps in `knot.js` go through the same style.
    - A dither's pattern coordinates follow `patternAnchor`, as hatching does.
-5. **Full dials onto the tabs, then delete the lab.** The genie graph editor (`lab/js/genie-graphs.js`) moves to `js/`. The lab pages' docs and links get updated.
+5. **Full dials onto the tabs, then delete the lab.** The genie graph editor moves to `js/genie-graphs.js`. The lab pages' docs and links get updated.
 
 Each step ends with probes in the browser pane (no console errors, values reaching the talk, reset working, nothing loading off localhost that shouldn't) and Max checking the look in Chrome.
 

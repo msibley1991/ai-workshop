@@ -19,6 +19,8 @@
   "dither": {
     "pattern": "bayer 4x4",
     "cellSize": 1,
-    "steps": 6
+    "steps": 6,
+    "lightest": 0,
+    "darkest": 1
   }
 }

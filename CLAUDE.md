@@ -6,11 +6,11 @@ This repo is a website that holds our workshop talk on designing with coding age
 
 ## Where to look
 
-- `index.html`: the talk, slide by slide; `glossary.html`: the glossary. Both run on the display engine in `js/` (render, raster, slides, graphics) with `css/site.css`. Read [lab/CLAUDE.md](lab/CLAUDE.md), which maps the engine, before working on either.
+- `index.html`: the talk, slide by slide; `glossary.html`: the glossary. Both run on the display engine in `js/` (render, raster, slides, graphics) with `css/site.css`. Read [js/CLAUDE.md](js/CLAUDE.md), which maps the engine, before working on either.
 - `css/style.css`: design tokens (the `:root` block), fonts and registered properties.
 - `presets/`: the saved look (palettes and shared display settings), static JSON the site loads. Viewers' own choices stay in their browser.
-- `lab/`: test pages for the genie, shading and type hierarchy, on the root engine. They move into a playground page next.
-- The site is meant to be published as static files (Vercel): nothing can save there. The dialkit panels load only on localhost.
+- `playground.html`: the playground, a tab per tool (genie, shading, type, display); viewers' changes follow them onto the talk. On localhost it also has the full dial panels for tuning and saving the look.
+- The site is meant to be published as static files (Vercel): nothing can save there. The dialkit panels load only on localhost, hidden until `d` shows them (`d` again hides them).
 - `assets/fonts/`: self-hosted fonts, one folder per family, each with its OFL.txt.
 - `docs/`: the script, the design system and session handoffs. Read only the ones relevant to the task.
 - `serve.py`: serves the repo root on port 8123 (`python3 serve.py`), and saves `presets/*.json` from the dial panels.
@@ -24,20 +24,20 @@ This repo is a website that holds our workshop talk on designing with coding age
 
 ## Git
 
-- For now Max works directly on `main`. Once a second person joins, work on a branch and bring in their work with `git fetch origin`, then `git merge origin/main`, then test the site and the lab pages before pushing. The full steps are in [README.md](README.md#working-together).
+- For now Max works directly on `main`. Once a second person joins, work on a branch and bring in their work with `git fetch origin`, then `git merge origin/main`, then test the talk, the glossary and the playground before pushing. The full steps are in [README.md](README.md#working-together).
 - Commit, merge and push only when asked.
 - `presets/*.json` are written by the dial panels' save buttons and often conflict. When resolving one, ask which values to keep.
 
 ## Docs
 
-- [docs/glossary.md](docs/glossary.md): points to the glossary page, `lab/glossary.html`, which holds the talk's terms from the Figma Glossary frame
+- [docs/glossary.md](docs/glossary.md): points to the glossary page, `glossary.html`, which holds the talk's terms from the Figma Glossary frame
 - [docs/aesthetic-direction.md](docs/aesthetic-direction.md): visual direction and open questions (exploratory)
 - [docs/design-system/layout-grid.md](docs/design-system/layout-grid.md): layout grid and spacing scheme (exploratory, built in the talk page)
 - [docs/design-system/typography.md](docs/design-system/typography.md): typefaces and type hierarchy (settled; tokens in `css/style.css`)
 - [docs/design-system/palettes.md](docs/design-system/palettes.md): viewer-selectable palettes and the controls panel (exploratory, built in the talk page)
-- [docs/design-system/graphics.md](docs/design-system/graphics.md): flat and isometric graphics, hatch shading, line weights, accent as focus (exploration, built in the lab shading page and the talk page)
+- [docs/design-system/graphics.md](docs/design-system/graphics.md): flat and isometric graphics, hatch shading, line weights, accent as focus (exploration, built in the talk and the playground's Shading tab)
 - [docs/design-system/slide-templates.md](docs/design-system/slide-templates.md): sections, slides and beats; row fields; the five templates; slide and section changes (exploration)
-- [docs/design-system/motion.md](docs/design-system/motion.md): motion rules: curves, named durations and sizes, loops, enter/exit, the text genie (exploration; genie built in the lab genie page)
+- [docs/design-system/motion.md](docs/design-system/motion.md): motion rules: curves, named durations and sizes, loops, enter/exit, the text genie (exploration; genie tuned on the playground's Genie tab)
 - [docs/design-system/display.md](docs/design-system/display.md): the display layer: one tuned look, ambient effects, viewer overrides, the DOM fallback, the projector test (exploration; tuned on the talk page)
 - [docs/design-system/text-artefacts.md](docs/design-system/text-artefacts.md): prompts, chats, documents and file trees as graphics of legible text: the face rule, span states, cross-links, carried spans, retype, the camera, detail levels, pixelated blur (exploration; partly built in the talk page, slides 1, 2 and 10–13)
 - [docs/design-system/components.md](docs/design-system/components.md): interface chrome: bars, palette indicator, key hints, buttons, panels, the subtree nav, tab headers, links (exploration; partly built in the talk page)

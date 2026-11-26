@@ -1,6 +1,6 @@
 # Graphics
 
-Status: **exploration**, from the graphics grilling session (2026-11-21). Built in the lab: the shading test ([`lab/shading.html`](../../lab/shading.html)) and two scene graphics in the layout test ([`index.html`](../../index.html), `[data-graphic]`). The scene engine is [`js/graphic.js`](../../js/graphic.js). It's built on [`js/shade.js`](../../js/shade.js), whose `ISO_STYLE` holds the values below.
+Status: **exploration**, from the graphics grilling session (2026-11-21). Built in the lab: the shading test (`lab/shading.html`, replaced on 2026-11-26 by the playground's Shading tab) and two scene graphics in the layout test ([`index.html`](../../index.html), `[data-graphic]`). The scene engine is [`js/graphic.js`](../../js/graphic.js). It's built on [`js/shade.js`](../../js/shade.js), whose `ISO_STYLE` holds the values below.
 
 ## Two styles
 - **Flat diagrams:** Swiss-modernist and diagrammatic.
@@ -33,7 +33,7 @@ Status: **exploration**, from the graphics grilling session (2026-11-21). Built 
 - **Light:** one global light, up and to the left (azimuth −60°, elevation 48°). It's fixed to the viewer, so rotating an object re-shades it. Graphics never override it.
 
 ## Shading
-- **Hatching shows light on 3D objects.** It's also available as an optional pattern fill for flat graphics. Dither was tested and dropped (the code stays in the lab).
+- **Hatching shows light on 3D objects.** It's also available as an optional pattern fill for flat graphics. Dither was tested and dropped for the talk; the playground offers it as a viewer's style (playground.md).
 - **Ink always means shadow,** in every palette, dark grounds included.
 - **The pattern is anchored to each face.** It follows the face when the object turns, rather than staying fixed to the screen.
 - **The ramp** is density mode: 4-pixel lines at 45° (relative to the face) with five steps.
@@ -130,7 +130,7 @@ The named curves, durations, loops and enter/exit motions are in [motion.md](mot
 - **Mounting:** a graphic mounts on a DOM element, for example `<div data-graphic="exploded-stack">`, and `shade.js` draws it into the raster.
 - **Shared rules:** hatching, the 4/2 weights, focus and state tweens are implemented once, for flat and iso alike.
 - **Labels stay real DOM text** in the type roles, anchored to points in the scene, so they stay selectable and leader lines can find them.
-- **Built in the lab:** [`js/graphic.js`](../../js/graphic.js), with scenes in `js/graphics/`. The scene format is described in [`lab/CLAUDE.md`](../../lab/CLAUDE.md). The two demo scenes, `exploded-stack` (iso) and `page-layout` (flat), appear on the layout test's hero, tab 1 and template slides; step them with ← and →.
+- **Built in the lab:** [`js/graphic.js`](../../js/graphic.js), with scenes in `js/graphics/`. The scene format is described in [`js/CLAUDE.md`](../../js/CLAUDE.md). The two demo scenes, `exploded-stack` (iso) and `page-layout` (flat), appear on the layout test's hero, tab 1 and template slides; step them with ← and →.
 - **Rendering cost:** graphics are painted on the CPU at full emulated-pixel resolution, so painting is the expensive step and is kept rare:
   - Each graphic keeps its last two painted looks, so a blink alternates between them without repainting.
   - Flow packets are drawn over the look each frame instead of being painted into it.
@@ -173,7 +173,7 @@ The hero's graphic is the setup the talk teaches, as one iso object ([`js/graphi
 - **Labels** are capitalised (`project/` keeps the file name) and sit beside their objects (free captions).
 - **Motion:** one state, assembled, with flow packets on every connector. The layers bob one after another (bob 0.15 world units, 1600 ms, 120 ms apart): context, chat's turns, the tiles, then External Tools and Output. The MCP connector holds still while External Tools bobs.
 - **Placement:** fitted by height to the hero's 6 rows, hung from the right edge and reaching left under the hero text. Its box is the drawing's width, so it doesn't take the pointer over the text.
-- **Engine features it added** (scene format in [`lab/CLAUDE.md`](../../lab/CLAUDE.md)): two-way connectors, parts standing on another part (`on`, painted after it so a big face under it never covers them), free captions with `align`, and the bob loop. Rings can also be accent now (`accent: true`): slide 3's two rings use it.
+- **Engine features it added** (scene format in [`js/CLAUDE.md`](../../js/CLAUDE.md)): two-way connectors, parts standing on another part (`on`, painted after it so a big face under it never covers them), free captions with `align`, and the bob loop. Rings can also be accent now (`accent: true`): slide 3's two rings use it.
 
 ## Open
 - **Motion session (separate):** easing curves for tweens and idle motion, the idle-motion vocabulary, and the 400/800 durations. Easing matters more than defining each motion's meaning.

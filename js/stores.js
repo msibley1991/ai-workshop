@@ -26,7 +26,7 @@ export const genieStore = createStore(
 // styles (technique "dither"), not drawn yet.
 export const shadingStore = createStore(
   "shading",
-  { ...structuredClone(ISO_STYLE), dither: { pattern: "bayer 4x4", cellSize: 1, steps: 6 } },
+  { ...structuredClone(ISO_STYLE), dither: { pattern: "bayer 4x4", cellSize: 1, steps: 6, lightest: 0, darkest: 1 } },
   (v) => {
     for (const [k, val] of Object.entries(structuredClone(v))) {
       if (val && typeof val === "object" && ISO_STYLE[k] && typeof ISO_STYLE[k] === "object") Object.assign(ISO_STYLE[k], val);

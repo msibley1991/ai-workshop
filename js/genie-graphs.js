@@ -1,14 +1,16 @@
-// genie.html only: the curvature graph editor. Two bezier graphs over a line's
-// run (a row's time, 0..1): "Swing" (-1..1, the spine's swing level) and
-// "Narrowing" (0..1.2, how far the funnel's sides have pulled in). Graphs live
-// in settings.graphs (js/genie-warp.js) and are saved in localStorage.
+// The genie's curvature graph editor (playground.html's Genie tab, localhost
+// only, js/dev-panels.js). Two bezier graphs over a line's run (a row's time,
+// 0..1): "Swing" (-1..1, the spine's swing level) and "Narrowing" (0..1.2, how
+// far the funnel's sides have pulled in). Graphs live in settings.graphs
+// (js/genie-warp.js); each edit goes into the genie store (js/stores.js), so
+// the Genie panel's "Save as default" writes them to presets/genie.json.
 //
 // Editing: drag an anchor (square) or a handle (dot); handles mirror unless
 // Shift is held. Click the curve to add an anchor; Alt-click an anchor to
 // remove it (the ends stay). Each graph's Reset restores the tuned default.
-import { settings, defaultGraph, graphPoints, sampleGraph, evalGraph } from "../../js/genie-warp.js";
+import { settings, defaultGraph, graphPoints, sampleGraph, evalGraph } from "./genie-warp.js";
+import { genieStore } from "./stores.js";
 
-const STORE = "lab-genie-graphs";
 const W = 256, H = 128, PAD = 10;
 const GRAPHS = [
   { key: "swing", title: "Swing over a line", min: -1, max: 1, guides: [0] },
@@ -18,26 +20,20 @@ const NS = "http://www.w3.org/2000/svg";
 const svgEl = (tag, attrs = {}) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
-function load() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(STORE));
-    // The swing graph was called arc until 2026-11-25.
-    if (saved && !saved.swing && saved.arc) { saved.swing = saved.arc; delete saved.arc; }
-    if (saved?.swing?.length >= 2 && saved?.narrow?.length >= 2) settings.graphs = saved;
-  } catch {}
-}
+// The edit is already in settings.graphs, so the lookups are rebuilt here;
+// the store's apply writes settings.graphs back from its copy.
 function save() {
   settings.graphsRev++;
-  try { localStorage.setItem(STORE, JSON.stringify(settings.graphs)); } catch {}
+  genieStore.set("graphs", structuredClone(settings.graphs));
 }
 
 // Mounts the panel; playhead() returns the time to mark (0..1) or null.
 export function mountGraphs({ playhead }) {
-  load();
   const panel = document.createElement("div");
   panel.className = "genie-graphs";
   document.body.append(panel);
   const views = GRAPHS.map((g) => mountGraph(panel, g));
+  genieStore.subscribe(() => views.forEach((v) => v.draw())); // a reset or a loaded preset
 
   (function tick() {
     requestAnimationFrame(tick);
@@ -47,7 +43,7 @@ export function mountGraphs({ playhead }) {
   })();
 
   return {
-    toggle() { panel.hidden = !panel.hidden; },
+    toggle(on = panel.hidden) { panel.hidden = !on; },
     get shown() { return !panel.hidden; },
     redraw() { for (const v of views) v.draw(); },
   };

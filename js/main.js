@@ -128,9 +128,28 @@ palettesReady.then(compose);
 // Localhost only: the dialkit Display and Palette panels, to tune the look and
 // save it into presets/ (serve.py). The published site never loads dialkit.
 // Display above Palette, both collapsed on load, so ← → step the page until
-// one is opened.
+// one is opened. They're hidden until d shows them (and the playground's
+// panels and graph editor with them); d hides them again, remembered here.
 const LOCAL_HOSTS = ["localhost", "127.0.0.1", "[::1]"];
 if (displayMode && LOCAL_HOSTS.includes(location.hostname)) {
+  const DIALS_KEY = "site-dials-shown";
+  const hide = document.createElement("style");
+  hide.textContent = ".dials-hidden :is(.dialkit-root, .genie-graphs) { display: none !important; }";
+  document.head.append(hide);
+  const showDials = (on) => {
+    document.documentElement.classList.toggle("dials-hidden", !on);
+    try { localStorage.setItem(DIALS_KEY, on ? "1" : "0"); } catch {}
+  };
+  let shown = false;
+  try { shown = localStorage.getItem(DIALS_KEY) === "1"; } catch {}
+  showDials(shown);
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "d" && e.key !== "D") return;
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.target.closest?.("input, textarea, select, [contenteditable], .dialkit-root")) return;
+    shown = !shown;
+    showDials(shown);
+  });
   const css = document.createElement("link");
   css.rel = "stylesheet";
   css.href = new URL("../vendor/dialkit/styles.css", import.meta.url);

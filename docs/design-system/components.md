@@ -113,6 +113,5 @@ The chrome is everything that isn't slide content: the bars, the accordion tabs,
 ## Open
 - **Hover, focus and pressed look the same.** A distinct focus look waits for the accessibility session.
 - **Not built yet:** links that leave the site (new tab, `↗`).
-- **On the lab's genie page,** g already opens the graph editor, so the `[g] Grid` key works only as a button there. The page has no nav.
 - The real tab names, after the layout recording.
 - Whether the palette indicator's ink box and its accent outline read on the dark palettes (Plasma, Vector), for the projector test ([display.md](display.md)).

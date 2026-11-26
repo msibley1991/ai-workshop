@@ -42,7 +42,7 @@ Do this before you push, and whenever `main` has moved.
    git commit
    ```
 
-5. Run and test the site and the lab pages (see below). A merge can be conflict-free and still break something.
+5. Run and test the talk, the glossary and the playground (see below). A merge can be conflict-free and still break something.
 6. Push:
 
    ```sh
@@ -74,11 +74,9 @@ There's nothing to install: dialkit is included in the repo (`vendor/`), three.j
 
 - `index.html`: the talk and its slides
 - `glossary.html`: the talk's terms
-- `lab/genie.html`: the text genie
-- `lab/hierarchy.html`: type scale
-- `lab/shading.html`: dither vs hatching
+- `playground.html`: the genie, shading, type and display tools, a tab each
 
-On localhost the talk and glossary also show the dialkit Display and Palette panels for tuning. Anywhere else (the published site) they don't load.
+On localhost the pages also load the dialkit panels for tuning (Display and Palette, plus Genie, Shading and Type on the playground), hidden until you press `d`; `d` hides them again. Anywhere else (the published site) they don't load.
 
 ### Shared settings (saved to the repo)
 
@@ -103,3 +101,4 @@ These are stored in your browser and never saved to the repo:
 - `g`: grid
 - `f`: fullscreen
 - `c`: controls
+- `d`: show or hide the dial panels (localhost only)

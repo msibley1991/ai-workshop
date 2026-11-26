@@ -6,7 +6,7 @@
 // `lightest` and `darkest`. Every pixel comes out as pure ink or pure ground:
 // shading is a pattern (hatching or dither), never a tint.
 
-// ---------- the settled look so far (tuned on lab/shading.html) ----------
+// ---------- the settled look so far (tuned on the old lab shading page; now the shading store's defaults, presets/shading.json) ----------
 
 export const ISO_STYLE = {
   technique: "hatch",

@@ -110,7 +110,7 @@ Slide 12's **poster grid** (beat 2, after the line pours in) is three steps of 4
 - Section changes keep the accordion as it is; the genie is for steps.
 
 ### Tuned values
-From the genie test page ([`lab/genie.html`](../../lab/genie.html)). They're the page's defaults, in `settings` and `DEFAULT_GRAPHS` in [`js/genie-warp.js`](../../js/genie-warp.js). The names are the Genie panel's, grouped as there (Timing, Shape, Swing, Trail); renamed on 2026-11-25.
+From the genie test page (`lab/genie.html`, replaced on 2026-11-26 by the playground's Genie tab and its localhost Genie panel). They're the page's defaults, in `settings` and `DEFAULT_GRAPHS` in [`js/genie-warp.js`](../../js/genie-warp.js). The names are the Genie panel's, grouped as there (Timing, Shape, Swing, Trail); renamed on 2026-11-25.
 
 | Group | Setting | Value | Meaning |
 |---|---|---|---|

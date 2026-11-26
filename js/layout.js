@@ -1,4 +1,4 @@
-// index.html, playground.html and lab/genie.html: the intro and the tabs form an accordion driven by scroll.
+// index.html and playground.html: the intro and the tabs form an accordion driven by scroll.
 //
 // State is a weight per panel (intro, then each tab), summing to 1; site.css
 // turns each weight (--w) into that panel's share of the free height. Scrolling

@@ -2,7 +2,7 @@
 
 Status: **settled** (2026-11-21), from the second design-system grilling session. The tokens are in [`css/style.css`](../../css/style.css), and the fonts are self-hosted in [`assets/fonts/`](../../assets/fonts/).
 - Faces were compared on the lab type specimen (`lab/type.html`, removed 2026-11-26 when the talk moved to the site root).
-- The hierarchy was tuned on [`lab/hierarchy.html`](../../lab/hierarchy.html).
+- The hierarchy was tuned on `lab/hierarchy.html` (removed 2026-11-26; the playground's Type tab moves the roles a step).
 - The talk page now uses the same roles.
 
 ## Constraints
@@ -28,7 +28,7 @@ Status: **settled** (2026-11-21), from the second design-system grilling session
 | 4 | Chakra Petch throughout | squared, static weights 300–700, one width |
 | 5 | Michroma display + Chakra Petch body | wide display over a squared body with real weights |
 
-The rejected candidates stay in `lab/fonts/` while the lab hierarchy page (`lab/css/type.css`) still loads them.
+The rejected candidates were removed with the lab on 2026-11-26 (they're in git history, `lab/fonts/`).
 - Chakra Petch now lives in `assets/fonts/chakra-petch/`, with only the shipped weights: 400, 500 and 700.
 - JetBrains Mono now lives in `assets/fonts/jetbrains-mono/`.
 - Each folder keeps its OFL.txt.
@@ -72,7 +72,7 @@ The rejected candidates stay in `lab/fonts/` while the lab hierarchy page (`lab/
 | Text → code block or figure | group 32 |
 | Figure → its caption | related 16 |
 | Beats or major blocks | section 64 |
-- Tested on [`lab/hierarchy.html`](../../lab/hierarchy.html) (preset 1).
+- Tested on `lab/hierarchy.html` (preset 1; removed 2026-11-26).
 - **Case:** sentence case for every role, including labels, bar text and captions ("Fig 1. Specific instructions are creative decisions"), all at default tracking. The site title keeps its lowercase as written. Caps for labels (+0.04em) were tried and rejected: sentence case looked better.
 
 ## Rendering note

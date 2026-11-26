@@ -1,6 +1,6 @@
-/* genie.html only: the curvature graph editor (js/genie-graphs.js). A normal,
-   visible panel outside the invisible #content, styled like the dark dial
-   panels, bottom left above the bottom bar so it's clear of the funnel. */
+/* The genie's curvature graph editor (js/genie-graphs.js, playground.html on
+   localhost). A normal, visible panel outside the invisible #content, styled
+   like the dark dial panels, bottom left above the bottom bar. */
 .genie-graphs {
   position: fixed;
   left: 16px;
