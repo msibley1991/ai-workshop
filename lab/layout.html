@@ -12,6 +12,7 @@
   </script>
   <script type="module" src="js/main.js"></script>
   <script type="module" src="js/layout.js"></script>
+  <script type="module" src="js/nora/stage.js"></script>
 </head>
 <!-- Layout from Figma frames "ref1" (intro, node 313:125) and "ref2" (open
      section, node 313:148), rendered through the effects pipeline. The tabs are
@@ -62,18 +63,332 @@
     <article class="site-tab site-panel" data-tab data-panel="foundations">
       <a class="site-tab-label" href="#foundations"><span>Nora's Section</span></a>
       <div class="site-tab-body" data-clip>
-        <!-- Tab 1 (Nora's part): one placeholder slide on the Split 4 template. -->
+        <!-- Tab 1 (Nora's part), from the Figma storyboard "Nora · Storyboard".
+             Its graphics are Nora's scenes (js/nora/stage.js, one file per
+             scene in js/nora/): they draw with svg[data-draw], [data-fill] and
+             label text, and follow the beat in the URL. -->
         <div class="slides">
-          <div data-section="Placeholder section">
+          <div data-section="Our angle">
+            <!-- N01 · Our angle, Text, 3 beats:
+                 beat 1, the debate, with the scale tipping; beat 2, "Too big a
+                 question…", the scale comes level and holds; beat 3, both lines
+                 genie out and our question pours in, then a connector runs from
+                 the scale to "designers".
+                 data-after on the scale: "stay" (through beat 3) or
+                 "leave" (it draws off with the old lines); ?scale=leave in the
+                 URL tries the other one.
+                 Spoken (draft): Everyone has an opinion on whether AI is good or
+                 bad for design. That's too big for one afternoon, so we're not
+                 answering it. Our question is smaller and more useful: what can
+                 it let you make? How AI and code can make designers more
+                 powerful - not just by generating things for us, but by making
+                 it easier to build the things we already want to design. -->
+            <section class="slide" data-slide data-template="text">
+              <div class="slide-statement">
+                <p data-genie data-exit="2">Is AI good or bad for designers?</p>
+                <p data-genie data-exit="2">Too big a question for one afternoon.</p>
+                <p data-genie data-enter="2" data-gap="1">Our question:<br>how can AI and code make <strong data-ink="accent" data-nora-target>designers</strong> more powerful?</p>
+              </div>
+              <div class="slide-visual"><div class="nora-scene" data-nora-scene="scale" data-after="stay"></div></div>
+            </section>
+            <!-- N02 · The premise, Split 4, 3 beats (copy: draft, not approved):
+                 beat 1, only the "Without AI" lane, the rectangle in its mock-up
+                 twitching and its counters ticking; beat 2, the first line genies out and the
+                 second pours in on its place (data-nora-swap), the top lane holds
+                 still and the "With AI" lane draws step by step to its prototype;
+                 beat 3, the prototype comes alive and the dashed loop back to
+                 Sketch draws. The prototype's button answers the real pointer.
+                 Spoken (draft): Think about how you prototype now: nudge
+                 something a millimetre, export, check, repeat, and you still
+                 don't know if the idea works. With AI writing the code, you
+                 describe the idea, see the real thing, and change it. The loop
+                 is the point. -->
             <section class="slide" data-slide data-template="split" data-split="4">
               <div class="slide-statement">
-                <p data-genie>Placeholder: the first slide of this part.</p>
-                <p data-genie>The page layout steps through its states.</p>
+                <p data-genie data-exit="1" data-nora-swap>Hours spent perfecting the spacing, on a layout nobody has clicked through yet.</p>
+                <p data-genie data-enter="1">With AI, you test first. Sketch it, build it, click through it. Then polish.</p>
+                <p data-genie data-enter="2" data-gap="1">Bad ideas fail fast. Good ones surface sooner, and get your time and attention.</p>
               </div>
-              <div class="slide-visual"><div data-graphic="page-layout" data-fit="box" data-align="top"></div></div>
+              <div class="slide-visual"><div class="nora-scene" data-nora-scene="two-lanes"></div></div>
+            </section>
+            <!-- N03 · What opens up, Wide, 2 beats: two short lines under four
+                 live tiles, the second on beat 2, both staying. The tiles open
+                 left to right, 200 apart: Motion (a ball
+                 drops and bounces), Interaction (a real button), 3D (Max's
+                 layer cube in its slot: drag to turn), Responsive (a mini page
+                 with a drag handle).
+                 Spoken (draft): Because AI writes the code, you can now
+                 prototype things that used to need a specialist: motion,
+                 interaction, 3D, layouts that respond to the screen. That
+                 changes when you think about them. They're not polish you add
+                 at the end; you design with them from the start. And you don't
+                 wait for someone to build it before you know if it works. -->
+            <section class="slide" data-slide data-template="wide">
+              <div class="slide-statement">
+                <p data-genie>You can prototype all of this now.</p>
+                <p data-genie>Design it from the start, on your own.</p>
+              </div>
+              <div class="slide-visual">
+                <div class="nora-scene" data-nora-scene="tiles"></div>
+                <div class="nora-slot" data-nora-slot="cube"><div data-graphic="layer-cube" data-fit="box" data-align="middle" data-delay="600"></div></div>
+              </div>
             </section>
           </div>
-          <footer class="slide-footer" data-clip><p class="slide-section-title">Placeholder section</p></footer>
+          <div data-section="Foundations">
+            <!-- N04 · How AI generates, Split 6, 3 beats, every line staying:
+                 beat 1, the question the last slide raises, and the prompt box
+                 opens; beat 2, the candidate next tokens grow in as bars
+                 (illustrative chances); beat 3, a marker runs down them and
+                 lands on one, picked by weighted chance in JS, which drops into
+                 the gap; then "Run again", a real button, picks again on every
+                 click.
+                 Spoken (draft): Quick look under the hood. An AI model doesn't
+                 look anything up. It predicts the next token, then the next,
+                 based on what was most likely in everything it learned from.
+                 And it doesn't always take the most likely one: it rolls
+                 weighted dice. Watch. Same sentence, run it again, and it can
+                 go somewhere else. -->
+            <section class="slide" data-slide data-template="split" data-split="6">
+              <div class="slide-statement">
+                <p data-genie>But if AI makes it, is it really your own?</p>
+                <p data-genie data-gap="1">AI predicts its answer, one token at a time.</p>
+                <p data-genie data-gap="1">Each token is picked by weighted chance.</p>
+              </div>
+              <div class="slide-visual"><div class="nora-scene" data-nora-scene="sampling"></div></div>
+            </section>
+            <!-- N05 · Deterministic or not, Wide, 6 beats, 3 presses. Three lanes
+                 of 4 columns, show then tell: a lane opens on one beat (a
+                 request and three runs of it, each captioned), and its sentence
+                 pours in under it on the next, which the scene steps to by
+                 itself going forward (a grid statement, as on Max's slide 7):
+                 Code (the same square three times), Vague prompt (three
+                 different sunsets), Exact prompt (the same square again, its
+                 exact values in accent). -->
+            <section class="slide" data-slide data-template="wide">
+              <div class="slide-statement slide-thirds" data-place="grid">
+                <p data-genie data-enter="1">Code is deterministic: same input, same result.</p>
+                <p data-genie data-enter="3">AI isn’t. Same prompt, different results.</p>
+                <p data-genie data-enter="5">Ask for something exact, and the results vary less.</p>
+              </div>
+              <div class="slide-visual"><div class="nora-scene" data-nora-scene="determinism"></div></div>
+            </section>
+          </div>
+          <div data-section="The task">
+            <!-- N06 · The target, Split 6, 4 beats. Beat 1, the answer to N04's
+                 question and the rule, as one block of text and nothing else;
+                 beat 2, that block genies out, "This is what I made." pours in
+                 on its place and the target's frame opens; beats 3 and 4, one
+                 more line each, staying.
+                 The frame holds a full-length, two-colour screenshot of the play
+                 page, scrolling slowly; the button under it opens the live
+                 site. -->
+            <section class="slide" data-slide data-template="split" data-split="6">
+              <div class="slide-statement">
+                <p data-genie data-exit="1" data-nora-swap>So is it yours? It is when you make the decisions.<br><br>Vague in, random out. Specific in, <strong data-ink="accent">specific</strong> out.</p>
+                <p data-genie data-enter="1">This is what I made.</p>
+                <p data-genie data-enter="2" data-gap="1">Made with 4 prompts. In the next 40 minutes, you make it too.</p>
+                <p data-genie data-enter="3" data-gap="1">How close will yours get?</p>
+              </div>
+              <div class="slide-visual">
+                <div class="nora-scene" data-nora-scene="target"></div>
+                <div class="nora-slot nora-shot" data-nora-slot="shot" data-clip><img data-draw src="../assets/slides/target-play-ink.png" alt="The finished workshop site: a grid of rounded tiles with the title, two running figures, the two parts, the instructors and a sign-up chat."></div>
+              </div>
+            </section>
+            <!-- N07 · Pick your tool, Split 6, 4 beats, no presses: going
+                 forward the scene steps each beat on by itself. Beat 1, only a
+                 builder's window, large and centred, opening and playing once
+                 (the prompt types, the reply writes out, the site builds); beat
+                 2, it shrinks into its box top right and the title pours in;
+                 beat 3, the two kinds of tool, each name a link that opens it;
+                 beat 4, the rule, then, after a pause, an accent arrow down to
+                 the switch in the footer. The tool is picked with that switch in the
+                 footer, which appears on this slide and stays to the end of the
+                 tab (js/nora/kit.js); the choice is remembered and its notes
+                 show under the window, each with its source (js/nora/tool.js).
+                 Nora presents in Neutral. -->
+            <section class="slide" data-slide data-template="split" data-split="6">
+              <div class="slide-statement">
+                <p data-genie data-enter="1"><em>Pick your tool</em></p>
+                <p data-genie data-enter="2" data-gap="1">Website generators: <a href="https://v0.app" target="_blank" rel="noopener" data-fill><span>v0</span></a>, <a href="https://lovable.dev" target="_blank" rel="noopener" data-fill><span>Lovable</span></a>.</p>
+                <p data-genie data-enter="2">Chat assistants: <a href="https://chatgpt.com" target="_blank" rel="noopener" data-fill><span>ChatGPT</span></a>, <a href="https://claude.ai" target="_blank" rel="noopener" data-fill><span>Claude</span></a>.</p>
+                <p data-genie data-enter="3" data-gap="1" data-nora-target>Same prompts for every tool.</p>
+              </div>
+              <div class="slide-visual"><div class="nora-scene" data-nora-scene="builder"></div></div>
+            </section>
+            <!-- N08 · Ground rules, Split 6, 5 beats, no presses going forward
+                 (each rule brings the next). The title, and five rules on the
+                 right, one per row field and per beat, all staying:
+                 each a small picture, the rule and a second line; rule 1 (one
+                 chat) in an accent frame. Beat 5, with the last rule, the
+                 closing line pours in, and under it (data-nora-target) the
+                 chosen tool's note and a button that opens the tool. -->
+            <section class="slide" data-slide data-template="split" data-split="6">
+              <div class="slide-statement">
+                <p data-genie><em>Ground rules</em></p>
+                <p data-genie data-enter="4" data-gap="1" data-nora-target>Now open your tool.</p>
+              </div>
+              <div class="slide-visual"><div class="nora-scene" data-nora-scene="rules"></div></div>
+            </section>
+            <!-- N09 · Stage 1 · the brief, Wide, 3 beats, every line staying.
+                 The title pours in first, on the base line; the prompt then
+                 opens by itself across the top (data-enter="1",
+                 data-nora-auto), in full, in Max's prompt field, with a real
+                 Copy button (js/nora/kit.js fills both from
+                 assets/kit/prompt-1-one-sentence.txt); no typing. Beat 3, what
+                 to do, and under the prompt, on the right, three flat figures
+                 at three screens open, their heads turning left and right; a
+                 few seconds later a different page fills each screen. No tool
+                 notes on this stage. -->
+            <section class="slide" data-slide data-template="wide" data-nora-auto="0:1200">
+              <div class="slide-statement">
+                <p data-genie><em>Stage 1 / 4</em> · the brief</p>
+                <p data-genie data-enter="2">Paste it. Then look left and right.</p>
+              </div>
+              <div class="slide-visual">
+                <div class="artefact nora-prompt" data-artefact="prompt" data-enter="1">
+                  <div class="prompt-field" data-box data-clip data-frame><div class="chat-sheet"><p><strong class="prompt-label">Prompt 1:</strong> <span data-nora-prompt="../assets/kit/prompt-1-one-sentence.txt"></span></p></div></div>
+                  <div class="nora-actions"><button class="site-bar-button nora-button" type="button" data-fill data-box data-nora-copy="../assets/kit/prompt-1-one-sentence.txt"><span>Copy prompt</span></button></div>
+                </div>
+                <div class="nora-scene" data-nora-scene="sites"></div>
+              </div>
+            </section>
+            <!-- N10 · Stage 2 · wireframe, moodboard and figures, Wide, 5 beats.
+                 The title pours in first; the prompt then opens by itself
+                 (data-enter="1", data-nora-auto).
+                 Prompt 2 as one folded document (data-nora-sections): its four
+                 sections are named in the box (1 / 4 · Structure, the text
+                 before its first heading, then Style, Images, Behaviour) and
+                 one is open per beat, the old one closing before the next
+                 opens; four of its phrases in accent (data-nora-marks). Under it, from the start, real
+                 buttons: Copy (the whole prompt), the zip of all four images,
+                 and each image on its own; then the chosen tool's note
+                 (data-nora-note). Beat 4, the point, from column 7 (data-at).
+                 The kit file's first line ("Attach before sending: ...") is
+                 neither shown nor copied. -->
+            <section class="slide" data-slide data-template="wide" data-nora-auto="0:1200">
+              <div class="slide-statement">
+                <p data-genie><em>Stage 2 / 4</em> · wireframe, moodboard and figures</p>
+                <p data-genie data-enter="4" data-at="7">Same structure. Similar style. Details guessed.</p>
+              </div>
+              <div class="slide-visual">
+                <div class="artefact nora-prompt nora-prompt-steps" data-artefact="prompt" data-enter="1">
+                  <div class="prompt-field" data-box data-clip data-frame><div class="chat-sheet"><p><strong class="prompt-label">Prompt 2:</strong> <span data-nora-prompt="../assets/kit/prompt-2-wireframe-moodboard.txt" data-nora-sections="Structure" data-nora-marks="wireframe|campaign moodboard|only for the visual style|Do not copy its text"></span></p></div></div>
+                  <div class="nora-actions">
+                    <button class="site-bar-button nora-button" type="button" data-fill data-box data-nora-copy="../assets/kit/prompt-2-wireframe-moodboard.txt"><span>Copy prompt</span></button>
+                    <span>Attach:</span>
+                    <a class="site-bar-button nora-button" href="../assets/kit/stage-2-images.zip" download data-fill data-box><span>all four (.zip)</span></a>
+                    <a class="site-bar-button nora-button" href="../assets/kit/prompt2-wireframe.png" download data-fill data-box><span>wireframe</span></a>
+                    <a class="site-bar-button nora-button" href="../assets/kit/campaign-moodboard.jpg" download data-fill data-box><span>moodboard</span></a>
+                    <a class="site-bar-button nora-button" href="../assets/kit/figure-run.png" download data-fill data-box><span>figure, running</span></a>
+                    <a class="site-bar-button nora-button" href="../assets/kit/figure-sit.png" download data-fill data-box><span>figure, sitting</span></a>
+                  </div>
+                  <p class="nora-note" data-nora-note="stage2"></p>
+                </div>
+              </div>
+            </section>
+            <!-- N11 · Stage 3 · design system, Wide, 6 beats. The
+                 title pours in first; the prompt then opens by itself
+                 (data-enter="1", data-nora-auto). Prompt 3 is too
+                 long to show at once, so it's one folded document
+                 (data-nora-sections): Colours, Background, Typography, Layout
+                 and Mobile are named in the box, and one is open per beat, its
+                 exact values in accent (data-nora-marks). Copy is there from
+                 the start and copies the whole prompt. Beat 5, with the last
+                 section, the point, from column 7 (data-at). No tool notes. -->
+            <section class="slide" data-slide data-template="wide" data-nora-auto="0:1200">
+              <div class="slide-statement">
+                <p data-genie><em>Stage 3 / 4</em> · design system</p>
+                <p data-genie data-enter="5" data-at="7">Same structure. Same colours. Same type.</p>
+              </div>
+              <div class="slide-visual">
+                <div class="artefact nora-prompt nora-prompt-steps" data-artefact="prompt" data-enter="1">
+                  <div class="prompt-field" data-box data-clip data-frame><div class="chat-sheet"><p><strong class="prompt-label">Prompt 3:</strong> <span data-nora-prompt="../assets/kit/prompt-3-design-system.txt" data-nora-sections data-nora-marks="#181269|#4A209D|#7D18A6|#D5189E|#62CD7D|#B2E64F|#FFFFFF|about half|about a third|Inter|300 (Light) and 700 (Bold)|118px|1360px|12-column grid|14px gap|border-radius 28px|fully rounded (pill)|Below 900px"></span></p></div></div>
+                  <div class="nora-actions">
+                    <button class="site-bar-button nora-button" type="button" data-fill data-box data-nora-copy="../assets/kit/prompt-3-design-system.txt"><span>Copy prompt</span></button>
+                    <span>Copies the whole prompt, all five sections.</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+            <!-- N12 · Stage 4 · motion (optional), Wide, 3 beats. The
+                 title pours in first; the prompt then opens by itself
+                 (data-enter="1", data-nora-auto). Prompt 4 is
+                 short enough to show whole, its exact values in accent, with
+                 Copy and the chosen tool's note (data-nora-note). Beat 2, the
+                 way out, from column 7 (data-at). -->
+            <section class="slide" data-slide data-template="wide" data-nora-auto="0:1200">
+              <div class="slide-statement">
+                <p data-genie><em>Stage 4 / 4</em> · motion, optional</p>
+                <p data-genie data-enter="2" data-at="7">Short on time or messages? Skip it. The site already works.</p>
+              </div>
+              <div class="slide-visual">
+                <div class="artefact nora-prompt nora-prompt-steps" data-artefact="prompt" data-enter="1">
+                  <div class="prompt-field" data-box data-clip data-frame><div class="chat-sheet"><p><strong class="prompt-label">Prompt 4:</strong> <span data-nora-prompt="../assets/kit/prompt-4-motion.txt" data-nora-marks="at most 10 degrees|0.25s, ease-out|translateZ 60px and 40px|520px wide|every 22 seconds|0.4s, ease-out|for 0.7s|scale to 1.05"></span></p></div></div>
+                  <div class="nora-actions">
+                    <button class="site-bar-button nora-button" type="button" data-fill data-box data-nora-copy="../assets/kit/prompt-4-motion.txt"><span>Copy prompt</span></button>
+                  </div>
+                  <p class="nora-note" data-nora-note="stage4"></p>
+                </div>
+              </div>
+            </section>
+            <!-- N13 · Compare, Split 6, 4 beats, every line staying. The room:
+                 screens grouped by tool, all nearly the same. Beat 2, a dashed
+                 path to walk draws through it; beat 4, the marked words from
+                 the four prompts cut in under the room, a line per stage. They
+                 lead into Design language. -->
+            <section class="slide" data-slide data-template="split" data-split="6">
+              <div class="slide-statement">
+                <p data-genie>Stand up. Walk around.</p>
+                <p data-genie>How close did you get?</p>
+                <p data-genie data-gap="1">Same prompts, different tools.</p>
+                <p data-genie data-gap="1">The marked words did the work.</p>
+              </div>
+              <div class="slide-visual"><div class="nora-scene" data-nora-scene="room"></div></div>
+            </section>
+          </div>
+          <div data-section="Design language">
+            <!-- N14 · Words are the interface, Split 6, 3 beats, every line
+                 staying. Beat 1, a chat box with a vague request; beat 2, it's
+                 struck through in accent and six design terms open under it,
+                 each with one exact value from today's prompts; beat 3, the
+                 point. -->
+            <section class="slide" data-slide data-template="split" data-split="6">
+              <div class="slide-statement">
+                <p data-genie>Words are the interface.</p>
+                <p data-genie data-gap="1">“Modern and clean” means nothing exact.</p>
+                <p data-genie data-gap="1">Design terms are the vocabulary, for people and for AI.</p>
+              </div>
+              <div class="slide-visual"><div class="nora-scene" data-nora-scene="terms"></div></div>
+            </section>
+            <!-- N15 · A few web words, Split 6, 2 beats, both lines staying. A
+                 small dictionary fills in by itself: the design word, what the
+                 web calls it, an example from today's prompts. -->
+            <section class="slide" data-slide data-template="split" data-split="6">
+              <div class="slide-statement">
+                <p data-genie>On the web, a few code words go a long way.</p>
+                <p data-genie data-gap="1">You don’t have to code. You have to name things.</p>
+              </div>
+              <div class="slide-visual"><div class="nora-scene" data-nora-scene="webterms"></div></div>
+            </section>
+            <!-- N16 · Variations, Split 6, 2 beats, both lines staying. The
+                 reveal, kept for the end: beat 1, the target's frame; beat 2,
+                 two more designs open beside it (two-colour screenshots, in
+                 slots). The button opens the page that holds all three;
+                 nothing before this slide links to it. -->
+            <section class="slide" data-slide data-template="split" data-split="6">
+              <div class="slide-statement">
+                <p data-genie>One more thing: I changed one variable.</p>
+                <p data-genie data-gap="1">Same brand, same prompts. A different layout.</p>
+              </div>
+              <div class="slide-visual">
+                <div class="nora-scene" data-nora-scene="variations"></div>
+                <div class="nora-slot nora-shot" data-nora-slot="v-play" data-clip><img data-draw src="../assets/slides/target-play-ink.png" alt="The target: the site as a grid of rounded tiles."></div>
+                <div class="nora-slot nora-shot" data-nora-slot="v-base" data-clip><img data-draw src="../assets/slides/variation-base-ink.png" alt="Variation 1: the same content as one long page, a ticker band under the title."></div>
+                <div class="nora-slot nora-shot" data-nora-slot="v-run" data-clip><img data-draw src="../assets/slides/variation-run-ink.png" alt="Variation 2: the same content one screen at a time, with a menu across the top."></div>
+              </div>
+            </section>
+          </div>
+          <footer class="slide-footer" data-clip><p class="slide-section-title">Our angle</p></footer>
           <span class="genie-sink" data-genie-sink data-fill aria-hidden="true"></span>
         </div>
       </div>

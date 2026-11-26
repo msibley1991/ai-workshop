@@ -1,0 +1,21 @@
+Attach before sending: prompt2-wireframe.png, campaign-moodboard.jpg, figure-run.png, figure-sit.png
+
+Rebuild the website so it matches the attached wireframe (prompt2-wireframe.png) exactly: a grid of rounded tiles with the same 11 tiles, in the same positions and sizes, and every piece of text copied word for word. The numbered grey badges in the tile corners are notes for you; do not show them on the page. Do not add, remove or rename any tiles, and do not invent text, icons or images.
+
+STYLE
+Style the page after the attached campaign moodboard (campaign-moodboard.jpg): 19 posts and stories from the same campaign as this workshop. Take its colours in roughly the proportions they appear, its gradients and background, its typography, shapes and mood. Use it only for the visual style. Do not copy its text, its layouts or its illustrations onto the page.
+
+IMAGES (attached)
+- figure-run.png: fills the Figure tile (3), fully visible (do not crop it).
+- figure-sit.png: bottom right of the Instructors tile (9), about 70% of the tile's width.
+The figures are white line drawings, so keep them on a dark or colourful background.
+
+BEHAVIOUR
+- The "Sign Up" button scrolls to the Sign-up chat tile (10).
+- Hero (2): clicking the word in square brackets changes it to the next word: Make → Build → Code → Design → back to Make. The brackets stay.
+- Ring (4): the text runs around a circle, with "Free / Beginners / Welcome" in the middle.
+- Sign-up chat (10): a short conversation instead of a form. The page asks one question at a time, as a chat bubble on the left:
+  1. "Hi! Want a spot in the workshop? What's your full name?" (text field + Send button)
+  2. "Nice to meet you, [first name]. Which email should we use?" (email field + Send button)
+  3. "And what year of study are you in?" (buttons: Freshman, Sophomore, Junior, Senior, Other)
+  Each answer appears as a bubble on the right. After the last answer, reply: "You're In. See You On 26 November In Lab 3." No backend.

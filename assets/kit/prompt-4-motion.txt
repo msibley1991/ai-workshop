@@ -1,0 +1,10 @@
+Keep all content, layout, colours and images exactly as they are. Only add the motion below, and nothing else.
+
+- Tilt: when the pointer moves over a tile, the tile tilts toward it in 3D (perspective 900px, at most 10 degrees each way) and springs back when the pointer leaves (0.25s, ease-out).
+- Depth: the figures in the Figure tile (3) and the Instructors tile (9) sit in front of their tile (translateZ 60px and 40px), so they float above it while it tilts.
+- Glow: a soft round glow, 520px wide (Magenta at 55% in the centre, fading through Green at 25% to transparent, blur 40px), follows the pointer behind the tiles.
+- Ring (4): the ring text turns slowly, one full turn every 22 seconds, in an endless loop.
+- Hero word: when the word in brackets changes, the new word slides up and fades in (0.4s, ease-out).
+- Chat (10): before each question, show three blinking typing dots for 0.7s. Each new bubble pops in: it slides up 8px and fades in (0.25s).
+- Buttons: on hover, scale to 1.05 (0.2s).
+- If the visitor's device asks for reduced motion (prefers-reduced-motion), turn all of this off.

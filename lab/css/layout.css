@@ -1004,3 +1004,61 @@
 .slide-links, .slide-wires, .cap-dot, .cap-leader, .chat-mark { --ink: accent; }
 /* Leader labels too (legibility test, not in the docs yet). */
 .doc-cap .site-caption { --ink: accent; }
+
+/* Nora's scenes (js/nora/stage.js): each fills its visual region, and its
+   layers (fills, two line weights, label text) share one origin, inside a
+   clip box the stage uses to wipe the scene in and out. Lines may
+   run out of the region (N01's connector reaches the statement). */
+/* It takes no pointer events: its clip box reaches over the statement, and the
+   scenes read the pointer from the window (js/nora/stage.js), so links and
+   text under it stay clickable. */
+.nora-scene { position: absolute; inset: 0; pointer-events: none; }
+.nora-clip { position: absolute; top: 0; left: -100vw; right: -100vw; }
+.nora-inner { position: absolute; top: 0; left: 100vw; }
+.nora-inner > * { position: absolute; inset: 0; }
+.nora-inner svg { overflow: visible; pointer-events: none; }
+.nora-scene [data-fill] { position: absolute; }
+/* The task slides' prompt (js/nora/kit.js): Max's prompt field in the flow of
+   its visual region, the full text shown at once, and a row of real buttons
+   under it: his one button (components.md), with the outline a slide needs. */
+.nora-prompt { position: relative; }
+.nora-prompt > [hidden] { display: none; } /* js/nora/kit.js: shown once the box is open */
+.nora-prompt .prompt-field { height: auto; } /* Max's is a fixed 168: these prompts are shown in full */
+.nora-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-16); margin: var(--space-16) 0 0; font-size: var(--space-24); line-height: var(--space-32); font-weight: 500; }
+.site a.nora-button { --ink: ink; text-decoration: none; } /* a download link that is a button, not a text link */
+/* A prompt with its own line breaks kept (N10 to N12), at the prompt field's
+   size; one too long to show whole is folded into its sections (js/nora/kit.js). */
+.nora-prompt-steps [data-nora-prompt] { white-space: pre-wrap; }
+/* The folds: each section's name on its own line (700, as the prompt's label),
+   its text under it in a box the script opens and closes by height. */
+.nora-fold, .nora-fold-head, .nora-fold-body { display: block; }
+.nora-fold-head { font-weight: 700; white-space: normal; }
+.nora-fold-body { overflow: hidden; }
+/* The tool switch in the footer strip (js/nora/kit.js), just right of the sink:
+   a button the strip's height, and above it, when open, the list of tools on a
+   ground plate. */
+.nora-toolbar { position: absolute; left: calc(var(--box-inset) + var(--space-32)); bottom: var(--box-inset); display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-8); }
+.nora-toolbar[hidden], .nora-toolbar-list[hidden] { display: none; }
+.nora-toolbar .nora-button { padding: 0 var(--space-8); }
+.nora-toolbar-list { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-8); padding: var(--space-8); margin-left: calc(-1 * var(--space-8)); }
+/* The chosen tool's note, in accent (empty in Neutral, but it keeps its line). */
+.site .nora-note { margin: var(--space-8) 0 0; min-height: var(--space-32); font-size: var(--space-24); line-height: var(--space-32); font-weight: 500; --ink: accent; }
+.nora-button { align-self: auto; padding: var(--space-8) var(--space-16); border-radius: var(--space-8); font-size: var(--space-24); line-height: var(--space-32); font-weight: 500; }
+/* A slot: one of Max's engine graphics, placed on a box of a scene by the stage. */
+.nora-slot { position: absolute; }
+.nora-slot > [data-graphic] { width: 100%; height: 100%; }
+/* A screenshot in a slot (N06, N14): as wide as its frame, cut off at its foot. */
+.nora-shot { overflow: hidden; }
+.nora-shot > img { display: block; width: 100%; height: auto; }
+.nora-scene .nora-lead { font-size: var(--space-32); line-height: calc(40 * var(--u)); }
+.nora-scene .nora-code { font-family: "JetBrains Mono", monospace; font-weight: 400; }
+/* N05: a grid statement (Max's data-place="grid", slide 7) with one sentence
+   under each of three lanes of 4 columns, at his caption size (32/40). */
+.site .slide-thirds > p { grid-row: 4 / 7; align-self: start; margin-top: var(--space-48); font-size: var(--space-32); line-height: calc(40 * var(--u)); }
+.site .slide-thirds > p:nth-child(1) { grid-column: 1 / span 4; }
+.site .slide-thirds > p:nth-child(2) { grid-column: 5 / span 4; }
+.site .slide-thirds > p:nth-child(3) { grid-column: 9 / span 4; }
+/* A sentence that a later one replaces in place (N02): out of the flow, so
+   the next one starts where it stood. */
+.site .slide-statement:has(> [data-nora-swap]) { position: relative; }
+.site .slide-statement > [data-nora-swap] { position: absolute; top: 0; left: 0; right: 0; }
