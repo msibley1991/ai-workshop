@@ -1,4 +1,4 @@
-// Loops inside slide 4's site artefacts ([data-artefact="site"], css/layout.css):
+// Loops inside slide 4's site artefacts ([data-artefact="site"], css/site.css):
 //   - stepped, like GIFs (8 frames a second, hard cuts), on the GeoCities page:
 //     [data-marquee] scrolls its text across its band and wraps,
 //     [data-blink] cuts on and off (500 ms each, by its hidden attribute),

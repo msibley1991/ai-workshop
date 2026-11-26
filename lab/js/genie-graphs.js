@@ -6,7 +6,7 @@
 // Editing: drag an anchor (square) or a handle (dot); handles mirror unless
 // Shift is held. Click the curve to add an anchor; Alt-click an anchor to
 // remove it (the ends stay). Each graph's Reset restores the tuned default.
-import { settings, defaultGraph, graphPoints, sampleGraph, evalGraph } from "./genie-warp.js";
+import { settings, defaultGraph, graphPoints, sampleGraph, evalGraph } from "../../js/genie-warp.js";
 
 const STORE = "lab-genie-graphs";
 const W = 256, H = 128, PAD = 10;

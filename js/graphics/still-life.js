@@ -42,7 +42,7 @@ export default {
   ],
   states: [
     { guides: true, loop: "sway", labels: ["perspective", "thirds", "hatching"] },
-    // reserve: the prompt field's height (184 = 168 + a 16 gap; css/layout.css .prompt-field).
+    // reserve: the prompt field's height (184 = 168 + a 16 gap; css/site.css .prompt-field).
     { frame: 1, reserve: 184, loop: "sway" },
   ],
 };

@@ -3,7 +3,7 @@
 // strip and the URL (#<slug>) follow the entry at the top of the column.
 // Clicking a term (in the index or a cross-link), ↑ ↓, or a pasted #slug brings
 // that entry to the top, on ease or, with motion off, at once. The bars and
-// the controls panel work as on layout.html (c, g, f, Esc).
+// the controls panel work as on index.html (c, g, f, Esc).
 import { viewer } from "./viewer.js";
 
 const JUMP_MS = 400;   // motion.md: the "step" duration
@@ -169,7 +169,7 @@ showViewer(viewer.get());
 
 // ---- Keys ---------------------------------------------------------------------------------------
 // While the controls are open they take ↑ ↓ (highlight, wrapping), Tab (next
-// group), Enter and Space (select), as on layout.html. Otherwise ↑ ↓ step terms.
+// group), Enter and Space (select), as on index.html. Otherwise ↑ ↓ step terms.
 const panelItems = () => [...panel.querySelectorAll("button")];
 const panelJumps = () => [...panel.querySelectorAll(".site-controls-group")].map((g) => g.querySelector("button"));
 document.addEventListener("keydown", (e) => {

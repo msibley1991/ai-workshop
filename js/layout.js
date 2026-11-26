@@ -1,6 +1,6 @@
-// layout.html only: the intro and the two tabs form an accordion driven by scroll.
+// index.html only: the intro and the two tabs form an accordion driven by scroll.
 //
-// State is a weight per panel (intro, then each tab), summing to 1; layout.css
+// State is a weight per panel (intro, then each tab), summing to 1; site.css
 // turns each weight (--w) into that panel's share of the free height. Scrolling
 // scrubs a position p from 0 (intro) to 2 (last tab): at p = 1.4 the first tab is
 // 0.6 open and the second 0.4. When the wheel goes quiet, p eases to a whole
@@ -286,7 +286,7 @@ reflow();
 
 // ---- Panels: viewer controls ([c], columns 11-12) and left nav ([n], 1-2) ------
 // Opening reflows the content off the panel's columns, then tweens its --*-open
-// 0 -> 1, which stops the content boxes short of it (layout.css) and slides the
+// 0 -> 1, which stops the content boxes short of it (site.css) and slides the
 // panel in. Closing slides it out, then reflows the content back. Only one is
 // open at a time: opening one closes the other, and Esc closes it.
 const PANEL_MS = 250, PANEL_COLS = 2;

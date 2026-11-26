@@ -1,4 +1,4 @@
-/* Type hierarchy test (hierarchy.html). Builds on layout.css and type.css
+/* Type hierarchy test (hierarchy.html). Builds on site.css and type.css
    (Chakra Petch via body[data-type="chakra"]). Each role reads its size,
    line-height and weight from --r-<role>-size / -lh / -wt, which
    js/hierarchy.js sets from the Type scale dials (in units). */
@@ -13,7 +13,7 @@
   --r-code-size: var(--space-24); --r-code-lh: var(--space-32); --r-code-wt: 400;
 }
 
-/* Views: which panel is open (layout.css turns --w into its share of height). */
+/* Views: which panel is open (site.css turns --w into its share of height). */
 body[data-view="intro"] .site-intro { --w: 1; }
 body[data-view="section"] .h-open { --w: 1; }
 

@@ -60,7 +60,7 @@ git pull
 
 ## Run
 
-Open `index.html` in a browser, or serve locally:
+Serve it locally (the modules and presets need a server):
 
 ```sh
 python3 serve.py
@@ -68,31 +68,23 @@ python3 serve.py
 
 Then visit http://localhost:8123.
 
-## Effects lab
+## Pages
 
-`lab/` is a sandbox for the display layer and the slides in Max's Section, separate from the site. There's nothing to install: dialkit is included in the repo, three.js loads from a CDN, and the fonts are in `assets/fonts/`.
+There's nothing to install: dialkit is included in the repo (`vendor/`), three.js loads from a CDN, and the fonts are in `assets/fonts/`.
 
-```sh
-python3 serve.py
-```
+- `index.html`: the talk and its slides
+- `glossary.html`: the talk's terms
+- `lab/genie.html`: the text genie
+- `lab/hierarchy.html`: type scale
+- `lab/shading.html`: dither vs hatching
 
-Open http://localhost:8123/lab/.
-
-Pages:
-
-- `layout.html`: the site layout and the slides
-- `genie.html`: the text genie
-- `type.html`: typeface specimen
-- `hierarchy.html`: type scale
-- `shading.html`: dither vs hatching
-- `index.html`: the original effects specimen
+On localhost the talk and glossary also show the dialkit Display and Palette panels for tuning. Anywhere else (the published site) they don't load.
 
 ### Shared settings (saved to the repo)
 
 Saving needs `serve.py`, and only works from your own machine.
 
-- The **Palette** panel edits the active palette's colours and display effects, saved into `lab/presets/palettes.json` by **Save palette**. The **Display** menu holds only the shared pixel size and line weight, from `lab/presets/display.json` on every page load. **Save display settings** writes that file and **Revert to saved** reloads it. Unsaved tweaks are lost on reload.
-- The **Palette** panel edits the active palette. **Save palette** writes it into `lab/presets/palettes.json`.
+- The **Palette** panel edits the active palette's colours and display effects, saved into `presets/palettes.json` by **Save palette**. The **Display** menu holds only the shared pixel size and line weight, from `presets/display.json` on every page load. **Save display settings** writes that file and **Revert to saved** reloads it. Unsaved tweaks are lost on reload.
 
 Commit and push those files to share a look. Both of you can save to these files, so if you each save different values, the merge will conflict. Sync your branch first (see [Working together](#working-together)).
 
@@ -100,12 +92,11 @@ Commit and push those files to share a look. Both of you can save to these files
 
 These are stored in your browser and never saved to the repo:
 
-- the viewer controls (`[c]` on `layout.html`: palette choice, motion, blur, lines)
+- the viewer controls (`[c]` on `index.html`: palette choice, motion, blur, lines)
 - the Grid toggle
 - the genie and shading dials
-- the specimen page's sliders
 
-### Keys on `layout.html`
+### Keys on `index.html`
 
 - `←` `→`: step the slides
 - `n`: nav

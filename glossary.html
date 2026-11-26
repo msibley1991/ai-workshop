@@ -4,13 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Glossary — how (did you [make] this?)</title>
-  <link rel="stylesheet" href="vendor/dialkit/styles.css">
+  <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/text-layer.css">
-  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/site.css">
   <link rel="stylesheet" href="css/glossary.css">
-  <!-- TEMPORARY, as on layout.html: hides the dialkit Display menu. Display
-       settings still load from presets/display.json. -->
-  <style>.dialkit-root { display: none !important; }</style>
   <script type="importmap">
     { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js" } }
   </script>
@@ -19,7 +16,7 @@
 </head>
 <!-- Glossary (grilling session 2026-11-25): the talk's terms, from the Figma
      frame "Glossary" (node 86:2), in its order and wording. The same canvas,
-     bars, display layer and viewer controls as layout.html, with one open tab.
+     bars, display layer and viewer controls as index.html, with one open tab.
      A fixed index (columns 1-3, the nav's subtree look) sits beside a column of
      entries (4-9) that scrolls inside its own box; the canvas never scrolls.
      js/glossary.js keeps the index, the footer and the URL (#<slug>) in step
@@ -29,7 +26,7 @@
 
   <main id="content" class="site">
     <header class="site-bar site-bar-top" data-box>
-      <a class="site-title" href="layout.html">how (did you [make] this?)</a>
+      <a class="site-title" href="./">how (did you [make] this?)</a>
       <button class="site-bar-button site-palette" type="button" aria-controls="site-controls" data-fill>
         <span>Palette - <span class="site-palette-name">Ink</span></span>
         <span class="site-swatches" aria-hidden="true">
@@ -238,7 +235,7 @@
       <button class="site-bar-button site-controls-toggle" type="button" aria-expanded="false" aria-controls="site-controls" data-fill><span>[c] Controls</span></button>
     </footer>
 
-    <!-- Viewer controls, as on layout.html. -->
+    <!-- Viewer controls, as on index.html. -->
     <div class="site-controls-clip" data-clip>
       <aside class="site-controls" id="site-controls" aria-label="Controls" data-box inert>
         <p class="site-controls-title">Controls</p>

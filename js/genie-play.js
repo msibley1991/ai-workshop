@@ -1,5 +1,5 @@
 // Plays the genie on a page's [data-genie] text blocks (js/genie-warp.js), with
-// its settled defaults. Shared by layout.html (l toggles) and the genie test
+// its settled defaults. Shared by index.html (l toggles) and the genie test
 // page (genie.html, which adds the dials and graphs on top).
 import { settings, play, genieT, totalFor } from "./genie-warp.js";
 import { viewer } from "./viewer.js";

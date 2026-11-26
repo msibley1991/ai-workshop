@@ -1,6 +1,6 @@
 # Palettes and viewer controls
 
-Status: **exploration**. Started 2026-11-21 and built on the lab layout page ([`lab/layout.html`](../../lab/layout.html), [`lab/js/viewer.js`](../../lab/js/viewer.js)). Viewers choose a palette themselves, so there's no single site palette. The colours below are starting values to tune by eye.
+Status: **exploration**. Started 2026-11-21 and built on the talk page ([`index.html`](../../index.html), [`js/viewer.js`](../../js/viewer.js)). Viewers choose a palette themselves, so there's no single site palette. The colours below are starting values to tune by eye.
 
 ## Palettes
 A palette is **a whole look** (since 2026-11-25): its colours (the ground, the ink, the accent, the link colour and the three trail colours, trail 1–3) and its display effects (sharp text, glow, trails, lines, noise and warp; see [display.md](display.md)). Only pixel size and line weight are shared. Light or dark mode follows the ground automatically: a ground brighter than mid-grey is light. It isn't a setting, because a light ground in dark mode breaks the trail maths. All four palettes start with the same effects, to be tuned per palette.
@@ -33,12 +33,12 @@ A palette is **a whole look** (since 2026-11-25): its colours (the ground, the i
 - **Remembered:** each viewer's choices are saved in their browser (`localStorage` key `lab-viewer`).
 
 ## How it works in the lab
-- **Source of truth:** the palettes are in [`lab/presets/palettes.json`](../../lab/presets/palettes.json), each with its colours and a `display` block of effects.
+- **Source of truth:** the palettes are in [`presets/palettes.json`](../../presets/palettes.json), each with its colours and a `display` block of effects.
 - **Editing:** the **Palette** dial panel edits the active palette: Colours (ground, ink, accent, link and trail 1–3), then its effects (Pixels → sharpText, Glow, Trails, Lines, Noise, Warp). Switching palette switches the effects with the colours, in the same cut.
   - Edits show live, and they're kept when you switch palettes.
   - **Save palette** writes only the active palette, colours and effects, to the file (needs `serve.py`); the others stay as saved. Unsaved edits are lost on reload.
 - **Trail history:** a ground change (a palette switch or a ground edit) clears the trail history for two frames, so old trails don't smear over the new ground.
-- **Colours and effects live in the palettes.** The lab's Display menu holds only the shared pixel size and line weight (`lab/presets/display.json`); it has no colour dials and no light or dark mode.
+- **Colours and effects live in the palettes.** The lab's Display menu holds only the shared pixel size and line weight (`presets/display.json`); it has no colour dials and no light or dark mode.
 - Motion, blur and lines are **overrides applied on top of the dials** at render time. Switching them back on restores the tuned values.
 
 ## Open

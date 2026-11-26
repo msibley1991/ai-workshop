@@ -3,9 +3,9 @@
 // sink (the ink square near its bottom-right corner), ← pours it back out, g shows or hides the graph editor
 // (js/genie-graphs.js). The warp is js/genie-warp.js; the rules are in
 // docs/design-system/motion.md. The other dial panels start collapsed.
-import { createDialKit, DialStore } from "../vendor/dialkit/index.js";
-import { settings, genieT, lineT, lineCount } from "./genie-warp.js";
-import { genie, openBlock } from "./genie-play.js";
+import { createDialKit, DialStore } from "../../vendor/dialkit/index.js";
+import { settings, genieT, lineT, lineCount } from "../../js/genie-warp.js";
+import { genie, openBlock } from "../../js/genie-play.js";
 import { mountGraphs } from "./genie-graphs.js";
 
 const S = settings;

@@ -1,14 +1,14 @@
 # Display layer
 
-Status: **exploration**, from the display grilling session (2026-11-21). The look was tuned on the lab layout page ([`lab/layout.html`](../../lab/layout.html)), which is the working basis for the real site. Each palette carries its own effects (2026-11-25); the values below are the starting values all four palettes share for now, in each palette's `display` block in `lab/presets/palettes.json`. Only pixel size and line weight are shared, in `lab/presets/display.json`. It hasn't been tested on a projector yet (see "Projector test").
+Status: **exploration**, from the display grilling session (2026-11-21). The look was tuned on the talk page ([`index.html`](../../index.html)), which is the working basis for the real site. Each palette carries its own effects (2026-11-25); the values below are the starting values all four palettes share for now, in each palette's `display` block in `presets/palettes.json`. Only pixel size and line weight are shared, in `presets/display.json`. It hasn't been tested on a projector yet (see "Projector test").
 
 ## What it is
-- The page is drawn through a WebGL "pre-window" display. The DOM is laid out but transparent. Each frame, [`lab/js/text-raster.js`](../../lab/js/text-raster.js) redraws it into a low-res canvas, and [`lab/js/renderer.js`](../../lab/js/renderer.js) runs the passes: content → trails → blur → display.
+- The page is drawn through a WebGL "pre-window" display. The DOM is laid out but transparent. Each frame, [`js/text-raster.js`](../../js/text-raster.js) redraws it into a low-res canvas, and [`js/renderer.js`](../../js/renderer.js) runs the passes: content → trails → blur → display.
 - **It stays on the real site as the one renderer.** The settled rules assume it: no fades (motion.md), weights and hatching in emulated pixels (graphics.md), the genie's trail from the trails, and links and selected text drawn by the raster.
 - **One look per palette** (2026-11-25; until then every palette shared one look). A palette is its colours plus its effects, so choosing a palette chooses the whole look. There's still no separate presenter or reader look: viewers who want it calmer use the controls (Motion, Blur, Lines). Projector wash-out is a test for each palette's look, not a second preset.
 
 ## The look
-The settings are named and grouped as in the lab's menus ([`lab/js/params.js`](../../lab/js/params.js)): the effects are in the **Palette** panel (`paletteDisplayConfig`, per palette), and Pixels → size and Interface → lineWeight in the **Display** panel (`sharedDisplayConfig`, shared). A menu label is its key in words (`sharpText` is "Sharp Text"), so the names below are the same in the menus, the presets, the code and these docs. Renamed and regrouped on 2026-11-25.
+The settings are named and grouped as in the lab's menus ([`js/params.js`](../../js/params.js)): the effects are in the **Palette** panel (`paletteDisplayConfig`, per palette), and Pixels → size and Interface → lineWeight in the **Display** panel (`sharedDisplayConfig`, shared). A menu label is its key in words (`sharpText` is "Sharp Text"), so the names below are the same in the menus, the presets, the code and these docs. Renamed and regrouped on 2026-11-25.
 
 | Group | Setting | Value | What it does |
 |---|---|---|---|
@@ -52,7 +52,7 @@ The settings are named and grouped as in the lab's menus ([`lab/js/params.js`](.
 - Motion off removes them.
 
 ## Viewer controls
-These are overrides applied on top of the look at render time (`applyViewer()` in [`lab/js/viewer.js`](../../lab/js/viewer.js)). Turning one back on restores the tuned values. The panel itself is specified in [palettes.md](palettes.md).
+These are overrides applied on top of the look at render time (`applyViewer()` in [`js/viewer.js`](../../js/viewer.js)). Turning one back on restores the tuned values. The panel itself is specified in [palettes.md](palettes.md).
 
 | Control | Off removes |
 |---|---|
@@ -71,7 +71,7 @@ These are overrides applied on top of the look at render time (`applyViewer()` i
 - **Performance to carry over:** the raster's cost is in painting graphics, not in measuring the page (about 1 ms). Keep the lab's caching (two looks per graphic, flow packets drawn on top), the span-based fills and the box-limited leader anchors, and skip hidden content when measuring (see [graphics.md](graphics.md), "Rendering cost").
 - **Code:** the raster, the passes, the scene engine and the viewer controls move into the site's `js/`. The dial panels, the preset actions and the vendored dialkit stay in the lab. **The live site has no dial panel.**
 - **The look:** frozen with the palettes: each palette's colours and effects in one file (the lab's `palettes.json` shape), plus the shared pixel size. Layout, type and spacing tokens stay in `:root` in `css/style.css`. The effect values aren't CSS tokens, because only the WebGL passes read them.
-- **Changing the look:** tune a palette on the lab layout page (Palette panel), then update the palettes file and this doc together.
+- **Changing the look:** tune a palette on the talk page (Palette panel), then update the palettes file and this doc together.
 - **Lab clean-up (done):** `dark.json`, `presenter.json` and `reader.json` are retired. `light.json` became `render.json` (2026-11-22), then `display.json` (2026-11-25), which now holds only the shared pixel size and line weight; the effects moved into each palette the same day. Its Interface group (`lineWeight`, the 2-pixel chrome line) doesn't go into the site's look file: there, the line token is in `:root`.
 
 ## Projector test

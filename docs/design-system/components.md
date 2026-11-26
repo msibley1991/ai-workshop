@@ -1,6 +1,6 @@
 # Interface components
 
-Status: **exploration**. Decided in the components grilling session (2026-11-22) and built on the lab layout page ([`lab/layout.html`](../../lab/layout.html), [`lab/css/layout.css`](../../lab/css/layout.css), [`lab/js/layout.js`](../../lab/js/layout.js)): the bars, palette indicator, hints and keys, panels, left nav and tab headers. The link rules (`↗`, new tab, inverted hover) aren't built yet, because the page has no such links.
+Status: **exploration**. Decided in the components grilling session (2026-11-22) and built on the talk page ([`index.html`](../../index.html), [`css/site.css`](../../css/site.css), [`js/layout.js`](../../js/layout.js)): the bars, palette indicator, hints and keys, panels, left nav and tab headers. The link rules (`↗`, new tab, inverted hover) aren't built yet, because the page has no such links.
 
 The chrome is everything that isn't slide content: the bars, the accordion tabs, the panels, buttons, key hints and links. It follows the mainframe lineage ([aesthetic-direction.md](../aesthetic-direction.md)): a status line on top and a function-key bar at the bottom.
 
@@ -32,7 +32,7 @@ The chrome is everything that isn't slide content: the bars, the accordion tabs,
 - **The nav's hint** `[n] Nav` sits on the left after the step control, once the nav is built.
 
 ## Keys
-- **Stepping:** → and **PageDown** step forward a beat. ← and **PageUp** step back. Presentation clickers send PageDown and PageUp (some send ← →), so a clicker steps beats and never skips a tab. Built in `lab/js/layout.js` (2026-11-22).
+- **Stepping:** → and **PageDown** step forward a beat. ← and **PageUp** step back. Presentation clickers send PageDown and PageUp (some send ← →), so a clicker steps beats and never skips a tab. Built in `js/layout.js` (2026-11-22).
 - **Tab jumps:** ↓ and Space open the next tab, and ↑ and Shift+Space the previous one, for someone browsing by keyboard.
 - **Esc** closes the open menu. It also leaves fullscreen, as the browser does.
 - **Menus take the keys** (2026-11-22). While a menu (the nav or the controls) is open:

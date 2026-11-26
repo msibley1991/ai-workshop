@@ -147,9 +147,13 @@ export function defaultsOf(cfg) {
   return out;
 }
 
-// Named presets live as JSON in presets/ so they can be versioned and diffed.
+// Named presets live as JSON in presets/ (at the site root) so they can be
+// versioned and diffed. Resolved from this module, so pages at any depth
+// (/, /lab/, /playground/) load the same files.
+export const presetURL = (name) => new URL(`../presets/${name}.json`, import.meta.url);
+
 export async function loadPreset(name) {
-  const res = await fetch(`presets/${name}.json`, { cache: "no-store" });
+  const res = await fetch(presetURL(name), { cache: "no-store" });
   if (!res.ok) throw new Error(`Preset ${name} not found`);
   return res.json();
 }
@@ -157,7 +161,7 @@ export async function loadPreset(name) {
 // Overwrites presets/<name>.json with the current values. Needs serve.py (the
 // plain `python3 -m http.server` can't write files).
 export async function savePreset(name, values) {
-  const res = await fetch(`presets/${name}.json`, {
+  const res = await fetch(presetURL(name), {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(values),

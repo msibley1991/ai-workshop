@@ -9,8 +9,8 @@
 // Tone t is "amount of ink" from 0 to 1. Each technique quantises it to its own
 // steps between its lightest and darkest values. "Ink shows" picks whether ink
 // marks shadow or light.
-import { createDialKit, createDialRoot } from "../vendor/dialkit/index.js";
-import { DITHERS, isErrorDiffusion, threshold, hatchInk, stepTone, Raster, fillIso, Spin, ISO_STYLE } from "./shade.js";
+import { createDialKit, createDialRoot } from "../../vendor/dialkit/index.js";
+import { DITHERS, isErrorDiffusion, threshold, hatchInk, stepTone, Raster, fillIso, Spin, ISO_STYLE } from "../../js/shade.js";
 
 const H = ISO_STYLE.hatch;
 const config = {
@@ -269,5 +269,5 @@ kit.subscribe((v) => {
   render();
 });
 addEventListener("resize", () => { measure(); render(); });
-fetch("presets/palettes.json").then((r) => r.json()).then((p) => { PALETTES = p; render(); });
+fetch("../presets/palettes.json").then((r) => r.json()).then((p) => { PALETTES = p; render(); });
 document.fonts.ready.then(render);

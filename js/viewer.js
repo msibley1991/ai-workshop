@@ -1,5 +1,5 @@
 // Viewer controls: palette, motion, blur and lines, chosen by whoever is looking at
-// the page (layout.html's controls panel). main.js applies them to the render;
+// the page (index.html's controls panel). main.js applies them to the render;
 // layout.js drives the panel. Pages opt in with <body data-viewer>; elsewhere
 // nothing here changes the render.
 //
@@ -7,7 +7,7 @@
 // the active palette (main.js composes it with the shared Display dials). Motion, blur and
 // lines are overrides applied on top, so turning them back on restores the
 // tuned look.
-import { paletteDisplayConfig, defaultsOf } from "./params.js";
+import { paletteDisplayConfig, defaultsOf, presetURL } from "./params.js";
 
 // Palettes live in presets/palettes.json (edited with the Palette dial panel,
 // js/palette-panel.js). PALETTES is filled once palettesReady resolves; the
@@ -16,7 +16,7 @@ export const PALETTE_IDS = ["ink", "blueprint", "plasma", "vector"];
 export const PALETTES = {
   ink: { name: "Ink", ground: "#F2F6FF", ink: "#00010F", accent: "#F38020", link: "#0050FF", trail1: "#FF0088", trail2: "#00C7F7", trail3: "#8A1A00" },
 };
-export const palettesReady = fetch("presets/palettes.json", { cache: "no-store" })
+export const palettesReady = fetch(presetURL("palettes"), { cache: "no-store" })
   .then((res) => (res.ok ? res.json() : Promise.reject(new Error("presets/palettes.json not found"))))
   .then((data) => Object.assign(PALETTES, data))
   .catch((err) => console.error("[lab]", err));

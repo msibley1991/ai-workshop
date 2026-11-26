@@ -168,7 +168,7 @@ export function measure(root, ctx) {
       ink: inkOf(el, style),
       clip: clipOf(el),
       radius: parseFloat(style.borderTopLeftRadius) || 0,
-      // --box-line (layout.css) is the declared width; the computed border is snapped.
+      // --box-line (site.css) is the declared width; the computed border is snapped.
       line: parseFloat(style.getPropertyValue("--box-line")) || parseFloat(style.borderTopWidth) || 1,
       dashed: style.borderTopStyle === "dashed",
     };

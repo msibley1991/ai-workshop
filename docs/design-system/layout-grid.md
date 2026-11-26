@@ -1,6 +1,6 @@
 # Layout grid and spacing
 
-Status: **exploration**. Decided in the first design-system grilling session (2026-11-20) and built on the lab layout page ([`lab/layout.html`](../../lab/layout.html), [`lab/css/layout.css`](../../lab/css/layout.css)). The tokens move to `css/style.css` once they're called settled.
+Status: **exploration**. Decided in the first design-system grilling session (2026-11-20) and built on the talk page ([`index.html`](../../index.html), [`css/site.css`](../../css/site.css)). The tokens move to `css/style.css` once they're called settled.
 
 ## Canvas
 - The page is one canvas, scaled as a whole. Nothing reflows.

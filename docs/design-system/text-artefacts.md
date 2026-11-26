@@ -1,6 +1,6 @@
 # Text artefacts
 
-Status: **exploration**. Decided in the prompt-blocks grilling session (2026-11-22). **Partly built** in the lab (`lab/layout.html`, `lab/js/artefact.js`, `lab/js/slides.js`): the chat kind with your turn only and typing in (slide 1), the prompt (slide 2), documents (slides 10, 11 and 13), file trees (slides 10–13), and the focus and marked span states (slides 11 and 13). The script's opening sections need these first ([`docs/max-pres-draft/max-pres-v3.md`](../max-pres-draft/max-pres-v3.md) §1, §3–6).
+Status: **exploration**. Decided in the prompt-blocks grilling session (2026-11-22). **Partly built** in the lab (`index.html`, `js/artefact.js`, `js/slides.js`): the chat kind with your turn only and typing in (slide 1), the prompt (slide 2), documents (slides 10, 11 and 13), file trees (slides 10–13), and the focus and marked span states (slides 11 and 13). The script's opening sections need these first ([`docs/max-pres-draft/max-pres-v3.md`](../max-pres-draft/max-pres-v3.md) §1, §3–6).
 
 ## What they are
 - A text artefact is a **graphic made of legible text**: prompts, chats, files and folders shown on a slide.

@@ -1,6 +1,6 @@
-/* Type specimen (type.html). Builds on layout.css: same canvas, units and grid.
+/* Type specimen (type.html). Builds on css/site.css: same canvas, units and grid.
    Rejected candidate faces are local OFL files in ../fonts/; Chakra Petch (chosen)
-   and JetBrains Mono come from ../../assets/fonts/ via layout.css. Only Chakra
+   and JetBrains Mono come from ../../assets/fonts/ via ../../css/style.css. Only Chakra
    Petch 400/500/700 ship, so the weight ladder's 300/600/800 rows fall back.
    body[data-type] picks a candidate by setting the face variables below. */
 
@@ -97,7 +97,7 @@ body[data-type="chakra"] {
 .type-widths { grid-column: 5 / 9; }
 .type-code { grid-column: 9 / -1; }
 
-/* Placeholder sizes from layout.css (units, line-heights on the 8 grid). */
+/* Placeholder sizes from css/site.css (units, line-heights on the 8 grid). */
 .site .type-h1 {
   font-family: var(--display-font);
   font-stretch: var(--display-stretch);

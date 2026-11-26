@@ -1,13 +1,27 @@
 /* Fonts: self-hosted OFL files (from github.com/google/fonts). See docs/design-system/typography.md. */
-@font-face { font-family: "Chakra Petch"; src: url("../assets/fonts/chakra-petch/ChakraPetch-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
-@font-face { font-family: "Chakra Petch"; src: url("../assets/fonts/chakra-petch/ChakraPetch-Medium.ttf") format("truetype"); font-weight: 500; font-display: swap; }
-@font-face { font-family: "Chakra Petch"; src: url("../assets/fonts/chakra-petch/ChakraPetch-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
-@font-face { font-family: "JetBrains Mono"; src: url("../assets/fonts/jetbrains-mono/JetBrainsMono-wght.ttf") format("truetype"); font-weight: 100 800; font-display: swap; }
+@font-face { font-family: "Chakra Petch"; src: url("../assets/fonts/chakra-petch/ChakraPetch-Regular.ttf") format("truetype"); font-weight: 400; }
+@font-face { font-family: "Chakra Petch"; src: url("../assets/fonts/chakra-petch/ChakraPetch-Medium.ttf") format("truetype"); font-weight: 500; }
+@font-face { font-family: "Chakra Petch"; src: url("../assets/fonts/chakra-petch/ChakraPetch-Bold.ttf") format("truetype"); font-weight: 700; }
+@font-face { font-family: "JetBrains Mono"; src: url("../assets/fonts/jetbrains-mono/JetBrainsMono-wght.ttf") format("truetype"); font-weight: 100 800; }
+
+/* Registered so they resolve to px: the raster and main.js read them. */
+@property --u { syntax: "<length>"; inherits: true; initial-value: 1px; }
+@property --line { syntax: "<length>"; inherits: true; initial-value: 2px; }
+@property --tab-header { syntax: "<length>"; inherits: true; initial-value: 64px; }
+@property --tab-flap { syntax: "<length>"; inherits: true; initial-value: 453px; }
+/* A box's border width as declared, for the raster. Chrome rounds CSS border
+   widths down to whole device pixels, so reading the border back would draw
+   boxes thinner than tab outlines (which read --line) whenever --u is
+   fractional, e.g. a 1080p screen with the browser not fullscreen. */
+@property --box-line { syntax: "<length>"; inherits: false; initial-value: 0px; }
+[data-box] { --box-line: var(--line); }
 
 /* Design tokens: all colors, fonts, spacing values live here. */
 :root {
   /* Canvas unit: screen px per unit on the 1080-tall canvas (docs/design-system/layout-grid.md). */
   --u: min(100dvh / 1080, 100vw / 1440);
+  --canvas-h: calc(1080 * var(--u));
+  --canvas-w: min(100vw, 1920 * var(--u));
 
   /* Spacing scale (units). */
   --space-4: calc(4 * var(--u));
@@ -41,9 +55,40 @@
   --type-label-size: var(--space-24);     --type-label-lh: var(--space-32);     --type-label-weight: var(--weight-medium);
   --type-bar-size: var(--space-16);       --type-bar-lh: var(--space-24);       --type-bar-weight: var(--weight-medium);
   --type-code-size: var(--space-24);      --type-code-lh: var(--space-32);      --type-code-weight: var(--weight-regular);
+
+  /* Frame. */
+  --frame-margin: var(--space-8);  /* canvas edge -> box edge */
+  --row-gap: var(--space-8);       /* between stacked rows */
+  --bar-height: var(--space-32);
+  --tab-height: var(--space-64);
+  --box-inset: var(--space-24);    /* box edge -> grid */
+  --radius: var(--space-8);
+  --line-dashed: 1px;              /* overwritten by main.js */
+
+  /* 12-column grid inside a box. */
+  --grid-columns: 12;
+  --grid-gutter: var(--space-24);
+  --col: calc((var(--canvas-w) - 2 * var(--frame-margin) - 2 * var(--box-inset) - (var(--grid-columns) - 1) * var(--grid-gutter)) / var(--grid-columns));
+  --span-2: calc(2 * var(--col) + var(--grid-gutter));
+  --span-4: calc(4 * var(--col) + 3 * var(--grid-gutter));
+  --span-6: calc(6 * var(--col) + 5 * var(--grid-gutter));
+  /* Viewer controls panel: covers columns 11-12, its box running from column
+     11's start to the frame margin. --controls-open (0..1, set by js/layout.js)
+     stops the content boxes one row gap short of it. Bars stay full width.
+     A left nav would cover columns 1-2 the same way (--nav-cols: 2). */
+  --controls-w: calc(var(--span-2) + var(--box-inset));
+  --controls-open: 0;
+  --controls-push: calc((var(--controls-w) + var(--row-gap)) * var(--controls-open));
+  --nav-cols: 0;
+  /* Left nav: covers columns 1-2 the same way, from the left frame margin.
+     --nav-open (0..1) stops the content boxes one row gap short of it. */
+  --nav-w: var(--controls-w);
+  --nav-open: 0;
+  --nav-push: calc((var(--nav-w) + var(--row-gap)) * var(--nav-open));
+
+  /* Height an open panel gets: canvas minus top/bottom margin, bars, tab headers and the 4 gaps between 5 rows (840 units). */
+  --avail: calc(var(--canvas-h) - 2 * var(--frame-margin) - 2 * var(--bar-height) - 2 * var(--tab-height) - 4 * var(--row-gap));
+
+  --site-font: "Chakra Petch", sans-serif;
 }
 
-*, *::before, *::after { box-sizing: border-box; }
-body { margin: 0; font-family: var(--font-sans); }
-img, video, canvas, svg { display: block; max-width: 100%; }
-em { font-style: normal; font-weight: var(--weight-bold); }

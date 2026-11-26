@@ -1,9 +1,9 @@
 # Typography
 
 Status: **settled** (2026-11-21), from the second design-system grilling session. The tokens are in [`css/style.css`](../../css/style.css), and the fonts are self-hosted in [`assets/fonts/`](../../assets/fonts/).
-- Faces were compared on the lab type specimen ([`lab/type.html`](../../lab/type.html)).
+- Faces were compared on the lab type specimen (`lab/type.html`, removed 2026-11-26 when the talk moved to the site root).
 - The hierarchy was tuned on [`lab/hierarchy.html`](../../lab/hierarchy.html).
-- The lab layout page now uses the same roles.
+- The talk page now uses the same roles.
 
 ## Constraints
 - The site will be hosted on Vercel and opened on school and personal devices, so faces come from the **Google Fonts** pool (OFL).
@@ -28,7 +28,7 @@ Status: **settled** (2026-11-21), from the second design-system grilling session
 | 4 | Chakra Petch throughout | squared, static weights 300–700, one width |
 | 5 | Michroma display + Chakra Petch body | wide display over a squared body with real weights |
 
-The rejected candidates stay in `lab/fonts/` for the specimen.
+The rejected candidates stay in `lab/fonts/` while the lab hierarchy page (`lab/css/type.css`) still loads them.
 - Chakra Petch now lives in `assets/fonts/chakra-petch/`, with only the shipped weights: 400, 500 and 700.
 - JetBrains Mono now lives in `assets/fonts/jetbrains-mono/`.
 - Each folder keeps its OFL.txt.
@@ -76,4 +76,4 @@ The rejected candidates stay in `lab/fonts/` for the specimen.
 - **Case:** sentence case for every role, including labels, bar text and captions ("Fig 1. Specific instructions are creative decisions"), all at default tracking. The site title keeps its lowercase as written. Caps for labels (+0.04em) were tried and rejected: sentence case looked better.
 
 ## Rendering note
-Canvas text ignores `font-stretch` in the `font` string, so `lab/js/text-raster.js` now sets `ctx.fontStretch`. A computed percentage maps to the nearest CSS keyword (125% → `expanded`). Widths between keywords snap to the nearest one in the raster, so the display widths should stay on keyword steps (100 / 112.5 / 125). The raster also applies CSS `text-transform` to the drawn string and sets `ctx.letterSpacing` from `letter-spacing`, since it draws the raw DOM text.
+Canvas text ignores `font-stretch` in the `font` string, so `js/text-raster.js` now sets `ctx.fontStretch`. A computed percentage maps to the nearest CSS keyword (125% → `expanded`). Widths between keywords snap to the nearest one in the raster, so the display widths should stay on keyword steps (100 / 112.5 / 125). The raster also applies CSS `text-transform` to the drawn string and sets `ctx.letterSpacing` from `letter-spacing`, since it draws the raw DOM text.

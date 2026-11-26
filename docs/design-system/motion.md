@@ -110,7 +110,7 @@ Slide 12's **poster grid** (beat 2, after the line pours in) is three steps of 4
 - Section changes keep the accordion as it is; the genie is for steps.
 
 ### Tuned values
-From the genie test page ([`lab/genie.html`](../../lab/genie.html)). They're the page's defaults, in `settings` and `DEFAULT_GRAPHS` in [`lab/js/genie-warp.js`](../../lab/js/genie-warp.js). The names are the Genie panel's, grouped as there (Timing, Shape, Swing, Trail); renamed on 2026-11-25.
+From the genie test page ([`lab/genie.html`](../../lab/genie.html)). They're the page's defaults, in `settings` and `DEFAULT_GRAPHS` in [`js/genie-warp.js`](../../js/genie-warp.js). The names are the Genie panel's, grouped as there (Timing, Shape, Swing, Trail); renamed on 2026-11-25.
 
 | Group | Setting | Value | Meaning |
 |---|---|---|---|
@@ -132,10 +132,10 @@ From the genie test page ([`lab/genie.html`](../../lab/genie.html)). They're the
 - **The genie is for statements only.** Text changing in place inside a text artefact uses **retype** instead: the old text is erased and the new text typed in at a steady rate with a block cursor ([text-artefacts.md](text-artefacts.md)). Its rate is still to be tuned and named.
 
 ## Built so far
-- **Built:** step tweens (ease, 400/800), blink, flow, the drag spring, and the genie (tuned on its test page, and **settled**: on the layout page too, with its sink squares, toggled by l while there are no text steps yet).
+- **Built:** step tweens (ease, 400/800), blink, flow, the drag spring, and the genie (tuned on its test page, and **settled**: on the talk page too, with its sink squares, toggled by l while there are no text steps yet).
 - **Not built yet:**
   - a shared curves module (out, settle, drop)
   - the enter/exit and loop motions on graphics (rise, fall, grow, shrink, bob, sway, spin, pulse)
   - stagger
   - the chrome timings above (the accordion jump is still 500, and the snap and panels still use ease)
-  - the genie fired by steps that remove text (the layout page has none yet, so l toggles it)
+  - the genie fired by steps that remove text (the talk page has none yet, so l toggles it)

@@ -1,6 +1,6 @@
 # Slide templates
 
-Status: **exploration**, from the slide-templates grilling session (2026-11-21). The approach is built on Swiss modernist layout principles. **Built in the lab** on [`lab/layout.html`](../../lab/layout.html): tab 2 holds placeholder slides for every template, driven by [`lab/js/slides.js`](../../lab/js/slides.js) (see "In the lab").
+Status: **exploration**, from the slide-templates grilling session (2026-11-21). The approach is built on Swiss modernist layout principles. **Built in the lab** on [`index.html`](../../index.html): tab 2 holds placeholder slides for every template, driven by [`js/slides.js`](../../js/slides.js) (see "In the lab").
 
 ## Sections, slides and beats
 - **Tab:** one presenter's part. Tab 1 is Nora's and tab 2 is Max's.
@@ -91,7 +91,7 @@ Each step starts only when the one before has finished, so nothing new appears u
 - **The hero is slide zero:** → from it opens tab 1.
 
 ## Authoring
-As built on the lab layout page:
+As built on the talk page:
 
 ```html
 <div class="slides">
@@ -144,13 +144,13 @@ As built on the lab layout page:
 - **Within a beat** the phases run in order: leaving and erasing artefacts (together), then a split, then the statement change, then marks, then links. A split on the same beat as a statement change runs with the old sentences' genie out, before the new ones pour in (slide 1, beat 5).
 
 ## In the lab
-- **`lab/layout.html`, tab 2:** Max's Section from the script, one slide per bullet by default. Each statement is the bullet's Text line. A spoken-only bullet may fold into the slide before it instead, decided case by case (the skills-vs-design-docs bullet did, 2026-11-24); otherwise a bullet with no Text yet shows a `[Placeholder]` statement. Slides 1–14 are built; the rest are on the Text template, one beat each. A bullet's **TODO** line (an example link or graphic) belongs to that bullet's slide, never a slide of its own (2026-11-23).
+- **`index.html`, tab 2:** Max's Section from the script, one slide per bullet by default. Each statement is the bullet's Text line. A spoken-only bullet may fold into the slide before it instead, decided case by case (the skills-vs-design-docs bullet did, 2026-11-24); otherwise a bullet with no Text yet shows a `[Placeholder]` statement. Slides 1–14 are built; the rest are on the Text template, one beat each. A bullet's **TODO** line (an example link or graphic) belongs to that bullet's slide, never a slide of its own (2026-11-23).
 - **Hero and tab 1** are on templates too: the hero is Split 6 (see Templates), and tab 1 (the placeholder for Nora's part) has one Split 4 slide with the page layout, in a placeholder section.
 - **Tab names** are temporarily "Nora's Section" and "Max's Section", for a layout recording. The hashes are still `#foundations` and `#advanced-topics`.
 - **Keys:** ← and →, and PageUp and PageDown from clickers, step beats and flow on across slides, sections and tabs. Clicking a tab or a scroll snap lands on that tab's first slide.
 - **Links:** the URL follows the talk: `#advanced-topics/8` is slide 8 of that tab, and `#advanced-topics/7.2` is slide 7's second beat. A reload or a pasted link cuts straight there. `#<tab>` alone is the tab's first slide. The old l toggle is off on this page; the genie page still has it.
 - **Rendering cost:** painting a graphic is the expensive step, so the lab keeps its last two painted looks and draws flow packets on top instead of repainting. A carried move or an explode tween still repaints its graphic every frame.
-- **Code:** `lab/js/slides.js` (stops, beats, the phases, template placement); box fitting, `setGraphicState()` and `copyGraphicState()` in `lab/js/graphic.js`; the slide grid and footer strip in `lab/css/layout.css`.
+- **Code:** `js/slides.js` (stops, beats, the phases, template placement); box fitting, `setGraphicState()` and `copyGraphicState()` in `js/graphic.js`; the slide grid and footer strip in `css/site.css`.
 
 ## Not built yet
 - Real slides from the script: slides 1–13 of tab 2 are built; the rest are still text only (see "In the lab").

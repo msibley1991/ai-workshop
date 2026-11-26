@@ -3,7 +3,7 @@
 // intro/section view switch, presets on keys 1-4 and the grid toggle.
 // Sizes are limited to the spacing scale; line-heights step by 4.
 // Every change fires `lab:layout` so the raster re-measures.
-import { createDialKit } from "../vendor/dialkit/index.js";
+import { createDialKit } from "../../vendor/dialkit/index.js";
 
 const SCALE = ["16", "24", "32", "48", "64", "96", "128"];
 const WEIGHTS = ["400", "500", "700"]; // the Chakra Petch weights that ship
