@@ -2,7 +2,7 @@
 
 Follows [2026-11-24-02-slide-14-skills-and-accent-lines.md](2026-11-24-02-slide-14-skills-and-accent-lines.md).
 
-This was a long session over 2026-11-25 and 26. It built the rest of Max's slides, gave the hero a real graphic, and reworked the lab's dial settings twice. All of it is exploration. The work is in commits `6fe81c9` through `61aab2c` (`git log 81732a7..61aab2c`). Everything is pushed.
+This was a long session over 2026-11-25 and 26. It built the rest of Max's slides, gave the hero a real graphic, and reworked the lab's dial settings twice. All of it is exploration. The work is in commits `6fe81c9` through `7071e46` (`git log 81732a7..7071e46`). Everything is pushed.
 
 ## What happened
 
@@ -18,7 +18,7 @@ Commit `6fe81c9`.
   - `data-statement="body"` gives it 48/56 type.
   - The last sentence sits on row 5, with **vision**, **curiosity** and **adaptability** in bold. Adaptability was Max's pick for the third quality.
 - **Slide 18 (thank you):** text only. The script's download button isn't built yet.
-- **New `slides.js` features** (in the code, not yet in the docs):
+- **New `slides.js` features** (documented in [slide-templates.md](../design-system/slide-templates.md) and [text-artefacts.md](../design-system/text-artefacts.md)):
   - `data-wire-beat` and `data-wire-step` override a wire's timing.
   - Wires can run in reverse.
   - `data-grow-at` sets `--grow` for a grow tween.
@@ -36,12 +36,14 @@ Commit `6fe81c9`.
 Max refined the layout over many rounds. Every connector runs on centre lines and stops clear of the objects. The design rule is in the scene's header comment.
 - **Bob:** the stacks, context, External Tools and Output bob in a staggered wave. The MCP connector stays still while External Tools bobs.
 - **Hit box:** the graphic's box is now the drawing's width, 1240 units hung from the right edge (`css/layout.css`). Max chose not to limit dragging to the drawn shapes.
-- **Engine additions in `graphic.js`, not yet documented:**
+- **Engine additions in `graphic.js`:**
   - `start: "arrow"` for two-way connectors
   - `on: "<part>"` to draw a part after the part it stands on
   - `captions: "free"` with `align`
   - the `bob` loop
   - `accent: true` on rings (slide 3's layer-cube rings now use it)
+
+  These are documented now: graphics.md ("The hero's setup scene") and `lab/CLAUDE.md`'s scene format.
 
 ### Settings rework
 1. **Rename** (commit `b7d6d7f`; Max grilled the names): every dial has a plain name that is the same in the menu, the presets, the code and the docs.
@@ -59,7 +61,8 @@ Max refined the layout over many rounds. Every connector runs on centre lines an
 - **Dialkit menu:** back on the layout page, with both panels collapsed on load.
 - **Glossary:**
   - `docs/glossary.md` and the glossary page in the lab were made in a separate session (`e7313d8`).
-  - On the slides, the first time each glossary term appears in a statement it links to its entry (`glossary.html#<id>`). There are 10 links; LLM's is on slide 10, not the hero.
+  - On the slides, the first time each glossary term appears in a statement it links to its entry (`glossary.html#<id>`). There are 10 links; LLM's is on slide 10, not the hero. The rule is in [components.md](../design-system/components.md), Links.
+  - Slide links (these and the playground link) invert on hover and focus, as on the glossary page (commit `7071e46`). Two fixes made it work: `layout.js` re-measures when a statement link is hovered, and an inline fill that wraps now draws one box per line (`text-raster.js`), so a wrapped link no longer inverts the whole sentence.
 - **Wording:**
   - slide 10: "A single chat has a limited context window."
   - slide 11: "Rules (CLAUDE.md or AGENTS.md):"
@@ -68,13 +71,8 @@ Max refined the layout over many rounds. Every connector runs on centre lines an
 ## Current state
 - **Run:** `python3 serve.py`, then open `/lab/layout.html`.
 - **Checks:** browser-pane probes found no console errors, the panel names correct, and the composed palette values right. Max checks looks in Chrome.
-- **Not checked by eye:** the rings in accent and the glossary links on the slides.
-- **Not documented yet** (record these together at session end):
-  - `graphics.md` and `lab/CLAUDE.md`'s scene format: the setup scene, `start: "arrow"`, `on`, free captions, `bob`, ring `accent`.
-  - `slide-templates.md`: the slides.js attributes listed above and `data-statement="body"`.
-  - `motion.md`: the bob loop.
-  - `text-artefacts.md`: slide 15's panes and lanes.
-  - The glossary links on slides; nothing says where to link yet.
+- **Not checked by eye:** the rings in accent, and the link hover after the wrap fix (Max reported the whole-sentence inversion; the fix wasn't confirmed before the commit).
+- **Docs:** all of this session's work is documented (commit `7071e46`). The handoff's earlier list of missing docs is done.
 - **Not built:**
   - the playground page, the target of slide 16's link
   - slide 18's download button
@@ -84,7 +82,7 @@ Max refined the layout over many rounds. Every connector runs on centre lines an
 Max hasn't picked the next task. Likely options:
 - the settings play pages, built on the renamed settings
 - tuning Blueprint and Vector's effects
-- the missing docs above
+- the playground page and slide 18's download button
 
 ## Suggested skills
 - `grill-me` before designing anything new (a play page, a graphic). Max grills every design first.
